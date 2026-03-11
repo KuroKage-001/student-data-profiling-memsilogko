@@ -25,6 +25,7 @@ return [
         'http://127.0.0.1:3000', 
         'http://127.0.0.1:5173',
         'https://student-data-profiling-memsilogko-2p9q9wn3a.vercel.app',
+        'https://student-data-profiling-memsilogko-nvkwhv8w9.vercel.app',
         'https://student-profiling-api-03.onrender.com'
     ],
 
