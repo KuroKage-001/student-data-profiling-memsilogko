@@ -6,6 +6,11 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ResearchMaterialController;
 use App\Http\Controllers\InstructionController;
 
+// Handle preflight OPTIONS requests
+Route::options('{any}', function () {
+    return response('', 200);
+})->where('any', '.*');
+
 Route::group(['prefix' => 'auth'], function () {
     Route::post('register', [AuthController::class, 'register']);
     Route::post('login', [AuthController::class, 'login']);
