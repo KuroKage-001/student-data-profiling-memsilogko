@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: student-profiling-api
+    env: php
+    buildCommand: cd server && ./render-build.sh
+    startCommand: cd server && ./render-start.sh
+    plan: free
+    rootDir: server
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: LOG_LEVEL
+        value: error
+      - key: DB_CONNECTION
+        value: pgsql
+    
+databases:
+  - name: student-profiling-db
+    plan: free
