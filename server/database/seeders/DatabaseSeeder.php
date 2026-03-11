@@ -16,18 +16,25 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create admin user
-        User::factory()->create([
-            'name' => 'Admin User',
-            'email' => 'admin@example.com',
-            'password' => Hash::make('password123'),
-        ]);
+        // Only seed if users don't already exist
+        if (User::count() == 0) {
+            // Create admin user
+            User::factory()->create([
+                'name' => 'Admin User',
+                'email' => 'admin@example.com',
+                'password' => Hash::make('password123'),
+            ]);
 
-        // Create test user
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-            'password' => Hash::make('password123'),
-        ]);
+            // Create test user
+            User::factory()->create([
+                'name' => 'Test User',
+                'email' => 'test@example.com',
+                'password' => Hash::make('password123'),
+            ]);
+            
+            echo "Database seeded successfully with admin and test users.\n";
+        } else {
+            echo "Users already exist, skipping seeding.\n";
+        }
     }
 }

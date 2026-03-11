@@ -45,6 +45,14 @@ php artisan jwt:secret --force
 echo "Running database migrations..."
 php artisan migrate --force
 
+# Run database seeders only if SEED_DATABASE environment variable is set
+if [ "$SEED_DATABASE" = "true" ]; then
+    echo "Running database seeders..."
+    php artisan db:seed --force
+else
+    echo "Skipping database seeders (set SEED_DATABASE=true to enable)"
+fi
+
 # Cache configuration for production
 echo "Caching configuration..."
 php artisan config:cache
