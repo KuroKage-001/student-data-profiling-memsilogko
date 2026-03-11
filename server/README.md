@@ -1,59 +1,225 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Laravel Database Seeder Commands Reference
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Basic Seeder Commands
 
-## About Laravel
+### Run All Seeders
+php artisan db:seed
+# Runs the DatabaseSeeder class which calls all registered seeders
+# Use this to populate your database with all seed data at once
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### Run Specific Seeder
+php artisan db:seed --class=CourseSeeder
+# Runs only the specified seeder class
+# Replace 'CourseSeeder' with any seeder class name
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Project-Specific Seeders
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Seed Courses
+php artisan db:seed --class=CourseSeeder
+# Populates the courses table with course data
 
-## Learning Laravel
+### Seed Question Sets
+php artisan db:seed --class=QuestionSetSeeder
+# Populates the question_sets table with question set data
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+### Seed Questions
+php artisan db:seed --class=QuestionSeeder
+# Populates the questions table with question data
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Seed Rizal Course
+php artisan db:seed --class=RizalCourseSeeder
+# Seeds a comprehensive Rizal course with various question types
+# Includes multiple choice, true/false, and other question formats
 
-## Laravel Sponsors
+### Seed in Order (Recommended for fresh setup)
+php artisan db:seed --class=CourseSeeder
+php artisan db:seed --class=QuestionSetSeeder
+php artisan db:seed --class=QuestionSeeder
+php artisan db:seed --class=RizalCourseSeeder
+# Run these commands sequentially to maintain data relationships
+# Ensures foreign key constraints are satisfied
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## Migration Commands
 
-### Premium Partners
+### Fresh Migration with Seeding
+php artisan migrate:fresh --seed
+# Drops all tables, re-runs all migrations, then runs all seeders
+# WARNING: This will delete ALL existing data in the database
+# Use this for a complete database reset
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### Refresh Database
+php artisan migrate:refresh --seed
+# Rolls back all migrations, re-runs them, then runs all seeders
+# Similar to migrate:fresh but uses rollback instead of drop
+# Also deletes all data - use with caution
 
-## Contributing
+### Fresh Migration without Seeding
+php artisan migrate:fresh
+# Drops all tables and re-runs migrations without seeding
+# Use when you want a clean database structure without sample data
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### Refresh Migration without Seeding
+php artisan migrate:refresh
+# Rolls back and re-runs migrations without seeding
 
-## Code of Conduct
+## Advanced Seeder Commands
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Run Seeder with Force (Production)
+php artisan db:seed --force
+# Forces seeder to run in production environment
+# Laravel normally prevents seeding in production for safety
 
-## Security Vulnerabilities
+### Run Specific Seeder with Force
+php artisan db:seed --class=CourseSeeder --force
+# Runs a specific seeder in production environment
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Run Seeder for Specific Database Connection
+php artisan db:seed --database=mysql
+# Runs seeders on a specific database connection
+# Useful when you have multiple database connections configured
 
-## License
+## Creating New Seeders
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### Create a New Seeder
+php artisan make:seeder UserSeeder
+# Creates a new seeder file in database/seeders directory
+# Replace 'UserSeeder' with your desired seeder name
+
+### Create a Seeder for a Specific Model
+php artisan make:seeder EmployeeSeeder
+# Creates a seeder for the Employee model
+# Follow naming convention: ModelNameSeeder
+
+## Migration Commands (Related)
+
+### Run Migrations
+php artisan migrate
+# Runs all pending migrations
+# Creates or modifies database tables
+
+### Rollback Last Migration
+php artisan migrate:rollback
+# Rolls back the last batch of migrations
+# Useful for undoing recent changes
+
+### Rollback Specific Steps
+php artisan migrate:rollback --step=3
+# Rolls back the last 3 migration batches
+# Allows fine-grained control over rollbacks
+
+### Reset All Migrations
+php artisan migrate:reset
+# Rolls back all migrations
+# Returns database to empty state
+
+### Check Migration Status
+php artisan migrate:status
+# Shows which migrations have been run and which are pending
+# Useful for debugging migration issues
+
+## Database Commands
+
+### Show Database Information
+php artisan db:show
+# Displays database connection information and table count
+# Available in Laravel 9+
+
+### Show Table Information
+php artisan db:table users
+# Shows detailed information about a specific table
+# Replace 'users' with any table name
+
+### Monitor Database
+php artisan db:monitor
+# Monitors database connections
+# Useful for checking connection health
+
+## Factory Commands (Related to Seeding)
+
+### Create a Factory
+php artisan make:factory CourseFactory
+# Creates a factory for generating fake data
+# Factories are used within seeders to create test data
+
+### Create a Factory for a Specific Model
+php artisan make:factory CourseFactory --model=Course
+# Creates a factory and associates it with the Course model
+
+## Tinker (Testing Seeders)
+
+### Open Tinker
+php artisan tinker
+# Opens an interactive shell to test code
+# Useful for testing seeder logic before running
+
+### Example Tinker Commands
+# Inside tinker:
+# App\Models\Course::factory()->count(10)->create();
+# Creates 10 courses using the factory
+
+## Best Practices
+
+### Development Workflow
+1. php artisan migrate:fresh --seed
+   # Start with a clean database and seed data
+
+2. Make changes to seeders or migrations
+
+3. php artisan migrate:fresh --seed
+   # Test your changes
+
+### Production Deployment
+1. php artisan migrate --force
+   # Run only new migrations in production
+
+2. php artisan db:seed --class=SpecificSeeder --force
+   # Seed only specific data if needed
+
+### Testing Workflow
+1. php artisan migrate:fresh --seed --env=testing
+   # Use testing environment for isolated tests
+
+## Common Issues and Solutions
+
+### Issue: Foreign Key Constraint Errors
+# Solution: Run seeders in the correct order
+# Parent tables must be seeded before child tables
+
+### Issue: Duplicate Entry Errors
+# Solution: Use updateOrCreate() or firstOrCreate() in seeders
+# Or run migrate:fresh to clear existing data
+
+### Issue: Seeder Not Found
+# Solution: Run composer dump-autoload
+composer dump-autoload
+# Regenerates the autoload files
+
+### Issue: Memory Limit Exceeded
+# Solution: Increase memory limit or use chunking
+php -d memory_limit=512M artisan db:seed
+
+## Environment-Specific Commands
+
+### Seed for Local Environment
+php artisan db:seed --env=local
+
+### Seed for Testing Environment
+php artisan db:seed --env=testing
+
+### Seed for Staging Environment
+php artisan db:seed --env=staging
+
+## Useful Combinations
+
+### Complete Database Reset and Seed
+php artisan migrate:fresh --seed
+# Most common command for development
+
+### Reset Specific Table Data
+php artisan migrate:refresh --path=/database/migrations/2024_01_01_create_courses_table.php
+php artisan db:seed --class=CourseSeeder
+# Refreshes only a specific table and its data
+
+### Quick Test Seed
+php artisan migrate:fresh && php artisan db:seed --class=CourseSeeder
+# Chains commands to reset and seed specific data quickly

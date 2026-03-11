@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import AdminLayout from '../../components/admin-components/AdminLayout';
+import AdminLayout from '../../layouts/AdminLayout';
 
 const Events = () => {
   const [events, setEvents] = useState([

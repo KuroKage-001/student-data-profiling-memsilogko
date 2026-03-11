@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import AdminLayout from '../../components/admin-components/AdminLayout';
-import StudentList from '../../components/admin-components/StudentList';
-import StudentProfileModal from '../../components/admin-components/StudentProfileModal';
+import AdminLayout from '../../layouts/AdminLayout';
+import StudentList from '../../components/student-components/student-profile/StudentList';
+import StudentProfileModal from '../../components/student-components/student-profile/StudentProfileModal';
 
 const StudentProfiles = () => {
   const [selectedStudent, setSelectedStudent] = useState(null);

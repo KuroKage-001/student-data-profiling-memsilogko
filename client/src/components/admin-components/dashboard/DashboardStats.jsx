@@ -1,3 +1,5 @@
+import { FaUserGraduate, FaChalkboardTeacher, FaClipboardCheck, FaClock } from 'react-icons/fa';
+
 const DashboardStats = () => {
   const stats = [
     {
@@ -5,28 +7,28 @@ const DashboardStats = () => {
       value: '1,247',
       change: '+12%',
       changeType: 'increase',
-      icon: '👨‍🎓'
+      icon: FaUserGraduate
     },
     {
       title: 'Active Faculty',
       value: '89',
       change: '+3%',
       changeType: 'increase',
-      icon: '👨‍🏫'
+      icon: FaChalkboardTeacher
     },
     {
       title: 'Profiles Completed',
       value: '1,156',
       change: '+8%',
       changeType: 'increase',
-      icon: '📋'
+      icon: FaClipboardCheck
     },
     {
       title: 'Pending Reviews',
       value: '23',
       change: '-15%',
       changeType: 'decrease',
-      icon: '⏳'
+      icon: FaClock
     }
   ];
 
@@ -47,7 +49,9 @@ const DashboardStats = () => {
                 <span className="text-sm text-gray-500 ml-1">from last month</span>
               </div>
             </div>
-            <div className="text-3xl">{stat.icon}</div>
+            <div className="text-orange-600 text-3xl">
+              <stat.icon />
+            </div>
           </div>
         </div>
       ))}

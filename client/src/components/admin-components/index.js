@@ -1,9 +1,7 @@
 // Admin Components Exports
 export { default as AdminLayout } from './AdminLayout';
 export { default as DashboardStats } from './DashboardStats';
-export { default as StudentList } from './StudentList';
 export { default as FacultyList } from './FacultyList';
-export { default as StudentProfileModal } from './StudentProfileModal';
 export { default as FacultyProfileModal } from './FacultyProfileModal';
 
 // Instructions Components

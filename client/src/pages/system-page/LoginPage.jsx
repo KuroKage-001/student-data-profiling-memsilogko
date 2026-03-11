@@ -1,13 +1,16 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
-const AdminLogin = () => {
+const LoginPage = () => {
   const [credentials, setCredentials] = useState({
-    username: '',
+    email: '',
     password: ''
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -20,12 +23,17 @@ const AdminLogin = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+    setError('');
     
-    // Simulate login process
-    setTimeout(() => {
-      setIsLoading(false);
+    const result = await login(credentials);
+    
+    if (result.success) {
       navigate('/admin/dashboard');
-    }, 1500);
+    } else {
+      setError(result.message || 'Login failed');
+    }
+    
+    setIsLoading(false);
   };
 
   return (
@@ -38,20 +46,26 @@ const AdminLogin = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+              {error}
+            </div>
+          )}
+          
           <div className="space-y-4">
             <div>
-              <label htmlFor="username" className="block text-sm font-medium text-black mb-2">
-                Username
+              <label htmlFor="email" className="block text-sm font-medium text-black mb-2">
+                Email
               </label>
               <input
-                id="username"
-                name="username"
-                type="text"
+                id="email"
+                name="email"
+                type="email"
                 required
-                value={credentials.username}
+                value={credentials.email}
                 onChange={handleInputChange}
                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-orange-600 focus:outline-none transition-colors text-black"
-                placeholder="Enter your username"
+                placeholder="Enter your email"
               />
             </div>
 
@@ -91,4 +105,4 @@ const AdminLogin = () => {
   );
 };
 
-export default AdminLogin;
+export default LoginPage;

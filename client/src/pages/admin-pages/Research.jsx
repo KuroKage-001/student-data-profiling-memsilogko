@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import AdminLayout from '../../components/admin-components/AdminLayout';
+import AdminLayout from '../../layouts/AdminLayout';
 
 const Research = () => {
   const [materials, setMaterials] = useState([

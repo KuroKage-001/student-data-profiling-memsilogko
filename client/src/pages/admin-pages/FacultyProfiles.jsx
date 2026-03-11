@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import AdminLayout from '../../components/admin-components/AdminLayout';
-import FacultyList from '../../components/admin-components/FacultyList';
-import FacultyProfileModal from '../../components/admin-components/FacultyProfileModal';
+import AdminLayout from '../../layouts/AdminLayout';
+import FacultyList from '../../components/admin-components/faculty-profile/FacultyList';
+import FacultyProfileModal from '../../components/admin-components/faculty-profile/FacultyProfileModal';
 
 const FacultyProfiles = () => {
   const [selectedFaculty, setSelectedFaculty] = useState(null);
