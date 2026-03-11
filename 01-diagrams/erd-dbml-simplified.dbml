@@ -1,0 +1,197 @@
+// =====================================================
+// Student Profiling System - SIMPLIFIED DBML Format
+// =====================================================
+// Focus: Main student profiling dimensions only
+// - Academic History
+// - Non-Academic History
+// - Affiliations
+// - Violations
+// - Skills
+// =====================================================
+
+// =====================================================
+// INSTITUTIONAL HIERARCHY (Top Left)
+// =====================================================
+
+Table college {
+  college_id int [pk, increment]
+  college_name varchar(200) [not null, unique]
+  
+  Note: 'Top-level institutional organization'
+}
+
+Table department {
+  department_id int [pk, increment]
+  department_name varchar(200) [not null]
+  college_id int [ref: > college.college_id, not null]
+  
+  Note: 'Academic departments within colleges'
+}
+
+Table program {
+  program_id int [pk, increment]
+  program_name varchar(200) [not null]
+  department_id int [ref: > department.department_id, not null]
+  
+  Note: 'Degree programs offered'
+}
+
+Table faculty {
+  faculty_id int [pk, increment]
+  first_name varchar(100) [not null]
+  last_name varchar(100) [not null]
+  email varchar(255) [unique, not null]
+  department_id int [ref: > department.department_id, not null]
+  
+  Note: 'Faculty members'
+}
+
+// =====================================================
+// STUDENT CORE (Center)
+// =====================================================
+
+Table student {
+  student_id int [pk, increment]
+  first_name varchar(100) [not null]
+  middle_name varchar(100)
+  last_name varchar(100) [not null]
+  date_of_birth date [not null]
+  gender varchar(30)
+  email varchar(255) [unique, not null]
+  contact_number varchar(20)
+  address text
+  enrollment_status varchar(20) [not null]
+  admission_date date [not null]
+  cumulative_gpa decimal(3,2)
+  academic_standing varchar(50)
+  program_id int [ref: > program.program_id, not null]
+  
+  Note: '🎯 CENTRAL HUB - All profiling data connects here'
+}
+
+// =====================================================
+// PROFILING DIMENSIONS (Surrounding Student)
+// =====================================================
+
+// Top Right: ACADEMIC HISTORY
+Table academic_history {
+  academic_history_id int [pk, increment]
+  student_id int [ref: > student.student_id, not null]
+  semester_name varchar(50) [not null]
+  academic_year varchar(20) [not null]
+  course_code varchar(20) [not null]
+  course_title varchar(200) [not null]
+  units int [not null]
+  grade decimal(3,2)
+  semester_gpa decimal(3,2)
+  cumulative_gpa decimal(3,2)
+  academic_status varchar(50)
+  remarks text
+  
+  Note: '📚 Academic performance: courses, grades, GPA'
+}
+
+// Right: NON-ACADEMIC HISTORY
+Table non_academic_history {
+  non_academic_id int [pk, increment]
+  student_id int [ref: > student.student_id, not null]
+  activity_type varchar(50) [not null]
+  activity_name varchar(200) [not null]
+  description text
+  role varchar(100)
+  start_date date
+  end_date date
+  achievement text
+  hours_rendered int
+  
+  Note: '🏆 Extracurricular: events, awards, community service'
+}
+
+// Bottom Right: AFFILIATIONS
+Table affiliation {
+  affiliation_id int [pk, increment]
+  student_id int [ref: > student.student_id, not null]
+  affiliation_type varchar(50) [not null]
+  organization_name varchar(200) [not null]
+  role varchar(100)
+  start_date date [not null]
+  end_date date
+  status varchar(30)
+  details text
+  
+  Note: '🤝 Affiliations: organizations, scholarships, family, schools'
+}
+
+// Bottom: VIOLATIONS
+Table violation {
+  violation_id int [pk, increment]
+  student_id int [ref: > student.student_id, not null]
+  violation_type varchar(100) [not null]
+  severity_level varchar(20) [not null]
+  category varchar(50)
+  date_committed date [not null]
+  description text [not null]
+  reported_by int [ref: > faculty.faculty_id]
+  sanction text
+  resolution_status varchar(30) [not null]
+  resolution_date date
+  
+  Note: '⚠️ Disciplinary records and violations'
+}
+
+// Bottom Left: SKILLS
+Table skill {
+  skill_id int [pk, increment]
+  student_id int [ref: > student.student_id, not null]
+  skill_name varchar(100) [not null]
+  skill_category varchar(50) [not null]
+  proficiency_level varchar(30) [not null]
+  certification_name varchar(200)
+  certification_issuer varchar(200)
+  date_acquired date
+  expiration_date date
+  verification_status varchar(30)
+  assessment_score decimal(5,2)
+  assessment_date date
+  
+  Note: '💡 Competencies, certifications, and assessments'
+}
+
+// =====================================================
+// NOTES
+// =====================================================
+
+// ACTIVITY_TYPE values for non_academic_history:
+// - CLUB_MEMBERSHIP
+// - EVENT_PARTICIPATION
+// - AWARD
+// - COMPETITION
+// - COMMUNITY_SERVICE
+// - VOLUNTEER_WORK
+// - LEADERSHIP_ROLE
+
+// AFFILIATION_TYPE values:
+// - ORGANIZATION
+// - SCHOLARSHIP
+// - FAMILY_MEMBER
+// - PAST_SCHOOL
+
+// SEVERITY_LEVEL values:
+// - MINOR
+// - MODERATE
+// - MAJOR
+// - SEVERE
+
+// PROFICIENCY_LEVEL values:
+// - BEGINNER
+// - INTERMEDIATE
+// - ADVANCED
+// - EXPERT
+
+// SKILL_CATEGORY values:
+// - TECHNICAL
+// - COMMUNICATION
+// - LEADERSHIP
+// - ANALYTICAL
+// - CREATIVE
+// - INTERPERSONAL

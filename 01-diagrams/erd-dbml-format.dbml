@@ -1,0 +1,416 @@
+// =====================================================
+// Student Profiling System - DBML Format
+// =====================================================
+// Use with dbdiagram.io for visual ERD generation
+// =====================================================
+
+// CORE STRUCTURE
+Table college {
+  college_id int [pk, increment]
+  college_name varchar(200) [not null, unique]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+Table department {
+  department_id int [pk, increment]
+  department_name varchar(200) [not null]
+  college_id int [ref: > college.college_id, not null]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+  
+  indexes {
+    (college_id, department_name) [unique]
+  }
+}
+
+Table program {
+  program_id int [pk, increment]
+  program_name varchar(200) [not null]
+  department_id int [ref: > department.department_id, not null]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+  
+  indexes {
+    (department_id, program_name) [unique]
+  }
+}
+
+Table faculty {
+  faculty_id int [pk, increment]
+  first_name varchar(100) [not null]
+  last_name varchar(100) [not null]
+  position varchar(100)
+  specialization varchar(200)
+  email varchar(255) [unique, not null]
+  department_id int [ref: > department.department_id, not null]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+  
+  indexes {
+    email
+    department_id
+    (last_name, first_name)
+  }
+}
+
+Table course {
+  course_id int [pk, increment]
+  course_code varchar(20) [unique, not null]
+  course_title varchar(200) [not null]
+  units int [not null]
+  department_id int [ref: > department.department_id, not null]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+  
+  indexes {
+    course_code
+    department_id
+  }
+}
+
+Table semester {
+  semester_id int [pk, increment]
+  semester_name varchar(50) [not null]
+  academic_year varchar(20) [not null]
+  start_date date [not null]
+  end_date date [not null]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+  
+  indexes {
+    (semester_name, academic_year) [unique]
+  }
+}
+
+// STUDENT CORE
+Table student {
+  student_id int [pk, increment]
+  first_name varchar(100) [not null]
+  middle_name varchar(100)
+  last_name varchar(100) [not null]
+  date_of_birth date [not null]
+  gender varchar(30)
+  civil_status varchar(30)
+  nationality varchar(100)
+  contact_number varchar(20)
+  email varchar(255) [unique, not null]
+  address text
+  enrollment_status varchar(20) [not null]
+  admission_date date [not null]
+  expected_graduation date
+  cumulative_gpa decimal(3,2)
+  academic_standing varchar(50)
+  risk_score decimal(5,2)
+  program_id int [ref: > program.program_id, not null]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+  
+  indexes {
+    email
+    enrollment_status
+    program_id
+    cumulative_gpa
+    (last_name, first_name)
+  }
+}
+
+// ACADEMIC MODULE
+Table enrollment {
+  enrollment_id int [pk, increment]
+  student_id int [ref: > student.student_id, not null]
+  course_id int [ref: > course.course_id, not null]
+  semester_id int [ref: > semester.semester_id, not null]
+  grade decimal(3,2)
+  remarks text
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+  
+  indexes {
+    student_id
+    course_id
+    semester_id
+    (student_id, course_id, semester_id) [unique]
+  }
+}
+
+Table academic_history {
+  academic_history_id int [pk, increment]
+  student_id int [ref: > student.student_id, not null]
+  semester_id int [ref: > semester.semester_id, not null]
+  semester_gpa decimal(3,2)
+  total_units int
+  academic_status varchar(50)
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+  
+  indexes {
+    student_id
+    semester_id
+    (student_id, semester_id) [unique]
+  }
+}
+
+Table academic_award {
+  award_id int [pk, increment]
+  student_id int [ref: > student.student_id, not null]
+  award_title varchar(200) [not null]
+  description text
+  date_awarded date [not null]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+Table class_activity {
+  activity_id int [pk, increment]
+  course_id int [ref: > course.course_id, not null]
+  faculty_id int [ref: > faculty.faculty_id, not null]
+  semester_id int [ref: > semester.semester_id, not null]
+  activity_title varchar(200) [not null]
+  activity_type varchar(50)
+  description text
+  posted_date date [not null]
+  due_date date
+  max_score decimal(6,2)
+  grading_category varchar(50)
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+Table student_activity {
+  student_activity_id int [pk, increment]
+  student_id int [ref: > student.student_id, not null]
+  activity_id int [ref: > class_activity.activity_id, not null]
+  submission_date date
+  score decimal(6,2)
+  submission_status varchar(30)
+  late_submission boolean [default: false]
+  instructor_feedback text
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+  
+  indexes {
+    (student_id, activity_id) [unique]
+  }
+}
+
+Table attendance {
+  attendance_id int [pk, increment]
+  student_id int [ref: > student.student_id, not null]
+  course_id int [ref: > course.course_id, not null]
+  semester_id int [ref: > semester.semester_id, not null]
+  attendance_date date [not null]
+  status varchar(20)
+  remarks text
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+  
+  indexes {
+    student_id
+    course_id
+    attendance_date
+    (student_id, course_id, semester_id, attendance_date) [unique]
+  }
+}
+
+// AFFILIATIONS MODULE
+Table family_member {
+  family_id int [pk, increment]
+  student_id int [ref: > student.student_id, not null]
+  full_name varchar(200) [not null]
+  relationship varchar(50) [not null]
+  contact_number varchar(20)
+  email varchar(255)
+  occupation varchar(100)
+  is_guardian boolean [default: false]
+  is_emergency_contact boolean [default: false]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+Table past_school {
+  past_school_id int [pk, increment]
+  student_id int [ref: > student.student_id, not null]
+  school_name varchar(200) [not null]
+  school_type varchar(50)
+  address text
+  start_year date
+  end_year date
+  gpa decimal(3,2)
+  honors_received text
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+Table scholarship_program {
+  scholarship_id int [pk, increment]
+  scholarship_name varchar(200) [unique, not null]
+  sponsor varchar(200)
+  type varchar(50)
+  grant_amount decimal(10,2)
+  description text
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+Table student_scholarship {
+  student_scholarship_id int [pk, increment]
+  student_id int [ref: > student.student_id, not null]
+  scholarship_id int [ref: > scholarship_program.scholarship_id, not null]
+  start_date date [not null]
+  end_date date
+  status varchar(30)
+  maintaining_gpa decimal(3,2)
+  renewal_status varchar(30)
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+// SKILLS MODULE
+Table skill {
+  skill_id int [pk, increment]
+  skill_name varchar(100) [unique, not null]
+  category varchar(50)
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+Table student_skill {
+  student_skill_id int [pk, increment]
+  student_id int [ref: > student.student_id, not null]
+  skill_id int [ref: > skill.skill_id, not null]
+  proficiency_level varchar(30)
+  certification_name varchar(200)
+  certification_issuer varchar(200)
+  date_acquired date
+  expiration_date date
+  verification_status varchar(30)
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+  
+  indexes {
+    student_id
+    skill_id
+    proficiency_level
+    (student_id, skill_id) [unique]
+  }
+}
+
+Table skill_assessment {
+  assessment_id int [pk, increment]
+  student_id int [ref: > student.student_id, not null]
+  skill_id int [ref: > skill.skill_id, not null]
+  assessment_type varchar(50)
+  assessed_by varchar(200)
+  assessment_date date [not null]
+  assessment_score decimal(5,2)
+  assessment_result varchar(50)
+  remarks text
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+// ENGAGEMENT MODULE
+Table organization {
+  org_id int [pk, increment]
+  org_name varchar(200) [unique, not null]
+  org_type varchar(50)
+  category varchar(100)
+  faculty_adviser_id int [ref: > faculty.faculty_id]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+Table student_organization {
+  membership_id int [pk, increment]
+  student_id int [ref: > student.student_id, not null]
+  org_id int [ref: > organization.org_id, not null]
+  role varchar(100)
+  leadership_flag boolean [default: false]
+  start_date date [not null]
+  end_date date
+  membership_status varchar(30)
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+  
+  indexes {
+    student_id
+    org_id
+    membership_status
+  }
+}
+
+Table event {
+  event_id int [pk, increment]
+  event_name varchar(200) [not null]
+  event_type varchar(50)
+  organizer varchar(200)
+  event_date date [not null]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+Table student_event {
+  student_event_id int [pk, increment]
+  student_id int [ref: > student.student_id, not null]
+  event_id int [ref: > event.event_id, not null]
+  participation_role varchar(100)
+  achievement text
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+  
+  indexes {
+    (student_id, event_id) [unique]
+  }
+}
+
+Table community_service {
+  service_id int [pk, increment]
+  student_id int [ref: > student.student_id, not null]
+  organization_name varchar(200)
+  service_type varchar(50)
+  hours_rendered int
+  service_date date [not null]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+Table violation {
+  violation_id int [pk, increment]
+  violation_type varchar(100) [unique, not null]
+  severity_level varchar(20)
+  category varchar(50)
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+Table student_violation {
+  student_violation_id int [pk, increment]
+  student_id int [ref: > student.student_id, not null]
+  violation_id int [ref: > violation.violation_id, not null]
+  faculty_id int [ref: > faculty.faculty_id]
+  date_committed date [not null]
+  description text [not null]
+  sanction text
+  resolution_status varchar(30)
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+  
+  indexes {
+    student_id
+    resolution_status
+    date_committed
+  }
+}
+
+Table advising_record {
+  advising_id int [pk, increment]
+  student_id int [ref: > student.student_id, not null]
+  faculty_id int [ref: > faculty.faculty_id, not null]
+  session_date date [not null]
+  concern_type varchar(50)
+  notes text
+  recommendation text
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}

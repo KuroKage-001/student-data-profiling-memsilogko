@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "start": "echo Socket Server Checking: Working && node socket-server.js"
+  },
+  "dependencies": {
+    "socket.io": "^4.8.3",
+    "socket.io-client": "^4.8.3"
+  }
+}
