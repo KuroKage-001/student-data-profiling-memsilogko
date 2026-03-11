@@ -19,16 +19,18 @@ class DatabaseSeeder extends Seeder
         // Only seed if users don't already exist
         if (User::count() == 0) {
             // Create admin user
-            User::factory()->create([
+            User::create([
                 'name' => 'Admin User',
                 'email' => 'admin@example.com',
+                'email_verified_at' => now(),
                 'password' => Hash::make('password123'),
             ]);
 
             // Create test user
-            User::factory()->create([
+            User::create([
                 'name' => 'Test User',
                 'email' => 'test@example.com',
+                'email_verified_at' => now(),
                 'password' => Hash::make('password123'),
             ]);
             
