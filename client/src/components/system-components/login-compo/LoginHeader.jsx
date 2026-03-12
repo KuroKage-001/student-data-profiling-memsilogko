@@ -1,9 +1,11 @@
+import pncHeaderImage from '../../../assets/images/pnc-header-2.png';
+
 const LoginHeader = () => {
   return (
     <div className="text-center mb-8 lg:mb-10">
       <div className="mb-4 sm:mb-6">
         <img 
-          src="/src/assets/images/pnc-header-2.png" 
+          src={pncHeaderImage} 
           alt="PNC Header" 
           className="mx-auto h-16 sm:h-20 w-auto object-contain"
         />

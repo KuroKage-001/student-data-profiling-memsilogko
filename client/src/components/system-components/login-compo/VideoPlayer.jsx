@@ -1,3 +1,5 @@
+import grokVideo from '../../../assets/images/grok-vid.mp4';
+
 const VideoPlayer = ({ videoAnimating, onClose }) => {
   return (
     <div className={`relative w-full h-full flex items-center justify-center transition-all duration-500 ${videoAnimating ? 'animate-video-in' : 'animate-video-out'}`}>
@@ -15,7 +17,7 @@ const VideoPlayer = ({ videoAnimating, onClose }) => {
           autoPlay
           onEnded={onClose}
         >
-          <source src="/src/assets/images/grok-vid.mp4" type="video/mp4" />
+          <source src={grokVideo} type="video/mp4" />
           Your browser does not support the video tag.
         </video>
       </div>

@@ -3,6 +3,7 @@ import { carouselSlides } from '../../../utils/system-utils/login-utils/carousel
 import { CarouselContent } from './CarouselContent';
 import { CarouselIndicators } from './CarouselIndicators';
 import { CarouselProgressBar } from './CarouselProgressBar';
+import ccsLogo from '../../../assets/images/ccs-logo.png';
 
 const MobileCarousel = () => {
   const { currentSlide, goToSlide } = useCarousel(carouselSlides);
@@ -20,7 +21,7 @@ const MobileCarousel = () => {
           <div className="mb-6 relative">
             <div className="animate-logo-glow">
               <img 
-                src="/src/assets/images/ccs-logo.png" 
+                src={ccsLogo} 
                 alt="CCS Logo" 
                 className="w-20 h-20 object-contain mx-auto mb-4 transition-all duration-700 transform hover:scale-110 animate-fade-in-up"
               />

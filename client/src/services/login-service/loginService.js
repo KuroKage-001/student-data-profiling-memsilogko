@@ -25,6 +25,7 @@ class LoginService {
     } catch (error) {
       console.error('Login service error:', error);
       
+      // Handle different types of errors
       if (error.message.includes('Authentication failed')) {
         return {
           success: false,
@@ -34,6 +35,16 @@ class LoginService {
         return {
           success: false,
           message: 'Too many login attempts. Please try again later.'
+        };
+      } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+        return {
+          success: false,
+          message: 'Unable to connect to server. Please check if the backend server is running.'
+        };
+      } else if (error.message.includes('404')) {
+        return {
+          success: false,
+          message: 'Login endpoint not found. Please check server configuration.'
         };
       } else {
         return {

@@ -6,6 +6,7 @@ import { CarouselIndicators } from './CarouselIndicators';
 import { CarouselProgressBar } from './CarouselProgressBar';
 import { PiggyBank } from './PiggyBank';
 import { VideoPlayer } from './VideoPlayer';
+import ccsLogo from '../../../assets/images/ccs-logo.png';
 
 const CarouselSection = () => {
   const { currentSlide, goToSlide } = useCarousel(carouselSlides);
@@ -67,7 +68,7 @@ const CarouselSection = () => {
             <div className="mb-8 relative">
               <div className="animate-logo-glow">
                 <img 
-                  src="/src/assets/images/ccs-logo.png" 
+                  src={ccsLogo} 
                   alt="CCS Logo" 
                   className={`w-45 h-45 object-contain mx-auto mb-6 transition-all duration-700 transform hover:scale-110 animate-fade-in-up cursor-grab ${isDragging ? 'cursor-grabbing opacity-50' : ''}`}
                   draggable="true"
