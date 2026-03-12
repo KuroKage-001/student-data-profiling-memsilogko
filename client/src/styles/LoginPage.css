@@ -1,0 +1,291 @@
+/* Carousel Animation Styles */
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(180deg); }
+}
+
+@keyframes float-medium {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-15px) rotate(-180deg); }
+}
+
+@keyframes float-fast {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(360deg); }
+}
+
+@keyframes pulse-slow {
+  0%, 100% { opacity: 0.1; transform: scale(1); }
+  50% { opacity: 0.3; transform: scale(1.1); }
+}
+
+@keyframes bounce-slow {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes logo-glow {
+  0%, 100% { filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3)); }
+  50% { filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.6)); }
+}
+
+@keyframes fade-in-up {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-in-right {
+  0% { opacity: 0; transform: translateX(30px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slide-in-left {
+  0% { opacity: 0; transform: translateX(-30px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pulse-gentle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Apply animations */
+.animate-gradient-shift {
+  background-size: 200% 200%;
+  animation: gradient-shift 8s ease infinite;
+}
+
+.animate-float-slow {
+  animation: float-slow 6s ease-in-out infinite;
+}
+
+.animate-float-medium {
+  animation: float-medium 4s ease-in-out infinite;
+}
+
+.animate-float-fast {
+  animation: float-fast 3s ease-in-out infinite;
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 4s ease-in-out infinite;
+}
+
+.animate-bounce-slow {
+  animation: bounce-slow 3s ease-in-out infinite;
+}
+
+.animate-logo-glow {
+  animation: logo-glow 3s ease-in-out infinite;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.8s ease-out;
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.6s ease-out;
+}
+
+.animate-slide-in-left {
+  animation: slide-in-left 0.6s ease-out;
+}
+
+.animate-pulse-gentle {
+  animation: pulse-gentle 2s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  background-size: 200% 100%;
+  animation: shimmer 2s linear infinite;
+}
+
+.delay-200 {
+  animation-delay: 0.2s;
+}
+
+/* Cyberpunk Piggy Bank Animations */
+@keyframes cyberpunk-glow {
+  0%, 100% { 
+    box-shadow: 0 0 10px rgba(251, 146, 60, 0.5), 0 0 20px rgba(251, 146, 60, 0.3), 0 0 30px rgba(251, 146, 60, 0.1);
+  }
+  50% { 
+    box-shadow: 0 0 20px rgba(251, 146, 60, 0.8), 0 0 30px rgba(251, 146, 60, 0.6), 0 0 40px rgba(251, 146, 60, 0.4);
+  }
+}
+
+@keyframes coin-drop {
+  0% { transform: translateY(-20px) scale(1.2); opacity: 0; }
+  50% { transform: translateY(0px) scale(1.1); opacity: 0.8; }
+  100% { transform: translateY(10px) scale(1); opacity: 1; }
+}
+
+@keyframes piggy-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-3px); }
+  75% { transform: translateX(3px); }
+}
+
+.animate-cyberpunk-glow {
+  animation: cyberpunk-glow 2s ease-in-out infinite;
+}
+
+.animate-coin-drop {
+  animation: coin-drop 0.6s ease-out;
+}
+
+.animate-piggy-shake {
+  animation: piggy-shake 0.5s ease-in-out;
+}
+
+/* Drag and Drop Effects */
+.drag-over {
+  transform: scale(1.3) !important;
+  box-shadow: 0 0 40px rgba(251, 146, 60, 1) !important;
+}
+
+.dragging-logo {
+  transform: scale(0.8) rotate(5deg) !important;
+  opacity: 0.7 !important;
+}
+
+/* Custom Video Player - Hide All Controls */
+.custom-video-player::-webkit-media-controls-timeline {
+  display: none !important;
+}
+
+.custom-video-player::-webkit-media-controls-current-time-display {
+  display: none !important;
+}
+
+.custom-video-player::-webkit-media-controls-time-remaining-display {
+  display: none !important;
+}
+
+.custom-video-player::-moz-range-progress {
+  display: none !important;
+}
+
+.custom-video-player::-moz-range-track {
+  display: none !important;
+}
+
+/* Hide progress bar for all browsers */
+.custom-video-player::-webkit-media-controls-timeline-container {
+  display: none !important;
+}
+
+.custom-video-player::-webkit-media-controls-seek-back-button {
+  display: none !important;
+}
+
+.custom-video-player::-webkit-media-controls-seek-forward-button {
+  display: none !important;
+}
+
+/* Hide all video control buttons */
+.custom-video-player::-webkit-media-controls-play-button {
+  display: none !important;
+}
+
+.custom-video-player::-webkit-media-controls-pause-button {
+  display: none !important;
+}
+
+.custom-video-player::-webkit-media-controls-mute-button {
+  display: none !important;
+}
+
+.custom-video-player::-webkit-media-controls-volume-slider {
+  display: none !important;
+}
+
+.custom-video-player::-webkit-media-controls-fullscreen-button {
+  display: none !important;
+}
+
+.custom-video-player::-webkit-media-controls-toggle-closed-captions-button {
+  display: none !important;
+}
+
+.custom-video-player::-webkit-media-controls-overlay-play-button {
+  display: none !important;
+}
+
+.custom-video-player::-webkit-media-controls-panel {
+  display: none !important;
+}
+
+.custom-video-player::-webkit-media-controls-enclosure {
+  display: none !important;
+}
+
+/* Firefox controls */
+.custom-video-player::-moz-media-controls {
+  display: none !important;
+}
+
+/* Remove controls attribute programmatically for complete control removal */
+.custom-video-player {
+  outline: none !important;
+}
+
+.custom-video-player:focus {
+  outline: none !important;
+}
+
+/* Video Animation Keyframes */
+@keyframes video-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) translateY(20px);
+    filter: blur(10px);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(0.95) translateY(10px);
+    filter: blur(5px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: blur(0px);
+  }
+}
+
+@keyframes video-out {
+  0% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: blur(0px);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.05) translateY(-10px);
+    filter: blur(3px);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.1) translateY(-20px);
+    filter: blur(8px);
+  }
+}
+
+/* Video Animation Classes */
+.animate-video-in {
+  animation: video-in 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.animate-video-out {
+  animation: video-out 0.5s cubic-bezier(0.55, 0.06, 0.68, 0.19) forwards;
+}
