@@ -93,7 +93,7 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col lg:flex-row">
+    <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 flex flex-col lg:flex-row">
       {/* Left Side - Login Form */}
       <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
         <div className="max-w-md w-full">
@@ -210,9 +210,9 @@ const LoginPage = () => {
       {/* Right Side - Auto-sliding Carousel */}
       <div className="hidden lg:flex flex-1 relative overflow-hidden rounded-tl-[3rem] lg:rounded-tl-[4rem]">
         {/* Gradient Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-orange-400 via-orange-500 to-orange-600"></div>
-        <div className="absolute inset-0 bg-gradient-to-t from-orange-700/30 via-transparent to-orange-300/20"></div>
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-orange-500/10 to-orange-600/30"></div>
+        <div className="absolute inset-0 bg-linear-to-br from-orange-400 via-orange-500 to-orange-600"></div>
+        <div className="absolute inset-0 bg-linear-to-t from-orange-700/30 via-transparent to-orange-300/20"></div>
+        <div className="absolute inset-0 bg-linear-to-r from-transparent via-orange-500/10 to-orange-600/30"></div>
         
         {/* Content Container */}
         <div className="relative z-10 flex items-center justify-center p-12 w-full">
@@ -269,11 +269,11 @@ const LoginPage = () => {
       </div>
 
       {/* Mobile Carousel - Visible only on mobile */}
-      <div className="lg:hidden relative overflow-hidden rounded-t-[2rem]">
+      <div className="lg:hidden relative overflow-hidden rounded-t-4xl">
         {/* Mobile Gradient Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-orange-400 via-orange-500 to-orange-600"></div>
-        <div className="absolute inset-0 bg-gradient-to-t from-orange-700/30 via-transparent to-orange-300/20"></div>
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-orange-500/10 to-orange-600/30"></div>
+        <div className="absolute inset-0 bg-linear-to-br from-orange-400 via-orange-500 to-orange-600"></div>
+        <div className="absolute inset-0 bg-linear-to-t from-orange-700/30 via-transparent to-orange-300/20"></div>
+        <div className="absolute inset-0 bg-linear-to-r from-transparent via-orange-500/10 to-orange-600/30"></div>
         
         {/* Mobile Content */}
         <div className="relative z-10 py-8 px-4">

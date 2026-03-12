@@ -1,2 +1,2 @@
 // Student Pages Exports
-export { default as StudentProfiles } from './StudentProfiles';
+// StudentProfiles moved to admin-pages

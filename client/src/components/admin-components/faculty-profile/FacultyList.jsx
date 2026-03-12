@@ -83,26 +83,27 @@ const FacultyList = ({ searchTerm, onViewFaculty }) => {
 
   return (
     <div className="bg-white border-2 border-gray-200 rounded-lg overflow-hidden">
-      <div className="overflow-x-auto">
+      {/* Desktop Table View */}
+      <div className="hidden lg:block overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 xl:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Faculty Member
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 xl:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Department
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 xl:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Position
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 xl:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Specialization
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 xl:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Status
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 xl:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Actions
               </th>
             </tr>
@@ -110,49 +111,89 @@ const FacultyList = ({ searchTerm, onViewFaculty }) => {
           <tbody className="bg-white divide-y divide-gray-200">
             {filteredFaculty.map((member) => (
               <tr key={member.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-4 xl:px-6 py-4 whitespace-nowrap">
                   <div>
                     <div className="text-sm font-medium text-black">{member.name}</div>
                     <div className="text-sm text-gray-500">{member.id}</div>
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-4 xl:px-6 py-4 whitespace-nowrap">
                   <div className="text-sm text-black">{member.department}</div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-4 xl:px-6 py-4 whitespace-nowrap">
                   <div className="text-sm text-black">{member.position}</div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-4 xl:px-6 py-4 whitespace-nowrap">
                   <div className="text-sm text-black">{member.specialization}</div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-4 xl:px-6 py-4 whitespace-nowrap">
                   <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(member.status)}`}>
                     {member.status}
                   </span>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <button
-                    onClick={() => onViewFaculty(member)}
-                    className="text-orange-600 hover:text-orange-700 mr-3 transition-colors"
-                  >
-                    View
-                  </button>
-                  <button className="text-black hover:text-orange-600 mr-3 transition-colors">
-                    Edit
-                  </button>
-                  <button className="text-red-600 hover:text-red-700 transition-colors">
-                    Delete
-                  </button>
+                <td className="px-4 xl:px-6 py-4 whitespace-nowrap text-sm font-medium">
+                  <div className="flex flex-col xl:flex-row xl:space-x-3 space-y-1 xl:space-y-0">
+                    <button
+                      onClick={() => onViewFaculty(member)}
+                      className="text-orange-600 hover:text-orange-700 transition-colors text-left"
+                    >
+                      View
+                    </button>
+                    <button className="text-black hover:text-orange-600 transition-colors text-left">
+                      Edit
+                    </button>
+                    <button className="text-red-600 hover:text-red-700 transition-colors text-left">
+                      Delete
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+
+      {/* Mobile Card View */}
+      <div className="lg:hidden">
+        {filteredFaculty.map((member) => (
+          <div key={member.id} className="border-b border-gray-200 last:border-b-0 p-4 hover:bg-gray-50">
+            <div className="flex items-start justify-between mb-3">
+              <div className="flex-1">
+                <h3 className="text-base font-semibold text-black mb-1">{member.name}</h3>
+                <p className="text-sm text-gray-500 mb-2">{member.id}</p>
+                <div className="flex flex-wrap gap-2 text-sm mb-2">
+                  <span className="text-gray-700">{member.department}</span>
+                  <span className="text-gray-400">•</span>
+                  <span className="text-gray-700">{member.position}</span>
+                </div>
+                <p className="text-sm text-gray-600">{member.specialization}</p>
+              </div>
+              <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(member.status)} ml-2 shrink-0`}>
+                {member.status}
+              </span>
+            </div>
+            
+            <div className="flex justify-end space-x-3 text-sm">
+              <button
+                onClick={() => onViewFaculty(member)}
+                className="text-orange-600 hover:text-orange-700 transition-colors font-medium"
+              >
+                View
+              </button>
+              <button className="text-black hover:text-orange-600 transition-colors font-medium">
+                Edit
+              </button>
+              <button className="text-red-600 hover:text-red-700 transition-colors font-medium">
+                Delete
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
       
       {filteredFaculty.length === 0 && (
-        <div className="text-center py-8">
-          <p className="text-gray-500">No faculty members found matching your search criteria.</p>
+        <div className="text-center py-8 px-4">
+          <p className="text-gray-500 text-sm sm:text-base">No faculty members found matching your search criteria.</p>
         </div>
       )}
     </div>

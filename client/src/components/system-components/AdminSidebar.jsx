@@ -93,7 +93,7 @@ function AdminSidebar({ isOpen, onClose }) {
       {/* Mobile Overlay */}
       {isOpen && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-45 lg:hidden"
+          className="fixed inset-0 backdrop-blur-sm bg-white/10 z-45 lg:hidden"
           onClick={onClose}
         />
       )}

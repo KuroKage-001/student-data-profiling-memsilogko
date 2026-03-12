@@ -4,7 +4,7 @@ import ProtectedRoute from './context/ProtectedRoute';
 import HomePage from './pages/system-page/HomePage';
 import LoginPage from './pages/system-page/LoginPage';
 import AdminDashboard from './pages/admin-pages/AdminDashboard';
-import StudentProfiles from './pages/student-pages/StudentProfiles';
+import StudentProfiles from './pages/admin-pages/StudentProfiles';
 import FacultyProfiles from './pages/admin-pages/FacultyProfiles';
 import Events from './pages/admin-pages/Events';
 import Scheduling from './pages/admin-pages/Scheduling';
