@@ -3,6 +3,14 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
 // Get token from localStorage
 const getToken = () => localStorage.getItem('token');
 
+// Clear authentication data
+const clearAuthData = () => {
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+  // Trigger a custom event to notify AuthContext
+  window.dispatchEvent(new CustomEvent('auth-cleared'));
+};
+
 // Create headers with authentication
 const createHeaders = () => {
   const headers = {
@@ -18,7 +26,7 @@ const createHeaders = () => {
   return headers;
 };
 
-// API request wrapper
+// API request wrapper with enhanced error handling
 const apiRequest = async (endpoint, options = {}) => {
   const url = `${API_BASE_URL}${endpoint}`;
   const config = {
@@ -28,10 +36,17 @@ const apiRequest = async (endpoint, options = {}) => {
 
   try {
     const response = await fetch(url, config);
+    
+    // Handle 401 Unauthorized - token is invalid or expired
+    if (response.status === 401) {
+      clearAuthData();
+      throw new Error('Authentication failed. Please login again.');
+    }
+    
     const data = await response.json();
     
     if (!response.ok) {
-      throw new Error(data.message || 'API request failed');
+      throw new Error(data.message || `HTTP ${response.status}: Request failed`);
     }
     
     return data;

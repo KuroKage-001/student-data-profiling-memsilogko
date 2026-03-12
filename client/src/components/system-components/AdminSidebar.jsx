@@ -155,18 +155,7 @@ function AdminSidebar({ isOpen, onClose }) {
           </ul>
         </nav>
 
-        {/* Logout Button */}
-        <div className="px-3 py-4 border-t border-gray-100">
-          <button
-            onClick={() => navigate('/admin/login')}
-            className="w-full text-left px-3 py-2.5 rounded-lg text-gray-600 hover:bg-red-50 hover:text-red-600 transition-all duration-200 flex items-center gap-3 group"
-          >
-            <svg className="w-5 h-5 text-gray-400 group-hover:text-red-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
-            <span className="text-sm font-medium">Logout</span>
-          </button>
-        </div>
+
 
         {/* Footer */}
         <div className="px-6 py-3 border-t border-gray-100 bg-gray-50">
