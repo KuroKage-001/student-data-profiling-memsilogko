@@ -87,6 +87,26 @@ const Research = () => {
           <p className="text-sm sm:text-base text-gray-600">Research project management and academic publications</p>
         </div>
 
+        {/* Research Stats */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+          <div className="bg-white border-2 border-gray-200 rounded-lg p-4 sm:p-6">
+            <div className="text-xl sm:text-2xl font-bold text-black">{materials.length}</div>
+            <div className="text-xs sm:text-sm text-gray-600">Total Research</div>
+          </div>
+          <div className="bg-white border-2 border-gray-200 rounded-lg p-4 sm:p-6">
+            <div className="text-xl sm:text-2xl font-bold text-green-600">{materials.filter(m => m.status === 'Published').length}</div>
+            <div className="text-xs sm:text-sm text-gray-600">Published</div>
+          </div>
+          <div className="bg-white border-2 border-gray-200 rounded-lg p-4 sm:p-6">
+            <div className="text-xl sm:text-2xl font-bold text-yellow-600">{materials.filter(m => m.status === 'Under Review').length}</div>
+            <div className="text-xs sm:text-sm text-gray-600">Under Review</div>
+          </div>
+          <div className="bg-white border-2 border-gray-200 rounded-lg p-4 sm:p-6">
+            <div className="text-xl sm:text-2xl font-bold text-blue-600">{materials.filter(m => m.status === 'Draft').length}</div>
+            <div className="text-xs sm:text-sm text-gray-600">In Progress</div>
+          </div>
+        </div>
+
         {/* Search and Filters */}
         <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <input
@@ -217,26 +237,6 @@ const Research = () => {
               <p className="text-gray-500 text-sm sm:text-base">No research materials found matching your criteria.</p>
             </div>
           )}
-        </div>
-
-        {/* Research Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-          <div className="bg-white border-2 border-gray-200 rounded-lg p-4 sm:p-6">
-            <div className="text-xl sm:text-2xl font-bold text-black">{materials.length}</div>
-            <div className="text-xs sm:text-sm text-gray-600">Total Research</div>
-          </div>
-          <div className="bg-white border-2 border-gray-200 rounded-lg p-4 sm:p-6">
-            <div className="text-xl sm:text-2xl font-bold text-green-600">{materials.filter(m => m.status === 'Published').length}</div>
-            <div className="text-xs sm:text-sm text-gray-600">Published</div>
-          </div>
-          <div className="bg-white border-2 border-gray-200 rounded-lg p-4 sm:p-6">
-            <div className="text-xl sm:text-2xl font-bold text-yellow-600">{materials.filter(m => m.status === 'Under Review').length}</div>
-            <div className="text-xs sm:text-sm text-gray-600">Under Review</div>
-          </div>
-          <div className="bg-white border-2 border-gray-200 rounded-lg p-4 sm:p-6">
-            <div className="text-xl sm:text-2xl font-bold text-blue-600">{materials.filter(m => m.status === 'Draft').length}</div>
-            <div className="text-xs sm:text-sm text-gray-600">In Progress</div>
-          </div>
         </div>
       </div>
     </AdminLayout>

@@ -90,6 +90,26 @@ const Scheduling = () => {
           <p className="text-sm sm:text-base text-gray-600">Manage class schedules, room assignments, and timetables</p>
         </div>
 
+        {/* Quick Stats */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+          <div className="bg-white border-2 border-gray-200 rounded-lg p-4 sm:p-6">
+            <div className="text-xl sm:text-2xl font-bold text-black">{schedules.length}</div>
+            <div className="text-xs sm:text-sm text-gray-600">Total Classes</div>
+          </div>
+          <div className="bg-white border-2 border-gray-200 rounded-lg p-4 sm:p-6">
+            <div className="text-xl sm:text-2xl font-bold text-orange-600">{schedules.reduce((sum, s) => sum + s.students, 0)}</div>
+            <div className="text-xs sm:text-sm text-gray-600">Total Students</div>
+          </div>
+          <div className="bg-white border-2 border-gray-200 rounded-lg p-4 sm:p-6">
+            <div className="text-xl sm:text-2xl font-bold text-green-600">{new Set(schedules.map(s => s.room)).size}</div>
+            <div className="text-xs sm:text-sm text-gray-600">Rooms Used</div>
+          </div>
+          <div className="bg-white border-2 border-gray-200 rounded-lg p-4 sm:p-6">
+            <div className="text-xl sm:text-2xl font-bold text-black">{Math.round(schedules.reduce((sum, s) => sum + (s.students / s.capacity), 0) / schedules.length * 100)}%</div>
+            <div className="text-xs sm:text-sm text-gray-600">Avg. Capacity</div>
+          </div>
+        </div>
+
         {/* Controls */}
         <div className="mb-6 space-y-4 lg:space-y-0 lg:flex lg:items-center lg:justify-between lg:gap-4">
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 flex-1">
@@ -325,26 +345,6 @@ const Scheduling = () => {
                 </div>
               );
             })}
-          </div>
-        </div>
-
-        {/* Quick Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-          <div className="bg-white border-2 border-gray-200 rounded-lg p-4 sm:p-6">
-            <div className="text-xl sm:text-2xl font-bold text-black">{schedules.length}</div>
-            <div className="text-xs sm:text-sm text-gray-600">Total Classes</div>
-          </div>
-          <div className="bg-white border-2 border-gray-200 rounded-lg p-4 sm:p-6">
-            <div className="text-xl sm:text-2xl font-bold text-orange-600">{schedules.reduce((sum, s) => sum + s.students, 0)}</div>
-            <div className="text-xs sm:text-sm text-gray-600">Total Students</div>
-          </div>
-          <div className="bg-white border-2 border-gray-200 rounded-lg p-4 sm:p-6">
-            <div className="text-xl sm:text-2xl font-bold text-green-600">{new Set(schedules.map(s => s.room)).size}</div>
-            <div className="text-xs sm:text-sm text-gray-600">Rooms Used</div>
-          </div>
-          <div className="bg-white border-2 border-gray-200 rounded-lg p-4 sm:p-6">
-            <div className="text-xl sm:text-2xl font-bold text-black">{Math.round(schedules.reduce((sum, s) => sum + (s.students / s.capacity), 0) / schedules.length * 100)}%</div>
-            <div className="text-xs sm:text-sm text-gray-600">Avg. Capacity</div>
           </div>
         </div>
       </div>

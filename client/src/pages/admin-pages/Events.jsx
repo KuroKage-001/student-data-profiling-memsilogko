@@ -68,6 +68,26 @@ const Events = () => {
           <p className="text-sm sm:text-base text-gray-600">Manage academic and institutional events</p>
         </div>
 
+        {/* Quick Stats */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+          <div className="bg-white border-2 border-gray-200 rounded-lg p-4 sm:p-6">
+            <div className="text-xl sm:text-2xl font-bold text-black">{events.length}</div>
+            <div className="text-xs sm:text-sm text-gray-600">Total Events</div>
+          </div>
+          <div className="bg-white border-2 border-gray-200 rounded-lg p-4 sm:p-6">
+            <div className="text-xl sm:text-2xl font-bold text-orange-600">{events.filter(e => e.status === 'Upcoming').length}</div>
+            <div className="text-xs sm:text-sm text-gray-600">Upcoming Events</div>
+          </div>
+          <div className="bg-white border-2 border-gray-200 rounded-lg p-4 sm:p-6">
+            <div className="text-xl sm:text-2xl font-bold text-green-600">{events.filter(e => e.status === 'Completed').length}</div>
+            <div className="text-xs sm:text-sm text-gray-600">Completed Events</div>
+          </div>
+          <div className="bg-white border-2 border-gray-200 rounded-lg p-4 sm:p-6">
+            <div className="text-xl sm:text-2xl font-bold text-black">{events.reduce((sum, e) => sum + e.attendees, 0)}</div>
+            <div className="text-xs sm:text-sm text-gray-600">Total Attendees</div>
+          </div>
+        </div>
+
         {/* Controls */}
         <div className="mb-6 space-y-4 lg:space-y-0 lg:flex lg:items-center lg:justify-between lg:gap-4">
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 flex-1">
@@ -240,26 +260,6 @@ const Events = () => {
               <p className="text-gray-500 text-sm sm:text-base">No events found matching your criteria.</p>
             </div>
           )}
-        </div>
-
-        {/* Quick Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-          <div className="bg-white border-2 border-gray-200 rounded-lg p-4 sm:p-6">
-            <div className="text-xl sm:text-2xl font-bold text-black">{events.length}</div>
-            <div className="text-xs sm:text-sm text-gray-600">Total Events</div>
-          </div>
-          <div className="bg-white border-2 border-gray-200 rounded-lg p-4 sm:p-6">
-            <div className="text-xl sm:text-2xl font-bold text-orange-600">{events.filter(e => e.status === 'Upcoming').length}</div>
-            <div className="text-xs sm:text-sm text-gray-600">Upcoming Events</div>
-          </div>
-          <div className="bg-white border-2 border-gray-200 rounded-lg p-4 sm:p-6">
-            <div className="text-xl sm:text-2xl font-bold text-green-600">{events.filter(e => e.status === 'Completed').length}</div>
-            <div className="text-xs sm:text-sm text-gray-600">Completed Events</div>
-          </div>
-          <div className="bg-white border-2 border-gray-200 rounded-lg p-4 sm:p-6">
-            <div className="text-xl sm:text-2xl font-bold text-black">{events.reduce((sum, e) => sum + e.attendees, 0)}</div>
-            <div className="text-xs sm:text-sm text-gray-600">Total Attendees</div>
-          </div>
         </div>
       </div>
     </AdminLayout>

@@ -101,6 +101,26 @@ const InstructionsPage = () => {
           <p className="text-sm sm:text-base text-gray-600">Syllabus, Curriculum, and Lesson Management</p>
         </div>
 
+        {/* Quick Stats */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+          <div className="bg-white border-2 border-gray-200 rounded-lg p-4 sm:p-6">
+            <div className="text-xl sm:text-2xl font-bold text-black">{instructions.length}</div>
+            <div className="text-xs sm:text-sm text-gray-600">Total Instructions</div>
+          </div>
+          <div className="bg-white border-2 border-gray-200 rounded-lg p-4 sm:p-6">
+            <div className="text-xl sm:text-2xl font-bold text-green-600">{instructions.filter(i => i.status === 'Active').length}</div>
+            <div className="text-xs sm:text-sm text-gray-600">Active</div>
+          </div>
+          <div className="bg-white border-2 border-gray-200 rounded-lg p-4 sm:p-6">
+            <div className="text-xl sm:text-2xl font-bold text-yellow-600">{instructions.filter(i => i.type === 'Syllabus').length}</div>
+            <div className="text-xs sm:text-sm text-gray-600">Syllabi</div>
+          </div>
+          <div className="bg-white border-2 border-gray-200 rounded-lg p-4 sm:p-6">
+            <div className="text-xl sm:text-2xl font-bold text-blue-600">{instructions.filter(i => i.type === 'Curriculum').length}</div>
+            <div className="text-xs sm:text-sm text-gray-600">Curricula</div>
+          </div>
+        </div>
+
         {/* Search and Filters */}
         <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <input
@@ -235,26 +255,6 @@ const InstructionsPage = () => {
               <p className="text-gray-500 text-sm sm:text-base">No instructions found matching your criteria.</p>
             </div>
           )}
-        </div>
-
-        {/* Quick Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-          <div className="bg-white border-2 border-gray-200 rounded-lg p-4 sm:p-6">
-            <div className="text-xl sm:text-2xl font-bold text-black">{instructions.length}</div>
-            <div className="text-xs sm:text-sm text-gray-600">Total Instructions</div>
-          </div>
-          <div className="bg-white border-2 border-gray-200 rounded-lg p-4 sm:p-6">
-            <div className="text-xl sm:text-2xl font-bold text-green-600">{instructions.filter(i => i.status === 'Active').length}</div>
-            <div className="text-xs sm:text-sm text-gray-600">Active</div>
-          </div>
-          <div className="bg-white border-2 border-gray-200 rounded-lg p-4 sm:p-6">
-            <div className="text-xl sm:text-2xl font-bold text-yellow-600">{instructions.filter(i => i.type === 'Syllabus').length}</div>
-            <div className="text-xs sm:text-sm text-gray-600">Syllabi</div>
-          </div>
-          <div className="bg-white border-2 border-gray-200 rounded-lg p-4 sm:p-6">
-            <div className="text-xl sm:text-2xl font-bold text-blue-600">{instructions.filter(i => i.type === 'Curriculum').length}</div>
-            <div className="text-xs sm:text-sm text-gray-600">Curricula</div>
-          </div>
         </div>
       </div>
     </AdminLayout>
