@@ -1,4 +1,4 @@
-import { authAPI } from '../../utils/system-utils/apiService';
+import { authAPI } from '../system-service/apiService';
 
 class LoginService {
   async authenticate(credentials) {

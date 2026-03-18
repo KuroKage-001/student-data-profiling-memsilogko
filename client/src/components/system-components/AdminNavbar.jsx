@@ -4,9 +4,15 @@ import { useAuth } from '../../context/AuthContext';
 
 const AdminNavbar = ({ onToggleSidebar }) => {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
+
+  // Get user initial from name
+  const getUserInitial = () => {
+    if (!user || !user.name) return 'A';
+    return user.name.charAt(0).toUpperCase();
+  };
 
   const handleLogout = async () => {
     try {
@@ -52,8 +58,12 @@ const AdminNavbar = ({ onToggleSidebar }) => {
               onClick={() => navigate('/admin/dashboard')}
               className="cursor-pointer flex items-center space-x-2"
             >
-              <div className="w-8 h-8 bg-linear-to-r from-orange-600 to-orange-700 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">C</span>
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden">
+                <img 
+                  src="/src/assets/images/ccs-logo.png" 
+                  alt="CCS Logo" 
+                  className="w-full h-full object-contain"
+                />
               </div>
               <h1 className="text-xl font-semibold text-gray-900 hidden sm:block">CCS Admin</h1>
             </div>
@@ -66,9 +76,9 @@ const AdminNavbar = ({ onToggleSidebar }) => {
               className="flex items-center space-x-3 text-gray-700 hover:text-gray-900 transition-colors p-2 rounded-lg hover:bg-gray-50"
             >
               <div className="w-8 h-8 bg-linear-to-r from-orange-600 to-orange-700 rounded-full flex items-center justify-center">
-                <span className="text-white font-semibold text-sm">A</span>
+                <span className="text-white font-semibold text-sm">{getUserInitial()}</span>
               </div>
-              <span className="hidden md:block text-sm font-medium">Admin</span>
+              <span className="hidden md:block text-sm font-medium">{user?.name || 'Admin'}</span>
               <svg 
                 className={`w-4 h-4 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} 
                 fill="none" 
