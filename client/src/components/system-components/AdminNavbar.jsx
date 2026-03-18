@@ -60,7 +60,7 @@ const AdminNavbar = ({ onToggleSidebar }) => {
             >
               <div className="w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden">
                 <img 
-                  src="/src/assets/images/ccs-logo.png" 
+                  src="/ccs-logo.png" 
                   alt="CCS Logo" 
                   className="w-full h-full object-contain"
                 />
