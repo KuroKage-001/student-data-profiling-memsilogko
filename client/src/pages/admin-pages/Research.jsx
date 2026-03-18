@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import AdminLayout from '../../layouts/AdminLayout';
+import { FaFlask, FaSearch, FaPlus, FaChartBar, FaCheckCircle, FaClock, FaFileAlt } from 'react-icons/fa';
 
 const Research = () => {
   const [materials, setMaterials] = useState([
@@ -80,82 +81,120 @@ const Research = () => {
 
   return (
     <AdminLayout>
-      <div className="p-4 sm:p-6 lg:p-8">
-        {/* Header Section */}
-        <div className="mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-black mb-2">College Research</h1>
-          <p className="text-sm sm:text-base text-gray-600">Research project management and academic publications</p>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-orange-50/30 to-gray-50 p-4 sm:p-6 lg:p-8">
+        {/* Header Section with Enhanced Design */}
+        <div className="mb-8 sm:mb-10">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
+              <FaFlask className="text-white text-xl" />
+            </div>
+            <div>
+              <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                College Research
+              </h1>
+            </div>
+          </div>
+          <p className="text-base sm:text-lg text-gray-600 ml-16 font-medium">
+            Research project management and academic publications
+          </p>
         </div>
 
-        {/* Research Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
-          <div className="bg-white border-2 border-gray-200 rounded-lg p-4 sm:p-6">
-            <div className="text-xl sm:text-2xl font-bold text-black">{materials.length}</div>
-            <div className="text-xs sm:text-sm text-gray-600">Total Research</div>
+        {/* Research Stats - Enhanced Design */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 mb-8 sm:mb-10">
+          <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300">
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-2xl sm:text-3xl font-bold text-gray-900">{materials.length}</div>
+              <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                <FaChartBar className="text-gray-600 text-lg" />
+              </div>
+            </div>
+            <div className="text-sm sm:text-base text-gray-600 font-medium">Total Research</div>
           </div>
-          <div className="bg-white border-2 border-gray-200 rounded-lg p-4 sm:p-6">
-            <div className="text-xl sm:text-2xl font-bold text-green-600">{materials.filter(m => m.status === 'Published').length}</div>
-            <div className="text-xs sm:text-sm text-gray-600">Published</div>
+          <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300">
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-2xl sm:text-3xl font-bold text-green-600">{materials.filter(m => m.status === 'Published').length}</div>
+              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                <FaCheckCircle className="text-green-600 text-lg" />
+              </div>
+            </div>
+            <div className="text-sm sm:text-base text-gray-600 font-medium">Published</div>
           </div>
-          <div className="bg-white border-2 border-gray-200 rounded-lg p-4 sm:p-6">
-            <div className="text-xl sm:text-2xl font-bold text-yellow-600">{materials.filter(m => m.status === 'Under Review').length}</div>
-            <div className="text-xs sm:text-sm text-gray-600">Under Review</div>
+          <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300">
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-2xl sm:text-3xl font-bold text-yellow-600">{materials.filter(m => m.status === 'Under Review').length}</div>
+              <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+                <FaClock className="text-yellow-600 text-lg" />
+              </div>
+            </div>
+            <div className="text-sm sm:text-base text-gray-600 font-medium">Under Review</div>
           </div>
-          <div className="bg-white border-2 border-gray-200 rounded-lg p-4 sm:p-6">
-            <div className="text-xl sm:text-2xl font-bold text-blue-600">{materials.filter(m => m.status === 'Draft').length}</div>
-            <div className="text-xs sm:text-sm text-gray-600">In Progress</div>
+          <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300">
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-2xl sm:text-3xl font-bold text-blue-600">{materials.filter(m => m.status === 'Draft').length}</div>
+              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                <FaFileAlt className="text-blue-600 text-lg" />
+              </div>
+            </div>
+            <div className="text-sm sm:text-base text-gray-600 font-medium">In Progress</div>
           </div>
         </div>
 
-        {/* Search and Filters */}
-        <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          <input
-            type="text"
-            placeholder="Search research materials..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="px-3 sm:px-4 py-2 sm:py-3 border-2 border-gray-200 rounded-lg focus:border-orange-600 focus:outline-none transition-colors text-black text-sm sm:text-base"
-          />
-          <select
-            value={filterDepartment}
-            onChange={(e) => setFilterDepartment(e.target.value)}
-            className="px-3 sm:px-4 py-2 sm:py-3 border-2 border-gray-200 rounded-lg focus:border-orange-600 focus:outline-none transition-colors text-black text-sm sm:text-base"
-          >
-            <option value="All">All Departments</option>
-            {departments.map(dept => (
-              <option key={dept} value={dept}>{dept}</option>
-            ))}
-          </select>
-          <select
-            value={filterType}
-            onChange={(e) => setFilterType(e.target.value)}
-            className="px-3 sm:px-4 py-2 sm:py-3 border-2 border-gray-200 rounded-lg focus:border-orange-600 focus:outline-none transition-colors text-black text-sm sm:text-base"
-          >
-            <option value="All">All Types</option>
-            {researchTypes.map(type => (
-              <option key={type} value={type}>{type}</option>
-            ))}
-          </select>
-          <select
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            className="px-3 sm:px-4 py-2 sm:py-3 border-2 border-gray-200 rounded-lg focus:border-orange-600 focus:outline-none transition-colors text-black text-sm sm:text-base"
-          >
-            <option value="All">All Status</option>
-            {statuses.map(status => (
-              <option key={status} value={status}>{status}</option>
-            ))}
-          </select>
-        </div>
+        {/* Search and Filters - Enhanced Design */}
+        <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+            <div className="relative sm:col-span-2 lg:col-span-1">
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                <FaSearch className="text-lg" />
+              </div>
+              <input
+                type="text"
+                placeholder="Search research materials..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:outline-none transition-all text-gray-900 text-sm sm:text-base placeholder:text-gray-400 shadow-sm focus:shadow-md"
+              />
+            </div>
+            <select
+              value={filterDepartment}
+              onChange={(e) => setFilterDepartment(e.target.value)}
+              className="px-4 py-3.5 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:outline-none transition-all text-gray-900 text-sm sm:text-base shadow-sm focus:shadow-md"
+            >
+              <option value="All">All Departments</option>
+              {departments.map(dept => (
+                <option key={dept} value={dept}>{dept}</option>
+              ))}
+            </select>
+            <select
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value)}
+              className="px-4 py-3.5 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:outline-none transition-all text-gray-900 text-sm sm:text-base shadow-sm focus:shadow-md"
+            >
+              <option value="All">All Types</option>
+              {researchTypes.map(type => (
+                <option key={type} value={type}>{type}</option>
+              ))}
+            </select>
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className="px-4 py-3.5 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:outline-none transition-all text-gray-900 text-sm sm:text-base shadow-sm focus:shadow-md"
+            >
+              <option value="All">All Status</option>
+              {statuses.map(status => (
+                <option key={status} value={status}>{status}</option>
+              ))}
+            </select>
+          </div>
 
-        <div className="mb-4 sm:mb-6">
-          <button className="bg-orange-600 hover:bg-orange-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg transition-colors text-sm sm:text-base font-medium w-full sm:w-auto">
-            + Add New Research
+          <button className="group relative bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white px-6 py-3.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 font-semibold shadow-md hover:shadow-xl hover:-translate-y-0.5 overflow-hidden w-full sm:w-auto">
+            <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+            <FaPlus className="text-sm relative z-10" />
+            <span className="relative z-10">Add New Research</span>
           </button>
         </div>
 
-        {/* Research Materials List */}
-        <div className="bg-white border-2 border-gray-200 rounded-lg overflow-hidden mb-6 sm:mb-8">
+        {/* Research Materials List - Enhanced Container */}
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">

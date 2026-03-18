@@ -2,15 +2,18 @@ import pncHeaderImage from '../../../assets/images/pnc-header-2.png';
 
 const LoginHeader = () => {
   return (
-    <div className="text-center mb-8 lg:mb-10">
-      <div className="mb-4 sm:mb-6">
+    <div className="text-center mb-12 lg:mb-14">
+      <div className="mb-8 sm:mb-10">
         <img 
           src={pncHeaderImage} 
           alt="PNC Header" 
-          className="mx-auto h-16 sm:h-20 w-auto object-contain"
+          className="mx-auto h-24 sm:h-28 w-auto object-contain"
         />
       </div>
-      <p className="text-sm sm:text-base text-gray-600 px-4 sm:px-0">
+      <h2 className="text-2xl sm:text-3xl font-bold mb-4 bg-gradient-to-r from-orange-600 via-orange-500 to-orange-600 bg-clip-text text-transparent">
+       
+      </h2>
+      <p className="text-sm sm:text-base px-4 sm:px-0 leading-relaxed" style={{ color: '#5A6A7A' }}>
         Sign in to access the Comprehensive Profiling System
       </p>
     </div>

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import AdminLayout from '../../layouts/AdminLayout';
 import StudentList from '../../components/student-components/student-profile/StudentList';
 import StudentProfileModal from '../../components/student-components/student-profile/StudentProfileModal';
+import { FaUserGraduate, FaSearch, FaPlus, FaFileExport } from 'react-icons/fa';
 
 const StudentProfiles = () => {
   const [selectedStudent, setSelectedStudent] = useState(null);
@@ -20,39 +21,58 @@ const StudentProfiles = () => {
 
   return (
     <AdminLayout>
-      <div className="p-4 sm:p-6 lg:p-8">
-        {/* Header Section */}
-        <div className="mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-black mb-2">Student Profiles</h1>
-          <p className="text-sm sm:text-base text-gray-600">Comprehensive student data management and profiling</p>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-orange-50/30 to-gray-50 p-4 sm:p-6 lg:p-8">
+        {/* Header Section with Enhanced Design */}
+        <div className="mb-8 sm:mb-10">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
+              <FaUserGraduate className="text-white text-xl" />
+            </div>
+            <div>
+              <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                Student Profiles
+              </h1>
+            </div>
+          </div>
+          <p className="text-base sm:text-lg text-gray-600 ml-16 font-medium">
+            Comprehensive student data management and profiling
+          </p>
         </div>
 
-        {/* Search and Actions Section */}
-        <div className="mb-6 space-y-4 sm:space-y-0 sm:flex sm:flex-col lg:flex-row lg:gap-4 lg:items-center lg:justify-between">
-          {/* Search Input */}
-          <div className="w-full lg:flex-1 lg:max-w-md">
-            <input
-              type="text"
-              placeholder="Search students by name, ID, or program..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-gray-200 rounded-lg focus:border-orange-600 focus:outline-none transition-colors text-black text-sm sm:text-base"
-            />
-          </div>
-          
-          {/* Action Buttons */}
-          <div className="flex flex-col min-[480px]:flex-row gap-2 sm:gap-3 w-full min-[480px]:w-auto lg:w-auto">
-            <button className="bg-orange-600 hover:bg-orange-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg transition-colors text-sm sm:text-base font-medium w-full min-[480px]:w-auto">
-              Add Student
-            </button>
-            <button className="bg-white border-2 border-orange-600 text-orange-600 hover:bg-orange-50 px-4 sm:px-6 py-2 sm:py-3 rounded-lg transition-colors text-sm sm:text-base font-medium w-full min-[480px]:w-auto">
-              Export List
-            </button>
+        {/* Search and Actions Section - Enhanced Design */}
+        <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 mb-6">
+          <div className="space-y-4 lg:space-y-0 lg:flex lg:gap-4 lg:items-center lg:justify-between">
+            {/* Search Input with Icon */}
+            <div className="relative w-full lg:flex-1 lg:max-w-md">
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                <FaSearch className="text-lg" />
+              </div>
+              <input
+                type="text"
+                placeholder="Search students by name, ID, or program..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:outline-none transition-all text-gray-900 text-sm sm:text-base placeholder:text-gray-400 shadow-sm focus:shadow-md"
+              />
+            </div>
+            
+            {/* Action Buttons - Enhanced */}
+            <div className="flex flex-col min-[480px]:flex-row gap-3 w-full min-[480px]:w-auto lg:w-auto">
+              <button className="group relative bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white px-6 py-3.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 font-semibold shadow-md hover:shadow-xl hover:-translate-y-0.5 overflow-hidden">
+                <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+                <FaPlus className="text-sm relative z-10" />
+                <span className="relative z-10">Add Student</span>
+              </button>
+              <button className="group bg-white border-2 border-orange-600 text-orange-600 hover:bg-orange-600 hover:text-white px-6 py-3.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 font-semibold shadow-md hover:shadow-xl hover:-translate-y-0.5">
+                <FaFileExport className="text-sm" />
+                <span>Export List</span>
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Student List */}
-        <div className="overflow-hidden">
+        {/* Student List - Enhanced Container */}
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
           <StudentList 
             searchTerm={searchTerm}
             onViewStudent={handleViewStudent}
