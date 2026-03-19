@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../../layouts/AdminLayout';
 import DashboardStats from '../../components/admin-components/dashboard/DashboardStats';
-import { FaUserGraduate, FaChalkboardTeacher, FaFileAlt, FaDownload, FaCog } from 'react-icons/fa';
+import { FaUserGraduate, FaChalkboardTeacher, FaFileAlt, FaDownload, FaCog, FaArrowRight, FaChartLine } from 'react-icons/fa';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -16,73 +16,115 @@ const AdminDashboard = () => {
 
   return (
     <AdminLayout>
-      <div className="p-4 sm:p-6 lg:p-8">
-        {/* Header Section */}
-        <div className="mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-black mb-2">Admin Dashboard</h1>
-          <p className="text-sm sm:text-base text-gray-600">Comprehensive Profiling System Management</p>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-orange-50/30 to-gray-50 p-4 sm:p-6 lg:p-8">
+        {/* Header Section with Enhanced Design */}
+        <div className="mb-8 sm:mb-10">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-1.5 h-8 bg-gradient-to-b from-orange-600 to-orange-400 rounded-full"></div>
+            <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+              Admin Dashboard
+            </h1>
+          </div>
+          <p className="text-base sm:text-lg text-gray-600 ml-6 font-medium">
+            Comprehensive Profiling System Management
+          </p>
         </div>
 
-        {/* Dashboard Stats */}
-        <div className="mb-6 sm:mb-8">
+        {/* Dashboard Stats with Shadow */}
+        <div className="mb-8 sm:mb-10">
           <DashboardStats />
         </div>
 
-        {/* Main Navigation Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
+        {/* Main Navigation Cards - Enhanced Design */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6 mb-8 sm:mb-10">
+          {/* Student Profiles Card */}
           <div 
             onClick={handleNavigateToStudents}
-            className="bg-white border-2 border-gray-200 rounded-lg p-4 sm:p-6 hover:border-orange-600 transition-colors cursor-pointer group"
+            className="group relative bg-white rounded-2xl p-6 sm:p-8 cursor-pointer overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 hover:border-orange-300 hover:-translate-y-1"
           >
-            <div className="flex items-start sm:items-center justify-between gap-4">
-              <div className="flex-1 min-w-0">
-                <h3 className="text-lg sm:text-xl font-semibold text-black mb-2 group-hover:text-orange-600 transition-colors">
-                  Student Profiles
-                </h3>
-                <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
-                  Manage and view comprehensive student data, academic records, and profiling information.
-                </p>
+            {/* Gradient Background Effect */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-orange-100 to-transparent rounded-full -mr-16 -mt-16 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            
+            <div className="relative">
+              <div className="flex items-start justify-between gap-4 mb-4">
+                <div className="flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                  <FaUserGraduate className="text-white text-2xl sm:text-3xl" />
+                </div>
+                <div className="flex-shrink-0 w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:translate-x-0 translate-x-4">
+                  <FaArrowRight className="text-orange-600 text-lg" />
+                </div>
               </div>
-              <div className="text-orange-600 text-3xl sm:text-4xl shrink-0">
-                <FaUserGraduate />
+              
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 group-hover:text-orange-600 transition-colors duration-300">
+                Student Profiles
+              </h3>
+              <p className="text-sm sm:text-base text-gray-600 leading-relaxed mb-4">
+                Manage and view comprehensive student data, academic records, and profiling information.
+              </p>
+              
+              <div className="flex items-center gap-2 text-orange-600 font-semibold text-sm group-hover:gap-3 transition-all duration-300">
+                <span>View Details</span>
+                <FaArrowRight className="text-xs" />
               </div>
             </div>
           </div>
 
+          {/* Faculty Profiles Card */}
           <div 
             onClick={handleNavigateToFaculty}
-            className="bg-white border-2 border-gray-200 rounded-lg p-4 sm:p-6 hover:border-orange-600 transition-colors cursor-pointer group"
+            className="group relative bg-white rounded-2xl p-6 sm:p-8 cursor-pointer overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 hover:border-orange-300 hover:-translate-y-1"
           >
-            <div className="flex items-start sm:items-center justify-between gap-4">
-              <div className="flex-1 min-w-0">
-                <h3 className="text-lg sm:text-xl font-semibold text-black mb-2 group-hover:text-orange-600 transition-colors">
-                  Faculty Profiles
-                </h3>
-                <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
-                  Access faculty information, teaching assignments, and professional development records.
-                </p>
+            {/* Gradient Background Effect */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-orange-100 to-transparent rounded-full -mr-16 -mt-16 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            
+            <div className="relative">
+              <div className="flex items-start justify-between gap-4 mb-4">
+                <div className="flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                  <FaChalkboardTeacher className="text-white text-2xl sm:text-3xl" />
+                </div>
+                <div className="flex-shrink-0 w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:translate-x-0 translate-x-4">
+                  <FaArrowRight className="text-orange-600 text-lg" />
+                </div>
               </div>
-              <div className="text-orange-600 text-3xl sm:text-4xl shrink-0">
-                <FaChalkboardTeacher />
+              
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 group-hover:text-orange-600 transition-colors duration-300">
+                Faculty Profiles
+              </h3>
+              <p className="text-sm sm:text-base text-gray-600 leading-relaxed mb-4">
+                Access faculty information, teaching assignments, and professional development records.
+              </p>
+              
+              <div className="flex items-center gap-2 text-orange-600 font-semibold text-sm group-hover:gap-3 transition-all duration-300">
+                <span>View Details</span>
+                <FaArrowRight className="text-xs" />
               </div>
             </div>
           </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="bg-gray-50 rounded-lg p-4 sm:p-6">
-          <h3 className="text-base sm:text-lg font-semibold text-black mb-4">Quick Actions</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-            <button className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-3 rounded-lg transition-colors flex items-center justify-center gap-2 text-sm sm:text-base font-medium">
-              <FaFileAlt className="text-sm sm:text-base" />
-              <span>Generate Reports</span>
+        {/* Quick Actions - Enhanced Design */}
+        <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-lg border border-gray-100">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
+              <FaChartLine className="text-white text-lg" />
+            </div>
+            <h3 className="text-xl sm:text-2xl font-bold text-gray-900">Quick Actions</h3>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <button className="group relative bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white px-6 py-4 rounded-xl transition-all duration-300 flex items-center justify-center gap-3 font-semibold shadow-md hover:shadow-xl hover:-translate-y-0.5 overflow-hidden">
+              <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+              <FaFileAlt className="text-lg relative z-10" />
+              <span className="relative z-10">Generate Reports</span>
             </button>
-            <button className="bg-white border-2 border-orange-600 text-orange-600 hover:bg-orange-50 px-4 py-3 rounded-lg transition-colors flex items-center justify-center gap-2 text-sm sm:text-base font-medium">
-              <FaDownload className="text-sm sm:text-base" />
+            
+            <button className="group bg-white border-2 border-orange-600 text-orange-600 hover:bg-orange-600 hover:text-white px-6 py-4 rounded-xl transition-all duration-300 flex items-center justify-center gap-3 font-semibold shadow-md hover:shadow-xl hover:-translate-y-0.5">
+              <FaDownload className="text-lg" />
               <span>Export Data</span>
             </button>
-            <button className="bg-white border-2 border-gray-300 text-black hover:bg-gray-50 px-4 py-3 rounded-lg transition-colors flex items-center justify-center gap-2 text-sm sm:text-base font-medium sm:col-span-2 lg:col-span-1">
-              <FaCog className="text-sm sm:text-base" />
+            
+            <button className="group bg-gray-50 border-2 border-gray-200 text-gray-700 hover:border-orange-600 hover:text-orange-600 px-6 py-4 rounded-xl transition-all duration-300 flex items-center justify-center gap-3 font-semibold shadow-md hover:shadow-xl hover:-translate-y-0.5 sm:col-span-2 lg:col-span-1">
+              <FaCog className="text-lg group-hover:rotate-90 transition-transform duration-300" />
               <span>System Settings</span>
             </button>
           </div>

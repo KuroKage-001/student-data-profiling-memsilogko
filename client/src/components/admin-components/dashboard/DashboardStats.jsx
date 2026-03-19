@@ -7,51 +7,59 @@ const DashboardStats = () => {
       value: '1,247',
       change: '+12%',
       changeType: 'increase',
-      icon: FaUserGraduate
+      icon: FaUserGraduate,
+      iconBg: 'bg-orange-100',
+      iconColor: 'text-orange-600'
     },
     {
       title: 'Active Faculty',
       value: '89',
       change: '+3%',
       changeType: 'increase',
-      icon: FaChalkboardTeacher
+      icon: FaChalkboardTeacher,
+      iconBg: 'bg-blue-100',
+      iconColor: 'text-blue-600'
     },
     {
       title: 'Profiles Completed',
       value: '1,156',
       change: '+8%',
       changeType: 'increase',
-      icon: FaClipboardCheck
+      icon: FaClipboardCheck,
+      iconBg: 'bg-green-100',
+      iconColor: 'text-green-600'
     },
     {
       title: 'Pending Reviews',
       value: '23',
       change: '-15%',
       changeType: 'decrease',
-      icon: FaClock
+      icon: FaClock,
+      iconBg: 'bg-red-100',
+      iconColor: 'text-red-600'
     }
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
       {stats.map((stat, index) => (
-        <div key={index} className="bg-white border-2 border-gray-200 rounded-lg p-6 hover:border-orange-600 transition-colors">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600 mb-1">{stat.title}</p>
-              <p className="text-2xl font-bold text-black">{stat.value}</p>
-              <div className="flex items-center mt-2">
-                <span className={`text-sm font-medium ${
-                  stat.changeType === 'increase' ? 'text-green-600' : 'text-red-600'
-                }`}>
-                  {stat.change}
-                </span>
-                <span className="text-sm text-gray-500 ml-1">from last month</span>
-              </div>
+        <div key={index} className="bg-white rounded-2xl p-5 sm:p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300">
+          <div className="flex items-start justify-between mb-3">
+            <div className="flex-1">
+              <p className="text-sm sm:text-base text-gray-600 font-medium mb-2">{stat.title}</p>
+              <p className="text-2xl sm:text-3xl font-bold text-gray-900">{stat.value}</p>
             </div>
-            <div className="text-orange-600 text-3xl">
-              <stat.icon />
+            <div className={`w-12 h-12 ${stat.iconBg} rounded-xl flex items-center justify-center flex-shrink-0`}>
+              <stat.icon className={`text-xl ${stat.iconColor}`} />
             </div>
+          </div>
+          <div className="flex items-center">
+            <span className={`text-sm font-semibold ${
+              stat.changeType === 'increase' ? 'text-green-600' : 'text-red-600'
+            }`}>
+              {stat.change}
+            </span>
+            <span className="text-sm text-gray-500 ml-1.5">from last month</span>
           </div>
         </div>
       ))}

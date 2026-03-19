@@ -14,8 +14,8 @@ const LoginForm = () => {
   } = useLoginForm();
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
-      <div className="space-y-4 sm:space-y-5">
+    <form onSubmit={handleSubmit} className="space-y-10 sm:space-y-12 my-12">
+      <div className="space-y-7 sm:space-y-8">
         <InputField
           id="email"
           name="email"

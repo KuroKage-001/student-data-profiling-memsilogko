@@ -25,7 +25,7 @@ const InputField = ({
 
   return (
     <div className={className}>
-      <label htmlFor={id} className="block text-sm font-semibold text-gray-700 mb-2">
+      <label htmlFor={id} className="block text-sm font-semibold mb-2" style={{ color: '#2C3E50' }}>
         {label}
       </label>
       <div className="relative">
@@ -41,8 +41,9 @@ const InputField = ({
           required={required}
           value={value}
           onChange={onChange}
-          className={`w-full ${icon ? 'pl-10 sm:pl-12' : 'pl-3 sm:pl-4'} pr-3 sm:pr-4 py-3 sm:py-3.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 text-gray-900 placeholder-gray-500 bg-white text-sm sm:text-base`}
+          className={`w-full ${icon ? 'pl-10 sm:pl-12' : 'pl-3 sm:pl-4'} pr-3 sm:pr-4 py-3 sm:py-3.5 border-2 border-orange-100 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 bg-white text-sm sm:text-base hover:border-orange-200`}
           placeholder={placeholder}
+          style={{ color: '#2C3E50' }}
         />
       </div>
     </div>

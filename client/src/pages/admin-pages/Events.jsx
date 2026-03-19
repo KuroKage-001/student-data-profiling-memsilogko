@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import AdminLayout from '../../layouts/AdminLayout';
+import { FaCalendarAlt, FaSearch, FaPlus, FaChartBar } from 'react-icons/fa';
 
 const Events = () => {
   const [events, setEvents] = useState([
@@ -61,46 +62,110 @@ const Events = () => {
 
   return (
     <AdminLayout>
-      <div className="p-4 sm:p-6 lg:p-8">
-        {/* Header Section */}
-        <div className="mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-black mb-2">Events Management</h1>
-          <p className="text-sm sm:text-base text-gray-600">Manage academic and institutional events</p>
-        </div>
-
-        {/* Controls */}
-        <div className="mb-6 space-y-4 lg:space-y-0 lg:flex lg:items-center lg:justify-between lg:gap-4">
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 flex-1">
-            <input
-              type="text"
-              placeholder="Search events..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="flex-1 sm:max-w-md px-3 sm:px-4 py-2 sm:py-3 border-2 border-gray-200 rounded-lg focus:border-orange-600 focus:outline-none transition-colors text-black text-sm sm:text-base"
-            />
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              className="px-3 sm:px-4 py-2 sm:py-3 border-2 border-gray-200 rounded-lg focus:border-orange-600 focus:outline-none transition-colors text-black text-sm sm:text-base min-w-0"
-            >
-              <option value="All">All Status</option>
-              <option value="Upcoming">Upcoming</option>
-              <option value="Ongoing">Ongoing</option>
-              <option value="Completed">Completed</option>
-              <option value="Cancelled">Cancelled</option>
-            </select>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-orange-50/30 to-gray-50 p-4 sm:p-6 lg:p-8">
+        {/* Header Section with Enhanced Design */}
+        <div className="mb-8 sm:mb-10">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
+              <FaCalendarAlt className="text-white text-xl" />
+            </div>
+            <div>
+              <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                Events Management
+              </h1>
+            </div>
           </div>
-          
-          <button
-            onClick={() => setShowForm(true)}
-            className="bg-orange-600 hover:bg-orange-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg transition-colors text-sm sm:text-base font-medium w-full lg:w-auto"
-          >
-            + Add Event
-          </button>
+          <p className="text-base sm:text-lg text-gray-600 ml-16 font-medium">
+            Manage academic and institutional events
+          </p>
         </div>
 
-        {/* Events List */}
-        <div className="bg-white border-2 border-gray-200 rounded-lg overflow-hidden mb-6 sm:mb-8">
+        {/* Quick Stats - Enhanced Design */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 mb-8 sm:mb-10">
+          <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300">
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-2xl sm:text-3xl font-bold text-gray-900">{events.length}</div>
+              <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                <FaChartBar className="text-gray-600 text-lg" />
+              </div>
+            </div>
+            <div className="text-sm sm:text-base text-gray-600 font-medium">Total Events</div>
+          </div>
+          <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300">
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-2xl sm:text-3xl font-bold text-orange-600">{events.filter(e => e.status === 'Upcoming').length}</div>
+              <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                <FaCalendarAlt className="text-orange-600 text-lg" />
+              </div>
+            </div>
+            <div className="text-sm sm:text-base text-gray-600 font-medium">Upcoming Events</div>
+          </div>
+          <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300">
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-2xl sm:text-3xl font-bold text-green-600">{events.filter(e => e.status === 'Completed').length}</div>
+              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+              </div>
+            </div>
+            <div className="text-sm sm:text-base text-gray-600 font-medium">Completed Events</div>
+          </div>
+          <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300">
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-2xl sm:text-3xl font-bold text-gray-900">{events.reduce((sum, e) => sum + e.attendees, 0)}</div>
+              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                </svg>
+              </div>
+            </div>
+            <div className="text-sm sm:text-base text-gray-600 font-medium">Total Attendees</div>
+          </div>
+        </div>
+
+        {/* Controls - Enhanced Design */}
+        <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 mb-6">
+          <div className="space-y-4 lg:space-y-0 lg:flex lg:items-center lg:justify-between lg:gap-4">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 flex-1">
+              <div className="relative flex-1 sm:max-w-md">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                  <FaSearch className="text-lg" />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Search events..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:outline-none transition-all text-gray-900 text-sm sm:text-base placeholder:text-gray-400 shadow-sm focus:shadow-md"
+                />
+              </div>
+              <select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+                className="px-4 py-3.5 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:outline-none transition-all text-gray-900 text-sm sm:text-base shadow-sm focus:shadow-md min-w-0 sm:min-w-[160px]"
+              >
+                <option value="All">All Status</option>
+                <option value="Upcoming">Upcoming</option>
+                <option value="Ongoing">Ongoing</option>
+                <option value="Completed">Completed</option>
+                <option value="Cancelled">Cancelled</option>
+              </select>
+            </div>
+            
+            <button
+              onClick={() => setShowForm(true)}
+              className="group relative bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white px-6 py-3.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 font-semibold shadow-md hover:shadow-xl hover:-translate-y-0.5 overflow-hidden w-full lg:w-auto"
+            >
+              <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+              <FaPlus className="text-sm relative z-10" />
+              <span className="relative z-10">Add Event</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Events List - Enhanced Container */}
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
           {/* Desktop Table View */}
           <div className="hidden lg:block overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
@@ -240,26 +305,6 @@ const Events = () => {
               <p className="text-gray-500 text-sm sm:text-base">No events found matching your criteria.</p>
             </div>
           )}
-        </div>
-
-        {/* Quick Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-          <div className="bg-white border-2 border-gray-200 rounded-lg p-4 sm:p-6">
-            <div className="text-xl sm:text-2xl font-bold text-black">{events.length}</div>
-            <div className="text-xs sm:text-sm text-gray-600">Total Events</div>
-          </div>
-          <div className="bg-white border-2 border-gray-200 rounded-lg p-4 sm:p-6">
-            <div className="text-xl sm:text-2xl font-bold text-orange-600">{events.filter(e => e.status === 'Upcoming').length}</div>
-            <div className="text-xs sm:text-sm text-gray-600">Upcoming Events</div>
-          </div>
-          <div className="bg-white border-2 border-gray-200 rounded-lg p-4 sm:p-6">
-            <div className="text-xl sm:text-2xl font-bold text-green-600">{events.filter(e => e.status === 'Completed').length}</div>
-            <div className="text-xs sm:text-sm text-gray-600">Completed Events</div>
-          </div>
-          <div className="bg-white border-2 border-gray-200 rounded-lg p-4 sm:p-6">
-            <div className="text-xl sm:text-2xl font-bold text-black">{events.reduce((sum, e) => sum + e.attendees, 0)}</div>
-            <div className="text-xs sm:text-sm text-gray-600">Total Attendees</div>
-          </div>
         </div>
       </div>
     </AdminLayout>
