@@ -1,6 +1,4 @@
-import BubbleWrap from '../../components/system-components/BubbleWrap';
-import PortalCards from '../../components/system-components/PortalCards';
-import FeaturesSection from '../../components/system-components/FeaturesSection';
+import { BubbleWrap, PortalCards, FeaturesSection } from '../../components/system-components/home-compo';
 
 const HomePage = () => {
   return (
@@ -13,10 +11,10 @@ const HomePage = () => {
           <div className="mb-3">
             <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight inline-block relative" 
                 style={{ fontFamily: 'Inter, Montserrat, Poppins, sans-serif' }}>
-              <span className="bg-gradient-to-r from-orange-600 via-orange-500 to-orange-600 bg-clip-text text-transparent">
+              <span className="bg-linear-to-r from-orange-600 via-orange-500 to-orange-600 bg-clip-text text-transparent">
                 CCS
               </span>
-              <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-20 h-1 bg-gradient-to-r from-transparent via-orange-500 to-transparent rounded-full"></div>
+              <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-20 h-1 bg-linear-to-r from-transparent via-orange-500 to-transparent rounded-full"></div>
             </h1>
           </div>
           
