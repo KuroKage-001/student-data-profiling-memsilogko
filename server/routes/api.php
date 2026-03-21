@@ -27,3 +27,9 @@ Route::apiResource('research-materials', ResearchMaterialController::class);
 
 // Instructions API Routes
 Route::apiResource('instructions', InstructionController::class);
+
+// User Management API Routes (Protected)
+Route::middleware('auth:api')->group(function () {
+    Route::apiResource('users', App\Http\Controllers\UserManagementController::class);
+    Route::get('users-statistics', [App\Http\Controllers\UserManagementController::class, 'statistics']);
+});

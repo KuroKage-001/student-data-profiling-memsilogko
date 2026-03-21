@@ -10,6 +10,7 @@ import Events from './pages/admin-pages/Events';
 import Scheduling from './pages/admin-pages/Scheduling';
 import Research from './pages/admin-pages/Research';
 import InstructionsPage from './pages/admin-pages/InstructionsPage';
+import UserManagement from './pages/admin-pages/UserManagement';
 
 function App() {
   return (
@@ -24,6 +25,11 @@ function App() {
           <Route path="/admin/dashboard" element={
             <ProtectedRoute>
               <AdminDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/user-management" element={
+            <ProtectedRoute>
+              <UserManagement />
             </ProtectedRoute>
           } />
           <Route path="/admin/students" element={

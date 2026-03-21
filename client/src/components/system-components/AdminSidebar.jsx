@@ -18,6 +18,16 @@ function AdminSidebar({ isOpen, onClose }) {
       )
     },
     { 
+      id: 'user-management', 
+      label: 'User Management', 
+      route: '/admin/user-management',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+      )
+    },
+    { 
       id: 'student-profile', 
       label: 'Students', 
       route: '/admin/students',
@@ -110,7 +120,7 @@ function AdminSidebar({ isOpen, onClose }) {
         `}
       >
         {/* Header */}
-        <div className="bg-gradient-to-br from-orange-500 to-orange-600 text-white px-6 py-6 relative overflow-hidden">
+        <div className="bg-linear-to-br from-orange-500 to-orange-600 text-white px-6 py-6 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
           <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full -ml-12 -mb-12"></div>
           <div className="relative flex items-center justify-between">
@@ -139,7 +149,7 @@ function AdminSidebar({ isOpen, onClose }) {
                   onClick={() => handleItemClick(item)}
                   className={`w-full text-left px-4 py-3 rounded-xl transition-all duration-200 flex items-center gap-3 group relative overflow-hidden ${
                     activeItem === item.id
-                      ? 'bg-gradient-to-r from-orange-50 to-orange-100 text-orange-700 shadow-sm'
+                      ? 'bg-linear-to-r from-orange-50 to-orange-100 text-orange-700 shadow-sm'
                       : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                   }`}
                 >
@@ -181,7 +191,7 @@ function AdminSidebar({ isOpen, onClose }) {
         </nav>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-gray-200 bg-gradient-to-br from-gray-50 to-white">
+        <div className="px-6 py-4 border-t border-gray-200 bg-linear-to-br from-gray-50 to-white">
           <div className="flex items-center justify-center gap-2 mb-2">
             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
             <p className="text-gray-600 text-xs font-medium">System Online</p>
