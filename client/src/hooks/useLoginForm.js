@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import useToast from './useToast';
-import { loginService } from '../services/login-service/loginService';
+import { authService } from '../services/login-service/authService';
 import { validateLoginCredentials } from '../utils/system-utils/login-utils/loginValidation';
 
 export const useLoginForm = () => {
@@ -14,7 +14,7 @@ export const useLoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { setUser } = useAuth();
   const { showSuccess, showError } = useToast();
 
   const handleInputChange = (e) => {
@@ -38,14 +38,15 @@ export const useLoginForm = () => {
     setIsLoading(true);
     
     try {
-      const result = await loginService.authenticate(credentials);
+      const result = await authService.login(credentials);
       
       if (result.success) {
-        await login(credentials);
+        // Update auth context with user data
+        setUser(result.user);
         showSuccess('Login Successful...');
-        setTimeout(() => {
-          navigate('/admin/dashboard');
-        }, 1000);
+        
+        // Navigate immediately for better UX
+        navigate('/admin/dashboard');
       } else {
         showError(result.message || 'Login failed. Please check your credentials.');
       }

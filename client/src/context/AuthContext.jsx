@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { authAPI } from '../services/system-service/apiService';
+import { authService } from '../services/login-service/authService';
 
 const AuthContext = createContext();
 
@@ -22,28 +22,35 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
-  // Validate token and user session
+  // Validate token and user session - optimized
   const validateSession = async () => {
     const token = localStorage.getItem('token');
     const userData = localStorage.getItem('user');
     
-    if (!token || !userData) {
+    if (!token) {
       setLoading(false);
       return;
     }
 
+    // Load user from localStorage immediately for faster initial render
+    if (userData) {
+      try {
+        setUser(JSON.parse(userData));
+      } catch (error) {
+        console.error('Failed to parse user data:', error);
+      }
+    }
+
+    // Then validate in background
     try {
-      // Verify token is still valid by calling the /me endpoint
-      const response = await authAPI.me();
+      const response = await authService.me();
       if (response.success && response.user) {
         setUser(response.user);
-        // Update stored user data in case it changed
         localStorage.setItem('user', JSON.stringify(response.user));
       } else {
         clearAuthData();
       }
     } catch (error) {
-      // Token is invalid or expired
       console.warn('Session validation failed:', error.message);
       clearAuthData();
     } finally {
@@ -54,7 +61,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     validateSession();
 
-    // Listen for auth-cleared events from API service
+    // Listen for auth-cleared events
     const handleAuthCleared = () => {
       setUser(null);
     };
@@ -66,57 +73,22 @@ export const AuthProvider = ({ children }) => {
     };
   }, []);
 
-  const login = async (credentials) => {
-    try {
-      const data = await authAPI.login(credentials);
-      
-      if (data.success) {
-        localStorage.setItem('token', data.access_token);
-        localStorage.setItem('user', JSON.stringify(data.user));
-        setUser(data.user);
-        return { success: true };
-      }
-      
-      return { success: false, message: data.message };
-    } catch (error) {
-      return { success: false, message: error.message };
-    }
-  };
-
   const logout = async () => {
     try {
-      // Call logout endpoint to invalidate token on server
-      await authAPI.logout();
+      await authService.logout();
     } catch (error) {
-      // Even if server logout fails, we still clear local data
       console.error('Server logout error:', error);
     } finally {
-      // Always clear local authentication data
       clearAuthData();
-    }
-  };
-
-  // Check if user is authenticated and token is valid
-  const checkAuthStatus = async () => {
-    if (!user) return false;
-    
-    try {
-      const response = await authAPI.me();
-      return response.success && response.user;
-    } catch (error) {
-      // Token is invalid, clear auth data
-      clearAuthData();
-      return false;
     }
   };
 
   const value = {
     user,
-    login,
+    setUser,
     logout,
     loading,
     isAuthenticated: !!user,
-    checkAuthStatus,
     clearAuthData,
   };
 

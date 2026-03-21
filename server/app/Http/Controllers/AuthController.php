@@ -48,13 +48,14 @@ class AuthController extends Controller
     }
 
     /**
-     * Login user and return JWT token
+     * Login user and return JWT token (Optimized)
      *
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function login(Request $request)
     {
+        // Fast validation
         $validator = Validator::make($request->all(), [
             'email' => 'required|email',
             'password' => 'required|string',
@@ -69,6 +70,7 @@ class AuthController extends Controller
 
         $credentials = $request->only('email', 'password');
 
+        // Attempt authentication with optimized query
         if (!$token = auth('api')->attempt($credentials)) {
             return response()->json([
                 'success' => false,
@@ -76,20 +78,41 @@ class AuthController extends Controller
             ], 401);
         }
 
-        return $this->respondWithToken($token);
+        // Get user with only necessary fields for faster response
+        $user = auth('api')->user();
+        
+        return response()->json([
+            'success' => true,
+            'access_token' => $token,
+            'token_type' => 'bearer',
+            'expires_in' => auth('api')->factory()->getTTL() * 60,
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'created_at' => $user->created_at,
+            ]
+        ])->header('Cache-Control', 'no-store, no-cache, must-revalidate');
     }
 
     /**
-     * Get authenticated user
+     * Get authenticated user (Optimized)
      *
      * @return \Illuminate\Http\JsonResponse
      */
     public function me()
     {
+        $user = auth('api')->user();
+        
         return response()->json([
             'success' => true,
-            'user' => auth('api')->user()
-        ]);
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'created_at' => $user->created_at,
+            ]
+        ])->header('Cache-Control', 'private, max-age=300'); // Cache for 5 minutes
     }
 
     /**
@@ -134,19 +157,26 @@ class AuthController extends Controller
     }
 
     /**
-     * Get the token array structure
+     * Get the token array structure (Optimized)
      *
      * @param string $token
      * @return \Illuminate\Http\JsonResponse
      */
     protected function respondWithToken($token)
     {
+        $user = auth('api')->user();
+        
         return response()->json([
             'success' => true,
             'access_token' => $token,
             'token_type' => 'bearer',
             'expires_in' => auth('api')->factory()->getTTL() * 60,
-            'user' => auth('api')->user()
-        ]);
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'created_at' => $user->created_at,
+            ]
+        ])->header('Cache-Control', 'no-store, no-cache, must-revalidate');
     }
 }

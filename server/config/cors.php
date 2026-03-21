@@ -29,8 +29,8 @@ return [
 
     'exposed_headers' => [],
 
-    'max_age' => 0,
+    'max_age' => 86400, // Cache preflight requests for 24 hours
 
-    'supports_credentials' => false,
+    'supports_credentials' => true,
 
 ];

@@ -12,7 +12,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Remove custom CORS middleware to use Laravel's built-in CORS
+        // Add performance optimization middleware
+        $middleware->api(append: [
+            \App\Http\Middleware\OptimizeResponse::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
