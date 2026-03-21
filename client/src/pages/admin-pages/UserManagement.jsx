@@ -86,7 +86,7 @@ const UserManagement = () => {
     <AdminLayout>
       <div className="h-[calc(100vh-4rem)] overflow-hidden bg-linear-to-br from-gray-50 via-orange-50/30 to-gray-50 p-4 sm:p-6 lg:p-8 flex flex-col">
         {/* Header Section */}
-        <div className="mb-4 sm:mb-6 flex-shrink-0">
+        <div className="mb-4 sm:mb-6 shrink-0">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-10 h-10 bg-linear-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
               <FaUsers className="text-white text-lg" />
@@ -103,7 +103,7 @@ const UserManagement = () => {
         </div>
 
         {/* Search and Actions Section */}
-        <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-lg border border-gray-100 mb-4 sm:mb-6 flex-shrink-0">
+        <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-lg border border-gray-100 mb-4 sm:mb-6 shrink-0">
           <div className="space-y-3 lg:space-y-0 lg:flex lg:gap-4 lg:items-center lg:justify-between">
             {/* Search Input */}
             <div className="relative w-full lg:flex-1 lg:max-w-md">

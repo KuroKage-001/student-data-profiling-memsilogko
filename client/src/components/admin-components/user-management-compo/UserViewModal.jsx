@@ -33,7 +33,7 @@ const UserViewModal = ({ isOpen, onClose, user }) => {
             <div className="space-y-4">
               {/* Name */}
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center shrink-0">
                   <FaUser className="text-orange-600" />
                 </div>
                 <div className="flex-1">
@@ -44,7 +44,7 @@ const UserViewModal = ({ isOpen, onClose, user }) => {
 
               {/* Email */}
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center shrink-0">
                   <FaEnvelope className="text-blue-600" />
                 </div>
                 <div className="flex-1">
@@ -55,7 +55,7 @@ const UserViewModal = ({ isOpen, onClose, user }) => {
 
               {/* Role */}
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center shrink-0">
                   <FaUserTag className="text-purple-600" />
                 </div>
                 <div className="flex-1">
@@ -68,7 +68,7 @@ const UserViewModal = ({ isOpen, onClose, user }) => {
 
               {/* Status */}
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center shrink-0">
                   <FaToggleOn className="text-green-600" />
                 </div>
                 <div className="flex-1">
@@ -81,7 +81,7 @@ const UserViewModal = ({ isOpen, onClose, user }) => {
 
               {/* Created At */}
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center shrink-0">
                   <FaCalendar className="text-gray-600" />
                 </div>
                 <div className="flex-1">

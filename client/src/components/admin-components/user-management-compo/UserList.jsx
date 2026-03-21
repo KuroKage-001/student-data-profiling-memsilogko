@@ -160,7 +160,7 @@ const UserList = ({ users, searchTerm, onEditUser, onDeleteUser, loading }) => {
 
       {/* Pagination */}
       {filteredUsers.length > 0 && (
-        <div className="bg-white border-t border-gray-200 px-4 py-3 flex items-center justify-between flex-shrink-0">
+        <div className="bg-white border-t border-gray-200 px-4 py-3 flex items-center justify-between shrink-0">
           <div className="flex-1 flex justify-between sm:hidden">
             <button
               onClick={() => goToPage(currentPage - 1)}

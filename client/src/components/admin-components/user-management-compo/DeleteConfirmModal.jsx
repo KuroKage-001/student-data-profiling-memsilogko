@@ -34,7 +34,7 @@ const DeleteConfirmModal = ({ isOpen, onClose, onConfirm, user, loading }) => {
           {/* Content */}
           <div className="px-6 py-6">
             <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center shrink-0">
                 <FaExclamationTriangle className="text-red-600 text-xl" />
               </div>
               <div>
