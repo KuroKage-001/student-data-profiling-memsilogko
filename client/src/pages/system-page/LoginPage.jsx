@@ -10,7 +10,6 @@ import {
 } from '../../components/system-components/login-compo';
 
 const LoginPage = () => {
-
   return (
     <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 flex flex-col lg:flex-row">
       {/* Left Side - Login Form */}
@@ -28,8 +27,31 @@ const LoginPage = () => {
       {/* Mobile Carousel */}
       <MobileCarousel />
 
-      {/* Toast Container */}
-      <ToastContainer />
+      {/* Toast Container with Modern Styling */}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={true}
+        newestOnTop={true}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        style={{
+          zIndex: 9999,
+          top: '24px',
+          right: '24px',
+        }}
+        toastStyle={{
+          backgroundColor: '#ffffff',
+          borderRadius: '16px',
+          boxShadow: '0 20px 25px -5px rgba(234, 88, 12, 0.1), 0 8px 10px -6px rgba(234, 88, 12, 0.1)',
+          padding: '0',
+          minHeight: '72px',
+        }}
+      />
     </div>
   );
 };
