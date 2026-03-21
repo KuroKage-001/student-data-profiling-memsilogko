@@ -43,7 +43,11 @@ php artisan jwt:secret --force
 
 # Run database migrations
 echo "Running database migrations..."
-php artisan migrate --force
+php artisan migrate --force --no-interaction
+
+# Show migration status for verification
+echo "Migration status:"
+php artisan migrate:status
 
 # Run database seeders only if SEED_DATABASE environment variable is set
 if [ "$SEED_DATABASE" = "true" ]; then
