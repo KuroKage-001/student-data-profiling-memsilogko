@@ -1,6 +1,9 @@
 import { BubbleWrap, PortalCards, FeaturesSection } from '../../components/system-components/home-compo';
+import usePageTitle from '../../hooks/usePageTitle';
 
 const HomePage = () => {
+  usePageTitle('Home');
+  
   return (
     <div className="min-h-screen relative flex items-center justify-center px-4 py-8 overflow-x-hidden" style={{ backgroundColor: '#FFFFFF' }}>
       <BubbleWrap />

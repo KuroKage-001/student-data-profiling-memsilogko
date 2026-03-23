@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import AdminLayout from '../../layouts/AdminLayout';
+import usePageTitle from '../../hooks/usePageTitle';
 import { FaClock, FaSearch, FaPlus, FaChartBar, FaUsers, FaDoorOpen } from 'react-icons/fa';
 
 const Scheduling = () => {
+  usePageTitle('Scheduling');
+  
   const [schedules, setSchedules] = useState([
     {
       id: 1,

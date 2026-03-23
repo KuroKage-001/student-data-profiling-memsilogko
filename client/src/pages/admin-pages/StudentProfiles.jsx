@@ -2,9 +2,12 @@ import { useState } from 'react';
 import AdminLayout from '../../layouts/AdminLayout';
 import StudentList from '../../components/student-components/student-profile/StudentList';
 import StudentProfileModal from '../../components/student-components/student-profile/StudentProfileModal';
+import usePageTitle from '../../hooks/usePageTitle';
 import { FaUserGraduate, FaSearch, FaPlus, FaFileExport } from 'react-icons/fa';
 
 const StudentProfiles = () => {
+  usePageTitle('Student Profiles');
+  
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');

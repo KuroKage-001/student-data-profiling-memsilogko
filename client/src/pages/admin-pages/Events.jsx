@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import AdminLayout from '../../layouts/AdminLayout';
+import usePageTitle from '../../hooks/usePageTitle';
 import { FaCalendarAlt, FaSearch, FaPlus, FaChartBar } from 'react-icons/fa';
 
 const Events = () => {
+  usePageTitle('Events');
+  
   const [events, setEvents] = useState([
     {
       id: 1,

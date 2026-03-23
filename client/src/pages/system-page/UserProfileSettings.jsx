@@ -6,8 +6,11 @@ import AdminLayout from '../../layouts/AdminLayout';
 import { ProfileInfoTab, ChangePasswordTab } from '../../components/system-components/user-profile-setting-compo';
 import { useUserProfile } from '../../hooks/user-profile-setting-hook/useUserProfile';
 import useToast from '../../hooks/useToast';
+import usePageTitle from '../../hooks/usePageTitle';
 
 const UserProfileSettings = () => {
+  usePageTitle('Profile Settings');
+  
   const [activeTab, setActiveTab] = useState('profile');
   const { profile, loading, updateProfile, changePassword } = useUserProfile();
   const { showSuccess, showError } = useToast();

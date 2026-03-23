@@ -8,8 +8,11 @@ import {
   CarouselSection, 
   MobileCarousel 
 } from '../../components/system-components/login-compo';
+import usePageTitle from '../../hooks/usePageTitle';
 
 const LoginPage = () => {
+  usePageTitle('Login');
+  
   return (
     <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 flex flex-col lg:flex-row">
       {/* Left Side - Login Form */}

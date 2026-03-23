@@ -7,9 +7,12 @@ import UserFormModal from '../../components/admin-components/user-management-com
 import DeleteConfirmModal from '../../components/admin-components/user-management-compo/DeleteConfirmModal';
 import { useUsers, useCreateUser, useUpdateUser, useDeleteUser } from '../../hooks/user-management-hook';
 import useToast from '../../hooks/useToast';
+import usePageTitle from '../../hooks/usePageTitle';
 import { FaUsers, FaSearch, FaPlus } from 'react-icons/fa';
 
 const UserManagement = () => {
+  usePageTitle('User Management');
+  
   const [searchTerm, setSearchTerm] = useState('');
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);

@@ -2,9 +2,12 @@ import { useState } from 'react';
 import AdminLayout from '../../layouts/AdminLayout';
 import FacultyList from '../../components/admin-components/faculty-profile/FacultyList';
 import FacultyProfileModal from '../../components/admin-components/faculty-profile/FacultyProfileModal';
+import usePageTitle from '../../hooks/usePageTitle';
 import { FaChalkboardTeacher, FaSearch, FaPlus, FaFileExport } from 'react-icons/fa';
 
 const FacultyProfiles = () => {
+  usePageTitle('Faculty Profiles');
+  
   const [selectedFaculty, setSelectedFaculty] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');

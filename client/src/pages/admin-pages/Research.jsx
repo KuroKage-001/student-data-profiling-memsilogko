@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import AdminLayout from '../../layouts/AdminLayout';
+import usePageTitle from '../../hooks/usePageTitle';
 import { FaFlask, FaSearch, FaPlus, FaChartBar, FaCheckCircle, FaClock, FaFileAlt } from 'react-icons/fa';
 
 const Research = () => {
+  usePageTitle('Research');
+  
   const [materials, setMaterials] = useState([
     {
       id: 1,

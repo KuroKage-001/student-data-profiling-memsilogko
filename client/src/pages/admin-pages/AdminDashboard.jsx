@@ -1,9 +1,12 @@
 import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../../layouts/AdminLayout';
 import DashboardStats from '../../components/admin-components/dashboard/DashboardStats';
+import usePageTitle from '../../hooks/usePageTitle';
 import { FaUserGraduate, FaChalkboardTeacher, FaFileAlt, FaDownload, FaCog, FaArrowRight, FaChartLine } from 'react-icons/fa';
 
 const AdminDashboard = () => {
+  usePageTitle('Dashboard');
+  
   const navigate = useNavigate();
 
   const handleNavigateToStudents = () => {

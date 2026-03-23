@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import AdminLayout from '../../layouts/AdminLayout';
+import usePageTitle from '../../hooks/usePageTitle';
 import { FaBook, FaSearch, FaPlus, FaChartBar, FaCheckCircle, FaClipboardList, FaGraduationCap } from 'react-icons/fa';
 
 const InstructionsPage = () => {
+  usePageTitle('Instructions');
+  
   const [instructions, setInstructions] = useState([
     {
       id: 1,
