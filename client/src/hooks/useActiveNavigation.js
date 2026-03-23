@@ -10,6 +10,7 @@ export const useActiveNavigation = () => {
 
   const getActiveItem = () => {
     const path = location.pathname;
+    if (path.includes('/user-management')) return 'user-management';
     if (path.includes('/students')) return 'student-profile';
     if (path.includes('/faculty')) return 'faculty-profile';
     if (path.includes('/events')) return 'events';

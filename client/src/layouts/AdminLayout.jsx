@@ -1,9 +1,18 @@
+import { useState } from 'react';
 import { useSidebar } from '../hooks';
 import AdminNavbar from '../components/system-components/AdminNavbar';
 import AdminSidebar from '../components/system-components/AdminSidebar';
 
 const AdminLayout = ({ children }) => {
   const { isSidebarOpen, toggleSidebar, closeSidebar } = useSidebar();
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
+    const saved = localStorage.getItem('sidebarCollapsed');
+    return saved === 'true';
+  });
+
+  const handleCollapseChange = (collapsed) => {
+    setIsSidebarCollapsed(collapsed);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -15,14 +24,15 @@ const AdminLayout = ({ children }) => {
         {/* Sidebar */}
         <AdminSidebar 
           isOpen={isSidebarOpen} 
-          onClose={closeSidebar} 
+          onClose={closeSidebar}
+          onCollapseChange={handleCollapseChange}
         />
         
         {/* Main Content Area */}
-        <main className="flex-1 lg:ml-64 transition-all duration-300">
-          <div className="p-4 sm:p-6 lg:p-8">
-            {children}
-          </div>
+        <main className={`flex-1 transition-all duration-300 ${
+          isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64'
+        }`}>
+          {children}
         </main>
       </div>
     </div>

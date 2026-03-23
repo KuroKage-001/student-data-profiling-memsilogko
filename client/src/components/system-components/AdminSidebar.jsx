@@ -1,9 +1,31 @@
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useActiveNavigation } from '../../hooks';
 
-function AdminSidebar({ isOpen, onClose }) {
+function AdminSidebar({ isOpen, onClose, onCollapseChange }) {
   const navigate = useNavigate();
   const { activeItem, setActiveItem } = useActiveNavigation();
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    // Load collapse state from localStorage
+    const saved = localStorage.getItem('sidebarCollapsed');
+    return saved === 'true';
+  });
+
+  // Save collapse state to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('sidebarCollapsed', isCollapsed);
+    // Notify parent component about collapse state change
+    if (onCollapseChange) {
+      onCollapseChange(isCollapsed);
+    }
+  }, [isCollapsed, onCollapseChange]);
+
+  // Notify parent on mount about initial state
+  useEffect(() => {
+    if (onCollapseChange) {
+      onCollapseChange(isCollapsed);
+    }
+  }, []);
 
   const menuItems = [
     { 
@@ -113,10 +135,10 @@ function AdminSidebar({ isOpen, onClose }) {
         data-sidebar
         className={`
           fixed lg:fixed top-16 left-0 z-46 lg:z-auto
-          w-64 h-[calc(100vh-4rem)] bg-white shadow-2xl lg:shadow-lg border-r border-gray-200
-          transform transition-transform duration-300 ease-in-out
+          ${isCollapsed ? 'w-20' : 'w-64'} h-[calc(100vh-4rem)] bg-white shadow-2xl lg:shadow-lg border-r border-gray-200
+          transform transition-all duration-300 ease-in-out
           ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-          flex flex-col
+          flex flex-col overflow-visible
         `}
       >
         {/* Header */}
@@ -124,10 +146,17 @@ function AdminSidebar({ isOpen, onClose }) {
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
           <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full -ml-12 -mb-12"></div>
           <div className="relative flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-bold">CCS Admin</h2>
-              <p className="text-xs text-orange-100 mt-1 font-medium">Profiling System</p>
+            <div className={`transition-all duration-300 ${isCollapsed ? 'opacity-0 w-0' : 'opacity-100'}`}>
+              <h2 className="text-xl font-bold whitespace-nowrap">CCS PnC</h2>
+              <p className="text-xs text-orange-100 mt-1 font-medium whitespace-nowrap">Profiling System</p>
             </div>
+            {isCollapsed && (
+              <div className="flex items-center justify-center w-full">
+                <div className="w-10 h-10 flex items-center justify-center">
+                  <span className="text-2xl font-bold">C</span>
+                </div>
+              </div>
+            )}
             {/* Close button for mobile only */}
             <button
               onClick={onClose}
@@ -138,6 +167,22 @@ function AdminSidebar({ isOpen, onClose }) {
               </svg>
             </button>
           </div>
+          
+          {/* Collapse Toggle Button - Desktop Only */}
+          <button
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="hidden lg:flex absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-white text-orange-600 rounded-full items-center justify-center shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110 z-50 border-2 border-orange-200"
+            title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            <svg 
+              className={`w-4 h-4 transition-transform duration-300 ${isCollapsed ? 'rotate-180' : ''}`}
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
         </div>
 
         {/* Menu Items */}
@@ -151,7 +196,8 @@ function AdminSidebar({ isOpen, onClose }) {
                     activeItem === item.id
                       ? 'bg-linear-to-r from-orange-50 to-orange-100 text-orange-700 shadow-sm'
                       : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                  }`}
+                  } ${isCollapsed ? 'justify-center' : ''}`}
+                  title={isCollapsed ? item.label : ''}
                 >
                   {/* Active indicator */}
                   {activeItem === item.id && (
@@ -162,28 +208,33 @@ function AdminSidebar({ isOpen, onClose }) {
                     activeItem === item.id 
                       ? 'text-orange-600 scale-110' 
                       : 'text-gray-400 group-hover:text-gray-600 group-hover:scale-105'
-                  }`}>
+                  } ${isCollapsed ? 'mx-auto' : ''}`}>
                     {item.icon}
                   </span>
-                  <span className={`text-sm font-semibold ${
-                    activeItem === item.id ? 'text-orange-700' : ''
-                  }`}>
-                    {item.label}
-                  </span>
                   
-                  {/* Hover arrow */}
-                  <svg 
-                    className={`w-4 h-4 ml-auto transition-all duration-200 ${
-                      activeItem === item.id 
-                        ? 'opacity-100 translate-x-0 text-orange-600' 
-                        : 'opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 text-gray-400'
-                    }`}
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
+                  {!isCollapsed && (
+                    <>
+                      <span className={`text-sm font-semibold ${
+                        activeItem === item.id ? 'text-orange-700' : ''
+                      }`}>
+                        {item.label}
+                      </span>
+                      
+                      {/* Hover arrow */}
+                      <svg 
+                        className={`w-4 h-4 ml-auto transition-all duration-200 ${
+                          activeItem === item.id 
+                            ? 'opacity-100 translate-x-0 text-orange-600' 
+                            : 'opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 text-gray-400'
+                        }`}
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </>
+                  )}
                 </button>
               </li>
             ))}
@@ -191,14 +242,29 @@ function AdminSidebar({ isOpen, onClose }) {
         </nav>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-gray-200 bg-linear-to-br from-gray-50 to-white">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-            <p className="text-gray-600 text-xs font-medium">System Online</p>
-          </div>
-          <p className="text-gray-400 text-xs text-center">© 2026 CCS System</p>
+        <div className={`py-4 border-t border-gray-200 bg-linear-to-br from-gray-50 to-white transition-all duration-300 ${isCollapsed ? 'px-2' : 'px-6'}`}>
+          {!isCollapsed ? (
+            <>
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <p className="text-gray-600 text-xs font-medium">System Online</p>
+              </div>
+              <p className="text-gray-400 text-xs text-center">© 2026 CCS System</p>
+            </>
+          ) : (
+            <div className="flex flex-col items-center gap-3">
+              <div className="relative">
+                <div className="w-8 h-8 bg-linear-to-br from-green-400 to-green-500 rounded-lg flex items-center justify-center shadow-md">
+                  <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                </div>
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white animate-ping"></div>
+              </div>
+              <div className="w-full h-px bg-linear-to-r from-transparent via-gray-300 to-transparent"></div>
+              <p className="text-gray-400 text-[9px] font-semibold text-center leading-tight tracking-wide">2026</p>
+            </div>
+          )}
         </div>
-      </div>
+      </div>G
     </>
   );
 }
