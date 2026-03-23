@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FaTimes, FaUser, FaEnvelope, FaLock, FaUserTag, FaToggleOn } from 'react-icons/fa';
+import { FaTimes, FaUser, FaEnvelope, FaLock, FaUserTag, FaToggleOn, FaEye, FaEyeSlash } from 'react-icons/fa';
 import { validateUserForm } from '../../../utils/admin-utilities/user-management-utils/userValidation';
 
 const UserFormModal = ({ isOpen, onClose, onSubmit, user, loading }) => {
@@ -9,12 +9,14 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, user, loading }) => {
     name: '',
     email: '',
     password: '',
+    confirmPassword: '',
     role: 'student',
     status: 'active'
   });
   
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -22,6 +24,7 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, user, loading }) => {
         name: user.name || '',
         email: user.email || '',
         password: '',
+        confirmPassword: '',
         role: user.role || 'student',
         status: user.status || 'active'
       });
@@ -30,11 +33,14 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, user, loading }) => {
         name: '',
         email: '',
         password: '',
+        confirmPassword: '',
         role: 'student',
         status: 'active'
       });
     }
     setErrors({});
+    setShowPassword(false);
+    setShowConfirmPassword(false);
   }, [user, isOpen]);
 
   const handleChange = (e) => {
@@ -49,6 +55,14 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, user, loading }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     
+    // Check if passwords match for new users or when password is being changed
+    if (!isEdit || formData.password) {
+      if (formData.password !== formData.confirmPassword) {
+        setErrors({ confirmPassword: 'Passwords do not match' });
+        return;
+      }
+    }
+    
     const validation = validateUserForm(formData, isEdit);
     
     if (!validation.isValid) {
@@ -56,8 +70,9 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, user, loading }) => {
       return;
     }
 
-    // Remove password if empty in edit mode
+    // Remove password and confirmPassword if empty in edit mode
     const submitData = { ...formData };
+    delete submitData.confirmPassword; // Always remove confirmPassword from submission
     if (isEdit && !submitData.password) {
       delete submitData.password;
     }
@@ -178,13 +193,47 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, user, loading }) => {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-orange-500 transition-colors"
                   >
-                    {showPassword ? '👁️' : '👁️‍🗨️'}
+                    {showPassword ? <FaEyeSlash className="text-lg" /> : <FaEye className="text-lg" />}
                   </button>
                 </div>
                 {errors.password && (
                   <p className="mt-1 text-sm text-red-600">{errors.password}</p>
+                )}
+              </div>
+
+              {/* Confirm Password Field */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Confirm Password {isEdit && <span className="text-gray-500 font-normal">(required if changing password)</span>}
+                </label>
+                <div className="relative">
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                    <FaLock />
+                  </div>
+                  <input
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    name="confirmPassword"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    className={`w-full pl-10 pr-12 py-3 border-2 rounded-xl focus:outline-none transition-all ${
+                      errors.confirmPassword 
+                        ? 'border-red-500 focus:border-red-600' 
+                        : 'border-gray-200 focus:border-orange-500'
+                    }`}
+                    placeholder={isEdit ? 'Confirm new password' : 'Confirm password'}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-orange-500 transition-colors"
+                  >
+                    {showConfirmPassword ? <FaEyeSlash className="text-lg" /> : <FaEye className="text-lg" />}
+                  </button>
+                </div>
+                {errors.confirmPassword && (
+                  <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
                 )}
               </div>
 
@@ -217,34 +266,36 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, user, loading }) => {
                 )}
               </div>
 
-              {/* Status Field */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Status
-                </label>
-                <div className="relative">
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                    <FaToggleOn />
+              {/* Status Field - Only show when editing */}
+              {isEdit && (
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Status
+                  </label>
+                  <div className="relative">
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                      <FaToggleOn />
+                    </div>
+                    <select
+                      name="status"
+                      value={formData.status}
+                      onChange={handleChange}
+                      className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all appearance-none ${
+                        errors.status 
+                          ? 'border-red-500 focus:border-red-600' 
+                          : 'border-gray-200 focus:border-orange-500'
+                      }`}
+                    >
+                      <option value="active">Active</option>
+                      <option value="inactive">Inactive</option>
+                      <option value="suspended">Suspended</option>
+                    </select>
                   </div>
-                  <select
-                    name="status"
-                    value={formData.status}
-                    onChange={handleChange}
-                    className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all appearance-none ${
-                      errors.status 
-                        ? 'border-red-500 focus:border-red-600' 
-                        : 'border-gray-200 focus:border-orange-500'
-                    }`}
-                  >
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                    <option value="suspended">Suspended</option>
-                  </select>
+                  {errors.status && (
+                    <p className="mt-1 text-sm text-red-600">{errors.status}</p>
+                  )}
                 </div>
-                {errors.status && (
-                  <p className="mt-1 text-sm text-red-600">{errors.status}</p>
-                )}
-              </div>
+              )}
             </div>
 
             {/* Action Buttons */}

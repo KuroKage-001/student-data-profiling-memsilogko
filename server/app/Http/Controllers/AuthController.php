@@ -81,6 +81,25 @@ class AuthController extends Controller
         // Get user with only necessary fields for faster response
         $user = auth('api')->user();
         
+        // Check user status before allowing login
+        if ($user->status === 'inactive') {
+            auth('api')->logout();
+            return response()->json([
+                'success' => false,
+                'message' => 'Your account is inactive. Please contact the administrator.',
+                'status' => 'inactive'
+            ], 403);
+        }
+
+        if ($user->status === 'suspended') {
+            auth('api')->logout();
+            return response()->json([
+                'success' => false,
+                'message' => 'Your account has been suspended. Please contact the administrator.',
+                'status' => 'suspended'
+            ], 403);
+        }
+        
         return response()->json([
             'success' => true,
             'access_token' => $token,
@@ -90,6 +109,8 @@ class AuthController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
+                'role' => $user->role,
+                'status' => $user->status,
                 'created_at' => $user->created_at,
             ]
         ])->header('Cache-Control', 'no-store, no-cache, must-revalidate');
@@ -110,6 +131,8 @@ class AuthController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
+                'role' => $user->role,
+                'status' => $user->status,
                 'created_at' => $user->created_at,
             ]
         ])->header('Cache-Control', 'private, max-age=300'); // Cache for 5 minutes
@@ -175,6 +198,8 @@ class AuthController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
+                'role' => $user->role,
+                'status' => $user->status,
                 'created_at' => $user->created_at,
             ]
         ])->header('Cache-Control', 'no-store, no-cache, must-revalidate');

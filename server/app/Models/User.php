@@ -68,4 +68,44 @@ class User extends Authenticatable implements JWTSubject
     {
         return [];
     }
+
+    /**
+     * Check if user is active
+     *
+     * @return bool
+     */
+    public function isActive()
+    {
+        return $this->status === 'active';
+    }
+
+    /**
+     * Check if user is inactive
+     *
+     * @return bool
+     */
+    public function isInactive()
+    {
+        return $this->status === 'inactive';
+    }
+
+    /**
+     * Check if user is suspended
+     *
+     * @return bool
+     */
+    public function isSuspended()
+    {
+        return $this->status === 'suspended';
+    }
+
+    /**
+     * Get status label
+     *
+     * @return string
+     */
+    public function getStatusLabelAttribute()
+    {
+        return ucfirst($this->status);
+    }
 }
