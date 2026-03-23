@@ -33,3 +33,10 @@ Route::middleware('auth:api')->group(function () {
     Route::apiResource('users', App\Http\Controllers\UserManagementController::class);
     Route::get('users-statistics', [App\Http\Controllers\UserManagementController::class, 'statistics']);
 });
+
+// User Profile API Routes (Protected)
+Route::middleware('auth:api')->group(function () {
+    Route::get('profile', [App\Http\Controllers\UserProfileController::class, 'show']);
+    Route::put('profile', [App\Http\Controllers\UserProfileController::class, 'updateProfile']);
+    Route::post('profile/change-password', [App\Http\Controllers\UserProfileController::class, 'changePassword']);
+});

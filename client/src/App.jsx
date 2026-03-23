@@ -15,6 +15,7 @@ const queryClient = new QueryClient({
 });
 import HomePage from './pages/system-page/HomePage';
 import LoginPage from './pages/system-page/LoginPage';
+import UserProfileSettings from './pages/system-page/UserProfileSettings';
 import AdminDashboard from './pages/admin-pages/AdminDashboard';
 import StudentProfiles from './pages/admin-pages/StudentProfiles';
 import FacultyProfiles from './pages/admin-pages/FacultyProfiles';
@@ -35,6 +36,11 @@ function App() {
           
           {/* Admin Routes */}
           <Route path="/admin/login" element={<LoginPage />} />
+          <Route path="/profile/settings" element={
+            <ProtectedRoute>
+              <UserProfileSettings />
+            </ProtectedRoute>
+          } />
           <Route path="/admin/dashboard" element={
             <ProtectedRoute>
               <AdminDashboard />

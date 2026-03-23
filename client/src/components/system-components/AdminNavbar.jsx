@@ -120,7 +120,7 @@ const AdminNavbar = ({ onToggleSidebar }) => {
                   <button
                     onClick={() => {
                       setIsDropdownOpen(false);
-                      navigate('/admin/profile');
+                      navigate('/profile/settings');
                     }}
                     className="flex items-center w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-all duration-200 group"
                   >

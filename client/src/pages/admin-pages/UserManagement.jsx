@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import AdminLayout from '../../layouts/AdminLayout';
 import UserList from '../../components/admin-components/user-management-compo/UserList';
 import UserFormModal from '../../components/admin-components/user-management-compo/UserFormModal';
@@ -86,6 +88,7 @@ const UserManagement = () => {
 
   return (
     <AdminLayout>
+      <ToastContainer />
       <div className="h-[calc(100vh-4rem)] overflow-hidden bg-linear-to-br from-gray-50 via-orange-50/30 to-gray-50 p-4 sm:p-6 lg:p-8 flex flex-col">
         {/* Header Section */}
         <div className="mb-4 sm:mb-6 shrink-0">
