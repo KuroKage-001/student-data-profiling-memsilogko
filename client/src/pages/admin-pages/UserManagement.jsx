@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import AdminLayout from '../../layouts/AdminLayout';
 import UserList from '../../components/admin-components/user-management-compo/UserList';
 import UserFormModal from '../../components/admin-components/user-management-compo/UserFormModal';
 import DeleteConfirmModal from '../../components/admin-components/user-management-compo/DeleteConfirmModal';
-import { useUserManagement } from '../../hooks/user-management-hook/useUserManagement';
+import { useUsers, useCreateUser, useUpdateUser, useDeleteUser } from '../../hooks/user-management-hook';
 import useToast from '../../hooks/useToast';
-import { FaUsers, FaSearch, FaPlus, FaFileExport } from 'react-icons/fa';
+import { FaUsers, FaSearch, FaPlus } from 'react-icons/fa';
 
 const UserManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -14,12 +14,18 @@ const UserManagement = () => {
   const [userToEdit, setUserToEdit] = useState(null);
   const [userToDelete, setUserToDelete] = useState(null);
 
-  const { users, loading, fetchUsers, createUser, updateUser, deleteUser } = useUserManagement();
-  const { showSuccess, showError, showInfo } = useToast();
+  // React Query hooks
+  const { data: users = [], isLoading, error } = useUsers();
+  const createUserMutation = useCreateUser();
+  const updateUserMutation = useUpdateUser();
+  const deleteUserMutation = useDeleteUser();
+  
+  const { showSuccess, showError } = useToast();
 
-  useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
+  // Show error toast if query fails
+  if (error) {
+    showError(error.message || 'Failed to fetch users');
+  }
 
   const handleAddUser = () => {
     setUserToEdit(null);
@@ -37,34 +43,34 @@ const UserManagement = () => {
   };
 
   const handleFormSubmit = async (formData) => {
-    let result;
-    
-    if (userToEdit) {
-      result = await updateUser(userToEdit.id, formData);
-    } else {
-      result = await createUser(formData);
-    }
-
-    if (result.success) {
-      showSuccess(result.message || 'Operation successful');
+    try {
+      if (userToEdit) {
+        const result = await updateUserMutation.mutateAsync({ 
+          id: userToEdit.id, 
+          userData: formData 
+        });
+        showSuccess(result.message || 'User updated successfully');
+      } else {
+        const result = await createUserMutation.mutateAsync(formData);
+        showSuccess(result.message || 'User created successfully');
+      }
       setIsFormModalOpen(false);
       setUserToEdit(null);
-    } else {
-      showError(result.message || 'Operation failed');
+    } catch (error) {
+      showError(error.message || 'Operation failed');
     }
   };
 
   const handleConfirmDelete = async () => {
     if (!userToDelete) return;
 
-    const result = await deleteUser(userToDelete.id);
-
-    if (result.success) {
+    try {
+      const result = await deleteUserMutation.mutateAsync(userToDelete.id);
       showSuccess(result.message || 'User deleted successfully');
       setIsDeleteModalOpen(false);
       setUserToDelete(null);
-    } else {
-      showError(result.message || 'Failed to delete user');
+    } catch (error) {
+      showError(error.message || 'Failed to delete user');
     }
   };
 
@@ -76,10 +82,6 @@ const UserManagement = () => {
   const handleCloseDeleteModal = () => {
     setIsDeleteModalOpen(false);
     setUserToDelete(null);
-  };
-
-  const handleExport = () => {
-    showInfo('Export functionality coming soon');
   };
 
   return (
@@ -129,13 +131,6 @@ const UserManagement = () => {
                 <FaPlus className="text-sm relative z-10" />
                 <span className="relative z-10">Add User</span>
               </button>
-              <button
-                onClick={handleExport}
-                className="group bg-white border-2 border-orange-600 text-orange-600 hover:bg-orange-600 hover:text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 font-semibold shadow-md hover:shadow-xl hover:-translate-y-0.5"
-              >
-                <FaFileExport className="text-sm" />
-                <span>Export List</span>
-              </button>
             </div>
           </div>
         </div>
@@ -147,7 +142,7 @@ const UserManagement = () => {
             searchTerm={searchTerm}
             onEditUser={handleEditUser}
             onDeleteUser={handleDeleteUser}
-            loading={loading}
+            loading={isLoading}
           />
         </div>
 
@@ -157,7 +152,7 @@ const UserManagement = () => {
           onClose={handleCloseFormModal}
           onSubmit={handleFormSubmit}
           user={userToEdit}
-          loading={loading}
+          loading={createUserMutation.isPending || updateUserMutation.isPending}
         />
 
         <DeleteConfirmModal
@@ -165,7 +160,7 @@ const UserManagement = () => {
           onClose={handleCloseDeleteModal}
           onConfirm={handleConfirmDelete}
           user={userToDelete}
-          loading={loading}
+          loading={deleteUserMutation.isPending}
         />
       </div>
     </AdminLayout>

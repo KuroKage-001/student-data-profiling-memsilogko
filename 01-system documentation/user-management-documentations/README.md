@@ -168,3 +168,106 @@ user-management-documentations/
 
 **Last Updated:** March 22, 2026  
 **Status:** Complete and Production Ready ✅
+
+=======================================================================
+
+# User Management Hooks
+
+This directory contains hooks for managing users in the application.
+
+## Available Hooks
+
+### React Query Hooks (Recommended)
+
+#### `useUsers(params)`
+Fetches all users with optional parameters.
+- **Returns**: `{ data, isLoading, error, refetch }`
+- **Features**: Automatic caching, background refetching, optimistic updates
+
+#### `useUser(id)`
+Fetches a single user by ID.
+- **Returns**: `{ data, isLoading, error }`
+- **Features**: Only fetches when ID is provided
+
+#### `useCreateUser()`
+Creates a new user.
+- **Returns**: `{ mutate, mutateAsync, isPending, error }`
+- **Features**: Automatically invalidates user list cache on success
+
+#### `useUpdateUser()`
+Updates an existing user.
+- **Returns**: `{ mutate, mutateAsync, isPending, error }`
+- **Usage**: `mutateAsync({ id, userData })`
+- **Features**: Automatically invalidates user list and detail cache on success
+
+#### `useDeleteUser()`
+Deletes a user.
+- **Returns**: `{ mutate, mutateAsync, isPending, error }`
+- **Features**: Automatically invalidates user list cache on success
+
+#### `useUserStatistics()`
+Fetches user statistics.
+- **Returns**: `{ data, isLoading, error }`
+- **Features**: 10-minute cache time
+
+### Legacy Hook
+
+#### `useUserManagement()`
+Traditional state management hook (deprecated in favor of React Query hooks).
+
+## Benefits of React Query
+
+1. **Automatic Caching**: Data is cached and reused across components
+2. **Background Refetching**: Keeps data fresh automatically
+3. **Optimistic Updates**: UI updates immediately, rolls back on error
+4. **Loading States**: Built-in loading and error states
+5. **Request Deduplication**: Multiple components requesting same data = single request
+6. **Stale-While-Revalidate**: Shows cached data while fetching fresh data
+
+## Example Usage
+
+```jsx
+import { useUsers, useCreateUser, useUpdateUser, useDeleteUser } from '../../hooks/user-management-hook';
+
+function UserManagement() {
+  // Fetch users
+  const { data: users = [], isLoading, error } = useUsers();
+  
+  // Mutations
+  const createUser = useCreateUser();
+  const updateUser = useUpdateUser();
+  const deleteUser = useDeleteUser();
+  
+  // Create user
+  const handleCreate = async (userData) => {
+    try {
+      await createUser.mutateAsync(userData);
+      // Success! List automatically refetches
+    } catch (error) {
+      // Handle error
+    }
+  };
+  
+  // Update user
+  const handleUpdate = async (id, userData) => {
+    try {
+      await updateUser.mutateAsync({ id, userData });
+    } catch (error) {
+      // Handle error
+    }
+  };
+  
+  // Delete user
+  const handleDelete = async (id) => {
+    try {
+      await deleteUser.mutateAsync(id);
+    } catch (error) {
+      // Handle error
+    }
+  };
+  
+  return (
+    // Your component JSX
+  );
+}
+```
