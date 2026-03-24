@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ResearchMaterialController;
 use App\Http\Controllers\InstructionController;
+use App\Http\Controllers\EventController;
 
 // Handle preflight OPTIONS requests
 Route::options('{any}', function () {
@@ -39,4 +40,10 @@ Route::middleware(['auth:api', 'check.status'])->group(function () {
     Route::get('profile', [App\Http\Controllers\UserProfileController::class, 'show']);
     Route::put('profile', [App\Http\Controllers\UserProfileController::class, 'updateProfile']);
     Route::post('profile/change-password', [App\Http\Controllers\UserProfileController::class, 'changePassword']);
+});
+
+// Events API Routes (Protected)
+Route::middleware(['auth:api', 'check.status'])->group(function () {
+    Route::apiResource('events', EventController::class);
+    Route::get('events-statistics', [EventController::class, 'statistics']);
 });

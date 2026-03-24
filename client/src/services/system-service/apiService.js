@@ -93,4 +93,25 @@ export const api = {
   }),
 };
 
+// Events API
+export const eventsAPI = {
+  getAll: (params = {}) => {
+    const queryString = new URLSearchParams(params).toString();
+    return apiRequest(`/events${queryString ? `?${queryString}` : ''}`);
+  },
+  getById: (id) => apiRequest(`/events/${id}`),
+  create: (data) => apiRequest('/events', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+  update: (id, data) => apiRequest(`/events/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  }),
+  delete: (id) => apiRequest(`/events/${id}`, {
+    method: 'DELETE',
+  }),
+  getStatistics: () => apiRequest('/events-statistics'),
+};
+
 export default api;
