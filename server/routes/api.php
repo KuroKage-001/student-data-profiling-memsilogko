@@ -40,3 +40,9 @@ Route::middleware(['auth:api', 'check.status'])->group(function () {
     Route::put('profile', [App\Http\Controllers\UserProfileController::class, 'updateProfile']);
     Route::post('profile/change-password', [App\Http\Controllers\UserProfileController::class, 'changePassword']);
 });
+
+// Student Management API Routes (Protected)
+Route::middleware(['auth:api', 'check.status'])->group(function () {
+    Route::apiResource('students', App\Http\Controllers\StudentController::class);
+    Route::get('students-statistics', [App\Http\Controllers\StudentController::class, 'statistics']);
+});

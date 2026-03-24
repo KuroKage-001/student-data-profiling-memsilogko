@@ -1,40 +1,69 @@
-import { useMemo, useState } from 'react';
-import { getStatusColor, getRoleColor, capitalize } from '../../../utils/admin-utilities/user-management-utils/userHelpers';
+import { useState, useEffect, useMemo } from 'react';
 
-const UserList = ({ users, searchTerm, onEditUser, onDeleteUser, loading }) => {
+const StudentList = ({ searchTerm, onViewStudent, onEditStudent, onDeleteStudent, loading, error, students }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  const filteredUsers = useMemo(() => {
-    if (!searchTerm) return users;
-    
-    const term = searchTerm.toLowerCase();
-    return users.filter(user =>
-      user.name?.toLowerCase().includes(term) ||
-      user.email?.toLowerCase().includes(term) ||
-      user.role?.toLowerCase().includes(term)
-    );
-  }, [users, searchTerm]);
-
   // Calculate pagination
-  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+  const totalPages = Math.ceil(students.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentUsers = filteredUsers.slice(startIndex, endIndex);
+  const currentStudents = students.slice(startIndex, endIndex);
 
-  // Reset to page 1 when search changes
+  // Reset to page 1 when search changes or students change
   useMemo(() => {
     setCurrentPage(1);
-  }, [searchTerm]);
+  }, [searchTerm, students.length]);
 
   const goToPage = (page) => {
     setCurrentPage(Math.max(1, Math.min(page, totalPages)));
   };
 
+  const getStatusColor = (status) => {
+    switch (status?.toLowerCase()) {
+      case 'active':
+        return 'bg-green-100 text-green-800';
+      case 'inactive':
+        return 'bg-red-100 text-red-800';
+      case 'suspended':
+        return 'bg-yellow-100 text-yellow-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const formatGPA = (gpa) => {
+    if (!gpa && gpa !== 0) return 'N/A';
+    const gpaNumber = parseFloat(gpa);
+    if (isNaN(gpaNumber)) return 'N/A';
+    return gpaNumber.toFixed(2);
+  };
+
+  const capitalize = (str) => {
+    if (!str) return 'N/A';
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  };
+
   if (loading) {
     return (
-      <div className="h-full flex items-center justify-center">
+      <div className="h-full flex items-center justify-center py-12">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center py-12 px-4">
+        <p className="text-red-600 text-sm">Error: {error}</p>
+      </div>
+    );
+  }
+
+  if (students.length === 0) {
+    return (
+      <div className="flex items-center justify-center py-12 px-4">
+        <p className="text-gray-500 text-sm">No students found matching your search criteria.</p>
       </div>
     );
   }
@@ -42,21 +71,24 @@ const UserList = ({ users, searchTerm, onEditUser, onDeleteUser, loading }) => {
   return (
     <div className="h-full flex flex-col">
       {/* Desktop Table View */}
-      <div className="hidden lg:block flex-1 overflow-auto">
+      <div className="hidden lg:block flex-1 overflow-auto scrollbar-thin scrollbar-thumb-orange-500 scrollbar-track-gray-100 hover:scrollbar-thumb-orange-600">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50 sticky top-0 z-10">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                User
+                Student
               </th>
               <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                Role
+                Program
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                Year
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                GPA
               </th>
               <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                 Status
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                Created At
               </th>
               <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                 Actions
@@ -64,39 +96,46 @@ const UserList = ({ users, searchTerm, onEditUser, onDeleteUser, loading }) => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {currentUsers.map((user) => (
-              <tr key={user.id} className="hover:bg-gray-50 transition-colors">
+            {currentStudents.map((student) => (
+              <tr key={student.id} className="hover:bg-gray-50 transition-colors">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div>
-                    <div className="text-sm font-semibold text-gray-900">{user.name}</div>
-                    <div className="text-sm text-gray-500">{user.email}</div>
+                    <div className="text-sm font-semibold text-gray-900">{student.name}</div>
+                    <div className="text-sm text-gray-500">{student.student_id || student.id}</div>
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`inline-flex px-2.5 py-1 text-xs font-semibold rounded-full ${getRoleColor(user.role)}`}>
-                    {capitalize(user.role)}
-                  </span>
+                  <div className="text-sm text-gray-700">{student.program || 'N/A'}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`inline-flex px-2.5 py-1 text-xs font-semibold rounded-full ${getStatusColor(user.status)}`}>
-                    {capitalize(user.status)}
-                  </span>
+                  <div className="text-sm text-gray-700">{student.year_level || 'N/A'}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-700">
-                    {new Date(user.created_at).toLocaleDateString()}
+                  <div className="text-sm font-medium text-gray-900">
+                    {formatGPA(student.gpa)}
                   </div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <span className={`inline-flex px-2.5 py-1 text-xs font-semibold rounded-full ${getStatusColor(student.status)}`}>
+                    {capitalize(student.status)}
+                  </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <div className="flex items-center space-x-3">
                     <button
-                      onClick={() => onEditUser(user)}
+                      onClick={() => onViewStudent(student)}
+                      className="text-blue-600 hover:text-blue-700 transition-colors font-medium"
+                    >
+                      View
+                    </button>
+                    <button
+                      onClick={() => onEditStudent(student)}
                       className="text-orange-600 hover:text-orange-700 transition-colors font-medium"
                     >
                       Edit
                     </button>
                     <button
-                      onClick={() => onDeleteUser(user)}
+                      onClick={() => onDeleteStudent(student)}
                       className="text-red-600 hover:text-red-700 transition-colors font-medium"
                     >
                       Delete
@@ -110,38 +149,49 @@ const UserList = ({ users, searchTerm, onEditUser, onDeleteUser, loading }) => {
       </div>
 
       {/* Mobile Card View */}
-      <div className="lg:hidden flex-1 overflow-auto">
-        {currentUsers.map((user) => (
-          <div key={user.id} className="border-b border-gray-200 last:border-b-0 p-4 hover:bg-gray-50 transition-colors">
-            <div className="flex items-start justify-between gap-3 mb-2">
-              <div className="flex-1 min-w-0">
-                <h3 className="text-sm font-semibold text-gray-900 mb-0.5 truncate">{user.name}</h3>
-                <p className="text-xs text-gray-500 mb-2 truncate">{user.email}</p>
-                <div className="flex flex-wrap gap-1.5">
-                  <span className={`inline-flex px-2 py-0.5 text-xs font-semibold rounded-full ${getRoleColor(user.role)}`}>
-                    {capitalize(user.role)}
-                  </span>
-                  <span className={`inline-flex px-2 py-0.5 text-xs font-semibold rounded-full ${getStatusColor(user.status)}`}>
-                    {capitalize(user.status)}
+      <div className="lg:hidden flex-1 overflow-auto scrollbar-thin scrollbar-thumb-orange-500 scrollbar-track-gray-100 hover:scrollbar-thumb-orange-600">
+        {currentStudents.map((student) => (
+          <div key={student.id} className="border-b border-gray-200 last:border-b-0 p-4 hover:bg-gray-50 transition-colors">
+            <div className="flex items-start justify-between mb-3">
+              <div className="flex-1">
+                <h3 className="text-base font-semibold text-gray-900 mb-1">{student.name}</h3>
+                <p className="text-sm text-gray-500 mb-2">{student.student_id || student.id}</p>
+                <div className="flex flex-wrap gap-2 text-sm mb-2">
+                  <span className="text-gray-700">{student.program || 'N/A'}</span>
+                  <span className="text-gray-400">•</span>
+                  <span className="text-gray-700">{student.year_level || 'N/A'}</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <span className={`inline-flex px-2.5 py-1 text-xs font-semibold rounded-full ${getStatusColor(student.status)}`}>
+                    {capitalize(student.status)}
                   </span>
                 </div>
               </div>
             </div>
             
-            <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-100">
-              <div className="text-xs text-gray-600">
-                {new Date(user.created_at).toLocaleDateString()}
+            <div className="flex items-center justify-between">
+              <div className="text-sm">
+                <span className="text-gray-600">GPA: </span>
+                <span className="font-semibold text-gray-900">
+                  {formatGPA(student.gpa)}
+                </span>
               </div>
               
-              <div className="flex space-x-3 text-xs">
+              <div className="flex space-x-3 text-sm">
                 <button
-                  onClick={() => onEditUser(user)}
+                  onClick={() => onViewStudent(student)}
+                  className="text-blue-600 hover:text-blue-700 transition-colors font-medium"
+                >
+                  View
+                </button>
+                <button
+                  onClick={() => onEditStudent(student)}
                   className="text-orange-600 hover:text-orange-700 transition-colors font-medium"
                 >
                   Edit
                 </button>
                 <button
-                  onClick={() => onDeleteUser(user)}
+                  onClick={() => onDeleteStudent(student)}
                   className="text-red-600 hover:text-red-700 transition-colors font-medium"
                 >
                   Delete
@@ -151,15 +201,15 @@ const UserList = ({ users, searchTerm, onEditUser, onDeleteUser, loading }) => {
           </div>
         ))}
       </div>
-      
-      {filteredUsers.length === 0 && !loading && (
+
+      {students.length === 0 && !loading && (
         <div className="flex items-center justify-center py-12 px-4">
-          <p className="text-gray-500 text-sm">No users found matching your search criteria.</p>
+          <p className="text-gray-500 text-sm">No students found matching your search criteria.</p>
         </div>
       )}
 
       {/* Pagination */}
-      {filteredUsers.length > 0 && (
+      {students.length > 0 && (
         <div className="bg-white border-t border-gray-200 px-4 py-3 flex items-center justify-between shrink-0">
           <div className="flex-1 flex justify-between sm:hidden">
             <button
@@ -181,8 +231,8 @@ const UserList = ({ users, searchTerm, onEditUser, onDeleteUser, loading }) => {
             <div>
               <p className="text-sm text-gray-700">
                 Showing <span className="font-medium">{startIndex + 1}</span> to{' '}
-                <span className="font-medium">{Math.min(endIndex, filteredUsers.length)}</span> of{' '}
-                <span className="font-medium">{filteredUsers.length}</span> results
+                <span className="font-medium">{Math.min(endIndex, students.length)}</span> of{' '}
+                <span className="font-medium">{students.length}</span> results
               </p>
             </div>
             <div>
@@ -251,4 +301,4 @@ const UserList = ({ users, searchTerm, onEditUser, onDeleteUser, loading }) => {
   );
 };
 
-export default UserList;
+export default StudentList;
