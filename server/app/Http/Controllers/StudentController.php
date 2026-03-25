@@ -46,6 +46,26 @@ class StudentController extends Controller
                 $query->where('program', $request->program);
             }
 
+            // Filter by skills
+            if ($request->has('skills') && !empty($request->skills)) {
+                $skillSearch = $request->skills;
+                $query->whereHas('skills', function($q) use ($skillSearch) {
+                    $q->where('skill_name', 'like', "%{$skillSearch}%")
+                      ->orWhere('description', 'like', "%{$skillSearch}%");
+                });
+            }
+
+            // Filter by activities
+            if ($request->has('activities') && !empty($request->activities)) {
+                $activitySearch = $request->activities;
+                $query->whereHas('activities', function($q) use ($activitySearch) {
+                    $q->where('activity_name', 'like', "%{$activitySearch}%")
+                      ->orWhere('description', 'like', "%{$activitySearch}%")
+                      ->orWhere('organization', 'like', "%{$activitySearch}%")
+                      ->orWhere('role', 'like', "%{$activitySearch}%");
+                });
+            }
+
             // Sorting
             $sortBy = $request->get('sort_by', 'created_at');
             $sortOrder = $request->get('sort_order', 'desc');
