@@ -73,11 +73,25 @@ const studentService = {
   // Create new student
   createStudent: async (studentData) => {
     try {
+      // Clean up the data before transformation
+      const cleanedData = {
+        ...studentData,
+        // Convert empty strings to null for optional numeric/date fields
+        gpa: studentData.gpa && studentData.gpa !== '' ? parseFloat(studentData.gpa) : null,
+        phone: studentData.phone && studentData.phone.trim() !== '' ? studentData.phone.trim() : null,
+        address: studentData.address && studentData.address.trim() !== '' ? studentData.address.trim() : null,
+        graduation_date: studentData.graduation_date && studentData.graduation_date !== '' ? studentData.graduation_date : null,
+        guardian_name: studentData.guardian_name && studentData.guardian_name.trim() !== '' ? studentData.guardian_name.trim() : null,
+        guardian_phone: studentData.guardian_phone && studentData.guardian_phone.trim() !== '' ? studentData.guardian_phone.trim() : null,
+        notes: studentData.notes && studentData.notes.trim() !== '' ? studentData.notes.trim() : null,
+      };
+
       // Transform skills and activities from text to array format if needed
       const transformedData = {
-        ...studentData,
-        skills: studentData.skills && studentData.skills.trim() 
-          ? studentData.skills.split(',')
+        ...cleanedData,
+        status: cleanedData.status || 'active', // Ensure status is always set
+        skills: cleanedData.skills && cleanedData.skills.trim() 
+          ? cleanedData.skills.split(',')
               .map(skill => skill.trim())
               .filter(skill => skill.length > 0)
               .map(skill => ({
@@ -86,8 +100,8 @@ const studentService = {
                 description: null
               }))
           : [],
-        activities: studentData.extracurricular_activities && studentData.extracurricular_activities.trim()
-          ? studentData.extracurricular_activities.split(',')
+        activities: cleanedData.extracurricular_activities && cleanedData.extracurricular_activities.trim()
+          ? cleanedData.extracurricular_activities.split(',')
               .map(activity => activity.trim())
               .filter(activity => activity.length > 0)
               .map(activity => ({
@@ -105,6 +119,9 @@ const studentService = {
       // Remove the text field
       delete transformedData.extracurricular_activities;
 
+      // Debug logging
+      console.log('Creating student with data:', JSON.stringify(transformedData, null, 2));
+
       const response = await axiosInstance.post('/students', transformedData);
       // Normalize student data
       if (response.data.success && response.data.data) {
@@ -116,6 +133,12 @@ const studentService = {
         message: response.data.message
       };
     } catch (error) {
+      console.error('Create student error:', {
+        message: error.response?.data?.message,
+        errors: error.response?.data?.errors,
+        status: error.response?.status,
+        data: error.response?.data
+      });
       return {
         success: false,
         message: error.response?.data?.message || 'Failed to create student',
@@ -127,11 +150,25 @@ const studentService = {
   // Update student
   updateStudent: async (id, studentData) => {
     try {
+      // Clean up the data before transformation
+      const cleanedData = {
+        ...studentData,
+        // Convert empty strings to null for optional numeric/date fields
+        gpa: studentData.gpa && studentData.gpa !== '' ? parseFloat(studentData.gpa) : null,
+        phone: studentData.phone && studentData.phone.trim() !== '' ? studentData.phone.trim() : null,
+        address: studentData.address && studentData.address.trim() !== '' ? studentData.address.trim() : null,
+        graduation_date: studentData.graduation_date && studentData.graduation_date !== '' ? studentData.graduation_date : null,
+        guardian_name: studentData.guardian_name && studentData.guardian_name.trim() !== '' ? studentData.guardian_name.trim() : null,
+        guardian_phone: studentData.guardian_phone && studentData.guardian_phone.trim() !== '' ? studentData.guardian_phone.trim() : null,
+        notes: studentData.notes && studentData.notes.trim() !== '' ? studentData.notes.trim() : null,
+      };
+
       // Transform skills and activities from text to array format if needed
       const transformedData = {
-        ...studentData,
-        skills: studentData.skills && studentData.skills.trim()
-          ? studentData.skills.split(',')
+        ...cleanedData,
+        status: cleanedData.status || 'active', // Ensure status is always set
+        skills: cleanedData.skills && cleanedData.skills.trim()
+          ? cleanedData.skills.split(',')
               .map(skill => skill.trim())
               .filter(skill => skill.length > 0)
               .map(skill => ({
@@ -140,8 +177,8 @@ const studentService = {
                 description: null
               }))
           : [],
-        activities: studentData.extracurricular_activities && studentData.extracurricular_activities.trim()
-          ? studentData.extracurricular_activities.split(',')
+        activities: cleanedData.extracurricular_activities && cleanedData.extracurricular_activities.trim()
+          ? cleanedData.extracurricular_activities.split(',')
               .map(activity => activity.trim())
               .filter(activity => activity.length > 0)
               .map(activity => ({
