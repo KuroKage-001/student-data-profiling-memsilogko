@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import studentService from '../../services/student-profile-service';
+import studentService from '../../services/student-profile-service/studentProfileService';
 
 const useStudentProfile = () => {
   const [students, setStudents] = useState([]);

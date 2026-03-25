@@ -1,19 +1,31 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 
 const StudentList = ({ searchTerm, onViewStudent, onEditStudent, onDeleteStudent, loading, error, students }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
+  const filteredStudents = useMemo(() => {
+    if (!searchTerm) return students;
+    
+    const term = searchTerm.toLowerCase();
+    return students.filter(student =>
+      student.name?.toLowerCase().includes(term) ||
+      student.student_id?.toLowerCase().includes(term) ||
+      student.program?.toLowerCase().includes(term) ||
+      student.email?.toLowerCase().includes(term)
+    );
+  }, [students, searchTerm]);
+
   // Calculate pagination
-  const totalPages = Math.ceil(students.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredStudents.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentStudents = students.slice(startIndex, endIndex);
+  const currentStudents = filteredStudents.slice(startIndex, endIndex);
 
-  // Reset to page 1 when search changes or students change
+  // Reset to page 1 when search changes
   useMemo(() => {
     setCurrentPage(1);
-  }, [searchTerm, students.length]);
+  }, [searchTerm]);
 
   const goToPage = (page) => {
     setCurrentPage(Math.max(1, Math.min(page, totalPages)));
@@ -46,7 +58,7 @@ const StudentList = ({ searchTerm, onViewStudent, onEditStudent, onDeleteStudent
 
   if (loading) {
     return (
-      <div className="h-full flex items-center justify-center py-12">
+      <div className="h-full flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
       </div>
     );
@@ -54,16 +66,8 @@ const StudentList = ({ searchTerm, onViewStudent, onEditStudent, onDeleteStudent
 
   if (error) {
     return (
-      <div className="flex items-center justify-center py-12 px-4">
-        <p className="text-red-600 text-sm">Error: {error}</p>
-      </div>
-    );
-  }
-
-  if (students.length === 0) {
-    return (
-      <div className="flex items-center justify-center py-12 px-4">
-        <p className="text-gray-500 text-sm">No students found matching your search criteria.</p>
+      <div className="h-full flex items-center justify-center">
+        <p className="text-red-600 text-sm">Error: {error.message || error}</p>
       </div>
     );
   }
@@ -71,7 +75,7 @@ const StudentList = ({ searchTerm, onViewStudent, onEditStudent, onDeleteStudent
   return (
     <div className="h-full flex flex-col">
       {/* Desktop Table View */}
-      <div className="hidden lg:block flex-1 overflow-auto scrollbar-thin scrollbar-thumb-orange-500 scrollbar-track-gray-100 hover:scrollbar-thumb-orange-600">
+      <div className="hidden lg:block flex-1 overflow-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50 sticky top-0 z-10">
             <tr>
@@ -149,35 +153,35 @@ const StudentList = ({ searchTerm, onViewStudent, onEditStudent, onDeleteStudent
       </div>
 
       {/* Mobile Card View */}
-      <div className="lg:hidden flex-1 overflow-auto scrollbar-thin scrollbar-thumb-orange-500 scrollbar-track-gray-100 hover:scrollbar-thumb-orange-600">
+      <div className="lg:hidden flex-1 overflow-auto">
         {currentStudents.map((student) => (
           <div key={student.id} className="border-b border-gray-200 last:border-b-0 p-4 hover:bg-gray-50 transition-colors">
-            <div className="flex items-start justify-between mb-3">
-              <div className="flex-1">
-                <h3 className="text-base font-semibold text-gray-900 mb-1">{student.name}</h3>
-                <p className="text-sm text-gray-500 mb-2">{student.student_id || student.id}</p>
-                <div className="flex flex-wrap gap-2 text-sm mb-2">
-                  <span className="text-gray-700">{student.program || 'N/A'}</span>
-                  <span className="text-gray-400">•</span>
-                  <span className="text-gray-700">{student.year_level || 'N/A'}</span>
+            <div className="flex items-start justify-between gap-3 mb-2">
+              <div className="flex-1 min-w-0">
+                <h3 className="text-sm font-semibold text-gray-900 mb-0.5 truncate">{student.name}</h3>
+                <p className="text-xs text-gray-500 mb-2 truncate">{student.student_id || student.id}</p>
+                <div className="flex flex-wrap gap-1.5 mb-1.5">
+                  <span className="text-xs text-gray-700">{student.program || 'N/A'}</span>
+                  <span className="text-xs text-gray-400">•</span>
+                  <span className="text-xs text-gray-700">{student.year_level || 'N/A'}</span>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  <span className={`inline-flex px-2.5 py-1 text-xs font-semibold rounded-full ${getStatusColor(student.status)}`}>
+                <div className="flex flex-wrap gap-1.5">
+                  <span className={`inline-flex px-2 py-0.5 text-xs font-semibold rounded-full ${getStatusColor(student.status)}`}>
                     {capitalize(student.status)}
                   </span>
                 </div>
               </div>
             </div>
             
-            <div className="flex items-center justify-between">
-              <div className="text-sm">
+            <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-100">
+              <div className="text-xs text-gray-600">
                 <span className="text-gray-600">GPA: </span>
                 <span className="font-semibold text-gray-900">
                   {formatGPA(student.gpa)}
                 </span>
               </div>
               
-              <div className="flex space-x-3 text-sm">
+              <div className="flex space-x-3 text-xs">
                 <button
                   onClick={() => onViewStudent(student)}
                   className="text-blue-600 hover:text-blue-700 transition-colors font-medium"
@@ -202,14 +206,14 @@ const StudentList = ({ searchTerm, onViewStudent, onEditStudent, onDeleteStudent
         ))}
       </div>
 
-      {students.length === 0 && !loading && (
-        <div className="flex items-center justify-center py-12 px-4">
+      {filteredStudents.length === 0 && !loading && (
+        <div className="h-full flex items-center justify-center">
           <p className="text-gray-500 text-sm">No students found matching your search criteria.</p>
         </div>
       )}
 
       {/* Pagination */}
-      {students.length > 0 && (
+      {filteredStudents.length > 0 && (
         <div className="bg-white border-t border-gray-200 px-4 py-3 flex items-center justify-between shrink-0">
           <div className="flex-1 flex justify-between sm:hidden">
             <button
@@ -231,8 +235,8 @@ const StudentList = ({ searchTerm, onViewStudent, onEditStudent, onDeleteStudent
             <div>
               <p className="text-sm text-gray-700">
                 Showing <span className="font-medium">{startIndex + 1}</span> to{' '}
-                <span className="font-medium">{Math.min(endIndex, students.length)}</span> of{' '}
-                <span className="font-medium">{students.length}</span> results
+                <span className="font-medium">{Math.min(endIndex, filteredStudents.length)}</span> of{' '}
+                <span className="font-medium">{filteredStudents.length}</span> results
               </p>
             </div>
             <div>

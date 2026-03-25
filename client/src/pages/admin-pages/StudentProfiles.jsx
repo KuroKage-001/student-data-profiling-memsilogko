@@ -1,14 +1,23 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import AdminLayout from '../../layouts/AdminLayout';
 import { StudentList, StudentFormModal, DeleteConfirmModal } from '../../components/admin-components/student-profile-compo';
 import StudentProfileModal from '../../components/student-components/student-profile/StudentProfileModal';
 import usePageTitle from '../../hooks/usePageTitle';
-import useStudentProfile from '../../hooks/student-profile-hook/useStudentProfile';
+import { 
+  useStudents, 
+  useCreateStudent, 
+  useUpdateStudent, 
+  useDeleteStudent,
+  getPrograms,
+  getYearLevels,
+  getStatuses,
+  generateStudentId
+} from '../../hooks/student-profile-hook';
 import useToast from '../../hooks/useToast';
 import { exportToCSV } from '../../utils/admin-utilities/student-profile-utils';
-import { FaUserGraduate, FaSearch, FaPlus, FaFileExport, FaSync } from 'react-icons/fa';
+import { FaUserGraduate, FaSearch, FaPlus, FaFileExport } from 'react-icons/fa';
 
 // Import auth debug utility (for development)
 if (import.meta.env.DEV) {
@@ -30,51 +39,30 @@ const StudentProfiles = () => {
     status: 'all'
   });
 
-  const {
-    students,
-    loading,
-    error,
-    pagination,
-    fetchStudents,
-    createStudent,
-    updateStudent,
-    deleteStudent,
-    searchStudents,
-    getPrograms,
-    getYearLevels,
-    getStatuses,
-    formatStudentForDisplay,
-    generateStudentId,
-    clearError
-  } = useStudentProfile();
+  // Build query params
+  const queryParams = useMemo(() => {
+    const params = {};
+    if (searchTerm) params.search = searchTerm;
+    if (filters.program !== 'all') params.program = filters.program;
+    if (filters.yearLevel !== 'all') params.year_level = filters.yearLevel;
+    if (filters.status !== 'all') params.status = filters.status;
+    return params;
+  }, [searchTerm, filters]);
+
+  // React Query hooks
+  const { data: students = [], isLoading, error } = useStudents(queryParams);
+  const createStudentMutation = useCreateStudent();
+  const updateStudentMutation = useUpdateStudent();
+  const deleteStudentMutation = useDeleteStudent();
 
   const { showSuccess, showError, showInfo } = useToast();
 
-  // Fetch students on component mount
-  useEffect(() => {
-    fetchStudents();
-  }, []);
-
-  // Handle search
-  useEffect(() => {
-    const searchTimeout = setTimeout(() => {
-      try {
-        searchStudents(searchTerm, filters);
-      } catch (err) {
-        console.error('Search error:', err);
-        showError('Failed to search students');
-      }
-    }, 500);
-
-    return () => clearTimeout(searchTimeout);
-  }, [searchTerm, filters]);
-
-  // Show error toast if there's an error
+  // Show error toast if query fails
   useEffect(() => {
     if (error) {
-      showError(error);
+      showError(error.message || 'Failed to fetch students');
     }
-  }, [error]);
+  }, [error, showError]);
 
   const handleViewStudent = (student) => {
     setSelectedStudent(student);
@@ -84,102 +72,67 @@ const StudentProfiles = () => {
   const handleEditStudent = (student) => {
     setSelectedStudent(student);
     setServerErrors(null);
-    clearError(); // Clear any previous errors
     setIsFormModalOpen(true);
   };
 
   const handleDeleteStudent = (student) => {
     setSelectedStudent(student);
-    clearError(); // Clear any previous errors
     setIsDeleteModalOpen(true);
   };
 
   const handleAddStudent = () => {
     setSelectedStudent(null);
     setServerErrors(null);
-    clearError(); // Clear any previous errors
     setIsFormModalOpen(true);
   };
 
   const handleCloseViewModal = () => {
     setIsViewModalOpen(false);
     setSelectedStudent(null);
-    clearError(); // Clear errors when closing
   };
 
   const handleCloseFormModal = () => {
     setIsFormModalOpen(false);
     setSelectedStudent(null);
     setServerErrors(null);
-    clearError(); // Clear errors when closing
   };
 
   const handleCloseDeleteModal = () => {
     setIsDeleteModalOpen(false);
     setSelectedStudent(null);
-    clearError(); // Clear errors when closing
   };
 
   const handleSubmitStudent = async (studentData, isEdit) => {
-    console.log('Submitting student data:', studentData);
     setServerErrors(null);
     
     try {
-      let result;
-      
       if (isEdit) {
-        result = await updateStudent(selectedStudent.id, studentData);
-        console.log('Update result:', result);
+        const result = await updateStudentMutation.mutateAsync({ 
+          id: selectedStudent.id, 
+          studentData 
+        });
+        showSuccess(result.message || 'Student updated successfully');
       } else {
-        result = await createStudent(studentData);
-        console.log('Create result:', result);
+        const result = await createStudentMutation.mutateAsync(studentData);
+        showSuccess(result.message || 'Student created successfully');
       }
-      
-      // Handle successful response
-      if (result.success) {
-        showSuccess(result.message || `Student ${isEdit ? 'updated' : 'created'} successfully`);
-        handleCloseFormModal();
-        return;
-      }
-      
-      // Handle validation errors from server
-      if (result.errors) {
-        console.error('Server validation errors:', result.errors);
-        setServerErrors(result.errors);
-        
-        // Show specific error message or generic validation error
-        const errorMessage = result.message || 'Please fix the validation errors';
-        showError(errorMessage);
-        return;
-      }
-      
-      // Handle general failure without specific errors
-      if (!result.success) {
-        const errorMessage = result.message || `Failed to ${isEdit ? 'update' : 'create'} student`;
-        showError(errorMessage);
-        return;
-      }
-      
+      handleCloseFormModal();
     } catch (err) {
-      console.error('Unexpected error:', err);
-      showError(err.message || 'An unexpected error occurred while saving the student');
+      // Handle validation errors
+      if (err.errors) {
+        setServerErrors(err.errors);
+      }
+      showError(err.message || `Failed to ${isEdit ? 'update' : 'create'} student`);
     }
   };
 
   const handleConfirmDelete = async (studentId) => {
     try {
-      const result = await deleteStudent(studentId);
-      
-      if (result.success) {
-        showSuccess(result.message || 'Student deleted successfully');
-        handleCloseDeleteModal();
-      } else {
-        const errorMessage = result.message || 'Failed to delete student';
-        showError(errorMessage);
-      }
+      const result = await deleteStudentMutation.mutateAsync(studentId);
+      showSuccess(result.message || 'Student deleted successfully');
+      handleCloseDeleteModal();
     } catch (err) {
-      console.error('Delete error:', err);
-      showError(err.message || 'An unexpected error occurred while deleting the student');
+      showError(err.message || 'Failed to delete student');
     }
   };
 
@@ -193,32 +146,15 @@ const StudentProfiles = () => {
       exportToCSV(students, `students_${new Date().toISOString().split('T')[0]}.csv`);
       showSuccess(`Successfully exported ${students.length} student(s) to CSV`);
     } catch (err) {
-      console.error('Export error:', err);
       showError(err.message || 'Failed to export student list');
     }
   };
 
-  const handleRefresh = async () => {
-    try {
-      await fetchStudents();
-      showInfo('Student list refreshed');
-    } catch (err) {
-      console.error('Refresh error:', err);
-      showError('Failed to refresh student list');
-    }
-  };
-
   const handleFilterChange = (filterName, value) => {
-    try {
-      setFilters(prev => ({
-        ...prev,
-        [filterName]: value
-      }));
-      clearError(); // Clear any previous errors when filters change
-    } catch (err) {
-      console.error('Filter change error:', err);
-      showError('Failed to apply filter');
-    }
+    setFilters(prev => ({
+      ...prev,
+      [filterName]: value
+    }));
   };
 
   const handleGenerateReport = (student) => {
@@ -277,11 +213,11 @@ Generated on: ${new Date().toLocaleString()}
   return (
     <AdminLayout>
       <ToastContainer />
-      <div className="min-h-screen bg-linear-to-br from-gray-50 via-orange-50/30 to-gray-50 p-4 sm:p-6 lg:p-8">
-        {/* Header Section with Enhanced Design */}
-        <div className="mb-6">
+      <div className="h-[calc(100vh-4rem)] overflow-hidden bg-linear-to-br from-gray-50 via-orange-50/30 to-gray-50 p-4 sm:p-6 lg:p-8 flex flex-col">
+        {/* Header Section */}
+        <div className="mb-6 shrink-0">
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
+            <div className="w-10 h-10 bg-linear-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
               <FaUserGraduate className="text-white text-lg" />
             </div>
             <div>
@@ -295,8 +231,8 @@ Generated on: ${new Date().toLocaleString()}
           </p>
         </div>
 
-        {/* Search and Actions Section - Enhanced Design */}
-        <div className="bg-white rounded-2xl p-4 shadow-lg border border-gray-100 mb-6">
+        {/* Search and Actions Section */}
+        <div className="bg-white rounded-2xl p-4 shadow-lg border border-gray-100 mb-6 shrink-0">
           <div className="space-y-3 lg:space-y-0 lg:flex lg:gap-3 lg:items-center lg:justify-between">
             {/* Search Input with Icon */}
             <div className="relative w-full lg:flex-1 lg:max-w-md">
@@ -312,11 +248,11 @@ Generated on: ${new Date().toLocaleString()}
               />
             </div>
             
-            {/* Action Buttons - Enhanced */}
+            {/* Action Buttons */}
             <div className="flex flex-wrap gap-2 w-full lg:w-auto">
               <button
                 onClick={handleAddStudent}
-                className="group relative bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white px-4 py-2.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 font-semibold shadow-md hover:shadow-lg text-sm"
+                className="group relative bg-linear-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white px-4 py-2.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 font-semibold shadow-md hover:shadow-lg text-sm"
               >
                 <FaPlus className="text-xs" />
                 <span>Add Student</span>
@@ -327,13 +263,6 @@ Generated on: ${new Date().toLocaleString()}
               >
                 <FaFileExport className="text-xs" />
                 <span>Export</span>
-              </button>
-              <button
-                onClick={handleRefresh}
-                className="group bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-900 px-4 py-2.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 font-semibold shadow-md hover:shadow-lg text-sm"
-              >
-                <FaSync className="text-xs" />
-                <span>Refresh</span>
               </button>
             </div>
           </div>
@@ -392,14 +321,14 @@ Generated on: ${new Date().toLocaleString()}
           </div>
         </div>
 
-        {/* Student List - Enhanced Container */}
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+        {/* Student List - Scrollable */}
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden flex-1 flex flex-col min-h-0">
           <StudentList 
             searchTerm={searchTerm}
             onViewStudent={handleViewStudent}
             onEditStudent={handleEditStudent}
             onDeleteStudent={handleDeleteStudent}
-            loading={loading}
+            loading={isLoading}
             error={error}
             students={students}
           />
@@ -424,7 +353,7 @@ Generated on: ${new Date().toLocaleString()}
             student={selectedStudent}
             onClose={handleCloseFormModal}
             onSubmit={handleSubmitStudent}
-            loading={loading}
+            loading={createStudentMutation.isPending || updateStudentMutation.isPending}
             serverErrors={serverErrors}
           />
         )}
@@ -435,7 +364,7 @@ Generated on: ${new Date().toLocaleString()}
             student={selectedStudent}
             onClose={handleCloseDeleteModal}
             onConfirm={handleConfirmDelete}
-            loading={loading}
+            loading={deleteStudentMutation.isPending}
           />
         )}
       </div>
