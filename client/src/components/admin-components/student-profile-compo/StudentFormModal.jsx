@@ -159,16 +159,15 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
 
       {/* Modal panel - Optimized size */}
       <div className="relative z-10 bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden">
-        {/* Header - Fixed */}
-        <div className="bg-gradient-to-r from-orange-500 to-orange-600 px-6 py-4 shrink-0">
+        {/* Header */}
+        <div className="bg-linear-to-r from-orange-500 to-orange-600 px-6 py-4 shrink-0">
           <div className="flex items-center justify-between">
-            <h3 className="text-xl font-bold text-white flex items-center gap-2">
-              <FaUserGraduate className="text-lg" />
+            <h3 className="text-xl font-bold text-white">
               {isEditMode ? 'Edit Student' : 'Add New Student'}
             </h3>
             <button
               onClick={onClose}
-              className="text-white hover:text-gray-200 transition-colors p-1 hover:bg-white/10 rounded-lg"
+              className="text-white hover:text-gray-200 transition-colors"
               disabled={loading}
             >
               <FaTimes className="text-xl" />
@@ -176,9 +175,9 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
           </div>
         </div>
 
-        {/* Form - Scrollable with custom scrollbar */}
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-orange-500 scrollbar-track-gray-100">
-          <div className="px-6 py-6 space-y-6">
+        {/* Form - Scrollable */}
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto">
+          <div className="px-6 py-6 space-y-4">
             {/* Basic Information */}
             <div>
               <h4 className="text-sm font-bold text-gray-700 mb-4 flex items-center gap-2 pb-2 border-b-2 border-orange-200">
@@ -503,7 +502,7 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
 
             {/* Address */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+              <label className="block text-sm font-semibold text-gray-700 mb-2 items-center gap-2">
                 <FaMapMarkerAlt className="text-orange-600" />
                 Address
               </label>
@@ -543,7 +542,7 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
 
                 {/* Extracurricular Activities */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2 items-center gap-2">
                     <FaRunning className="text-orange-600" />
                     Extracurricular Activities
                   </label>
@@ -560,7 +559,7 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
 
             {/* Notes */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+              <label className="block text-sm font-semibold text-gray-700 mb-2 items-center gap-2">
                 <FaStickyNote className="text-orange-600" />
                 Additional Notes
               </label>
@@ -577,12 +576,12 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
         </form>
 
         {/* Action Buttons - Fixed at bottom */}
-        <div className="px-6 py-4 bg-gradient-to-r from-gray-50 to-gray-100 border-t border-gray-200 shrink-0">
+        <div className="px-6 py-4 bg-white border-t border-gray-200 shrink-0">
           <div className="flex gap-3">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-5 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-white hover:border-gray-400 transition-all font-semibold shadow-sm"
+              className="flex-1 px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all font-semibold"
               disabled={loading}
             >
               Cancel
@@ -590,20 +589,10 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
             <button
               type="submit"
               onClick={handleSubmit}
-              className="flex-1 px-5 py-3 bg-gradient-to-r from-orange-600 to-orange-500 text-white rounded-xl hover:from-orange-700 hover:to-orange-600 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
+              className="flex-1 px-4 py-3 bg-linear-to-r from-orange-600 to-orange-500 text-white rounded-xl hover:from-orange-700 hover:to-orange-600 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={loading}
             >
-              {loading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Saving...
-                </span>
-              ) : (
-                isEditMode ? 'Update Student' : 'Create Student'
-              )}
+              {loading ? 'Saving...' : isEditMode ? 'Update Student' : 'Create Student'}
             </button>
           </div>
         </div>

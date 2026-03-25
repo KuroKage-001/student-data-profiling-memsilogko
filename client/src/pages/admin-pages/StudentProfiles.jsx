@@ -16,6 +16,7 @@ import {
 } from '../../hooks/student-profile-hook';
 import useToast from '../../hooks/useToast';
 import { exportToExcel } from '../../utils/admin-utilities/student-profile-utils';
+import { generateStudentPDF } from '../../utils/admin-utilities/pdfGenerator';
 import { FaUserGraduate, FaSearch, FaPlus, FaFileExport } from 'react-icons/fa';
 
 // Import auth debug utility (for development)
@@ -158,56 +159,12 @@ const StudentProfiles = () => {
     }));
   };
 
-  const handleGenerateReport = (student) => {
+  const handleGenerateReport = async (student) => {
     try {
-      // Generate a formatted text report
-      const report = `
-STUDENT PROFILE REPORT
-=====================
-
-Personal Information:
-- Name: ${student.name}
-- Student ID: ${student.student_id || student.id}
-- Email: ${student.email || 'N/A'}
-- Phone: ${student.phone || 'N/A'}
-- Address: ${student.address || 'N/A'}
-
-Academic Information:
-- Program: ${student.program || 'N/A'}
-- Year Level: ${student.year_level || 'N/A'}
-- GPA: ${student.gpa ? parseFloat(student.gpa).toFixed(2) : 'N/A'}
-- Status: ${student.status ? student.status.charAt(0).toUpperCase() + student.status.slice(1) : 'N/A'}
-- Enrollment Date: ${student.enrollment_date ? new Date(student.enrollment_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A'}
-- Expected Graduation: ${student.graduation_date ? new Date(student.graduation_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A'}
-
-Guardian Information:
-- Guardian Name: ${student.guardian_name || 'N/A'}
-- Guardian Phone: ${student.guardian_phone || 'N/A'}
-
-Skills & Activities:
-- Skills: ${student.skills || 'N/A'}
-- Extracurricular Activities: ${student.extracurricular_activities || 'N/A'}
-
-Additional Notes:
-${student.notes || 'No additional notes'}
-
-Generated on: ${new Date().toLocaleString()}
-      `.trim();
-
-      // Create a blob and download
-      const blob = new Blob([report], { type: 'text/plain' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `student_report_${student.student_id || student.id}_${new Date().toISOString().split('T')[0]}.txt`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
-
-      showSuccess(`Report generated for ${student.name}`);
+      await generateStudentPDF(student);
+      showSuccess(`PDF report generated for ${student.name}`);
     } catch (err) {
-      showError('Failed to generate report');
+      showError('Failed to generate PDF report');
     }
   };
 
