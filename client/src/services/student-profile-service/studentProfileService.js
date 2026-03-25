@@ -139,6 +139,10 @@ const studentService = {
         status: error.response?.status,
         data: error.response?.data
       });
+      // Log errors in detail
+      if (error.response?.data?.errors) {
+        console.error('Validation errors detail:', JSON.stringify(error.response.data.errors, null, 2));
+      }
       return {
         success: false,
         message: error.response?.data?.message || 'Failed to create student',

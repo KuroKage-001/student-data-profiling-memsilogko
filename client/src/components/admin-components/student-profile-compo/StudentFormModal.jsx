@@ -137,6 +137,15 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
       newErrors.gpa = 'GPA must be between 0.0 and 4.0';
     }
     
+    // Graduation date validation - must be after enrollment date
+    if (formData.graduation_date && formData.enrollment_date) {
+      const enrollmentDate = new Date(formData.enrollment_date);
+      const graduationDate = new Date(formData.graduation_date);
+      if (graduationDate <= enrollmentDate) {
+        newErrors.graduation_date = 'Graduation date must be after enrollment date';
+      }
+    }
+    
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
@@ -420,9 +429,16 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
                       name="graduation_date"
                       value={formData.graduation_date}
                       onChange={handleChange}
-                      className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-orange-500 transition-all"
+                      className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all ${
+                        errors.graduation_date 
+                          ? 'border-red-500 focus:border-red-600' 
+                          : 'border-gray-200 focus:border-orange-500'
+                      }`}
                     />
                   </div>
+                  {errors.graduation_date && (
+                    <p className="mt-1 text-sm text-red-600">{errors.graduation_date}</p>
+                  )}
                 </div>
 
             {/* Guardian Information */}
