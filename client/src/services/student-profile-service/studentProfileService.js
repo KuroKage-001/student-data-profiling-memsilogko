@@ -119,9 +119,6 @@ const studentService = {
       // Remove the text field
       delete transformedData.extracurricular_activities;
 
-      // Debug logging
-      console.log('Creating student with data:', JSON.stringify(transformedData, null, 2));
-
       const response = await axiosInstance.post('/students', transformedData);
       // Normalize student data
       if (response.data.success && response.data.data) {
@@ -133,16 +130,6 @@ const studentService = {
         message: response.data.message
       };
     } catch (error) {
-      console.error('Create student error:', {
-        message: error.response?.data?.message,
-        errors: error.response?.data?.errors,
-        status: error.response?.status,
-        data: error.response?.data
-      });
-      // Log errors in detail
-      if (error.response?.data?.errors) {
-        console.error('Validation errors detail:', JSON.stringify(error.response.data.errors, null, 2));
-      }
       return {
         success: false,
         message: error.response?.data?.message || 'Failed to create student',
