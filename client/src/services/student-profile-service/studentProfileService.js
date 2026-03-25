@@ -76,20 +76,30 @@ const studentService = {
       // Transform skills and activities from text to array format if needed
       const transformedData = {
         ...studentData,
-        skills: studentData.skills ? studentData.skills.split(',').map(skill => ({
-          skill_name: skill.trim(),
-          proficiency_level: 'intermediate',
-          description: null
-        })).filter(skill => skill.skill_name) : [],
-        activities: studentData.extracurricular_activities ? studentData.extracurricular_activities.split(',').map(activity => ({
-          activity_name: activity.trim(),
-          activity_type: 'extracurricular',
-          organization: null,
-          role: null,
-          start_date: null,
-          end_date: null,
-          description: null
-        })).filter(activity => activity.activity_name) : []
+        skills: studentData.skills && studentData.skills.trim() 
+          ? studentData.skills.split(',')
+              .map(skill => skill.trim())
+              .filter(skill => skill.length > 0)
+              .map(skill => ({
+                skill_name: skill,
+                proficiency_level: 'intermediate',
+                description: null
+              }))
+          : [],
+        activities: studentData.extracurricular_activities && studentData.extracurricular_activities.trim()
+          ? studentData.extracurricular_activities.split(',')
+              .map(activity => activity.trim())
+              .filter(activity => activity.length > 0)
+              .map(activity => ({
+                activity_name: activity,
+                activity_type: 'extracurricular',
+                organization: null,
+                role: null,
+                start_date: null,
+                end_date: null,
+                description: null
+              }))
+          : []
       };
 
       // Remove the text field
@@ -120,20 +130,30 @@ const studentService = {
       // Transform skills and activities from text to array format if needed
       const transformedData = {
         ...studentData,
-        skills: studentData.skills ? studentData.skills.split(',').map(skill => ({
-          skill_name: skill.trim(),
-          proficiency_level: 'intermediate',
-          description: null
-        })).filter(skill => skill.skill_name) : [],
-        activities: studentData.extracurricular_activities ? studentData.extracurricular_activities.split(',').map(activity => ({
-          activity_name: activity.trim(),
-          activity_type: 'extracurricular',
-          organization: null,
-          role: null,
-          start_date: null,
-          end_date: null,
-          description: null
-        })).filter(activity => activity.activity_name) : []
+        skills: studentData.skills && studentData.skills.trim()
+          ? studentData.skills.split(',')
+              .map(skill => skill.trim())
+              .filter(skill => skill.length > 0)
+              .map(skill => ({
+                skill_name: skill,
+                proficiency_level: 'intermediate',
+                description: null
+              }))
+          : [],
+        activities: studentData.extracurricular_activities && studentData.extracurricular_activities.trim()
+          ? studentData.extracurricular_activities.split(',')
+              .map(activity => activity.trim())
+              .filter(activity => activity.length > 0)
+              .map(activity => ({
+                activity_name: activity,
+                activity_type: 'extracurricular',
+                organization: null,
+                role: null,
+                start_date: null,
+                end_date: null,
+                description: null
+              }))
+          : []
       };
 
       // Remove the text field
