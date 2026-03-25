@@ -33,29 +33,11 @@ const StudentList = ({ searchTerm, onViewStudent, onEditStudent, onDeleteStudent
     setCurrentPage(Math.max(1, Math.min(page, totalPages)));
   };
 
-  const getStatusColor = (status) => {
-    switch (status?.toLowerCase()) {
-      case 'active':
-        return 'bg-green-100 text-green-800';
-      case 'inactive':
-        return 'bg-red-100 text-red-800';
-      case 'suspended':
-        return 'bg-yellow-100 text-yellow-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
   const formatGPA = (gpa) => {
     if (!gpa && gpa !== 0) return 'N/A';
     const gpaNumber = parseFloat(gpa);
     if (isNaN(gpaNumber)) return 'N/A';
     return gpaNumber.toFixed(2);
-  };
-
-  const capitalize = (str) => {
-    if (!str) return 'N/A';
-    return str.charAt(0).toUpperCase() + str.slice(1);
   };
 
   if (loading) {
@@ -94,9 +76,6 @@ const StudentList = ({ searchTerm, onViewStudent, onEditStudent, onDeleteStudent
                 GPA
               </th>
               <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                Status
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                 Actions
               </th>
             </tr>
@@ -120,11 +99,6 @@ const StudentList = ({ searchTerm, onViewStudent, onEditStudent, onDeleteStudent
                   <div className="text-sm font-medium text-gray-900">
                     {formatGPA(student.gpa)}
                   </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`inline-flex px-2.5 py-1 text-xs font-semibold rounded-full ${getStatusColor(student.status)}`}>
-                    {capitalize(student.status)}
-                  </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <div className="flex items-center space-x-3">
@@ -162,15 +136,10 @@ const StudentList = ({ searchTerm, onViewStudent, onEditStudent, onDeleteStudent
               <div className="flex-1 min-w-0">
                 <h3 className="text-sm font-semibold text-gray-900 mb-0.5 truncate">{student.name}</h3>
                 <p className="text-xs text-gray-500 mb-2 truncate">{student.student_id || student.id}</p>
-                <div className="flex flex-wrap gap-1.5 mb-1.5">
+                <div className="flex flex-wrap gap-1.5">
                   <span className="text-xs text-gray-700">{student.program || 'N/A'}</span>
                   <span className="text-xs text-gray-400">•</span>
                   <span className="text-xs text-gray-700">{student.year_level || 'N/A'}</span>
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                  <span className={`inline-flex px-2 py-0.5 text-xs font-semibold rounded-full ${getStatusColor(student.status)}`}>
-                    {capitalize(student.status)}
-                  </span>
                 </div>
               </div>
             </div>
