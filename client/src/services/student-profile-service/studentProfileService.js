@@ -17,7 +17,15 @@ const normalizeStudentData = (student) => {
     guardian_name: student.guardian_name || null,
     guardian_phone: student.guardian_phone || null,
     notes: student.notes || null,
-    status: student.status || 'active'
+    status: student.status || 'active',
+    // Convert skills array to comma-separated string
+    skills: student.skills && Array.isArray(student.skills) 
+      ? student.skills.map(s => s.skill_name).join(', ') 
+      : (student.skills || null),
+    // Convert activities array to comma-separated string
+    extracurricular_activities: student.activities && Array.isArray(student.activities)
+      ? student.activities.map(a => a.activity_name).join(', ')
+      : (student.extracurricular_activities || null)
   };
 };
 
@@ -65,7 +73,29 @@ const studentService = {
   // Create new student
   createStudent: async (studentData) => {
     try {
-      const response = await axiosInstance.post('/students', studentData);
+      // Transform skills and activities from text to array format if needed
+      const transformedData = {
+        ...studentData,
+        skills: studentData.skills ? studentData.skills.split(',').map(skill => ({
+          skill_name: skill.trim(),
+          proficiency_level: 'intermediate',
+          description: null
+        })).filter(skill => skill.skill_name) : [],
+        activities: studentData.extracurricular_activities ? studentData.extracurricular_activities.split(',').map(activity => ({
+          activity_name: activity.trim(),
+          activity_type: 'extracurricular',
+          organization: null,
+          role: null,
+          start_date: null,
+          end_date: null,
+          description: null
+        })).filter(activity => activity.activity_name) : []
+      };
+
+      // Remove the text field
+      delete transformedData.extracurricular_activities;
+
+      const response = await axiosInstance.post('/students', transformedData);
       // Normalize student data
       if (response.data.success && response.data.data) {
         response.data.data = normalizeStudentData(response.data.data);
@@ -87,7 +117,29 @@ const studentService = {
   // Update student
   updateStudent: async (id, studentData) => {
     try {
-      const response = await axiosInstance.put(`/students/${id}`, studentData);
+      // Transform skills and activities from text to array format if needed
+      const transformedData = {
+        ...studentData,
+        skills: studentData.skills ? studentData.skills.split(',').map(skill => ({
+          skill_name: skill.trim(),
+          proficiency_level: 'intermediate',
+          description: null
+        })).filter(skill => skill.skill_name) : [],
+        activities: studentData.extracurricular_activities ? studentData.extracurricular_activities.split(',').map(activity => ({
+          activity_name: activity.trim(),
+          activity_type: 'extracurricular',
+          organization: null,
+          role: null,
+          start_date: null,
+          end_date: null,
+          description: null
+        })).filter(activity => activity.activity_name) : []
+      };
+
+      // Remove the text field
+      delete transformedData.extracurricular_activities;
+
+      const response = await axiosInstance.put(`/students/${id}`, transformedData);
       // Normalize student data
       if (response.data.success && response.data.data) {
         response.data.data = normalizeStudentData(response.data.data);

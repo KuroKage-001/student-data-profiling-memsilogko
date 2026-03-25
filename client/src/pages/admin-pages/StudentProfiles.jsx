@@ -12,7 +12,6 @@ import {
   useDeleteStudent,
   getPrograms,
   getYearLevels,
-  getStatuses,
   generateStudentId
 } from '../../hooks/student-profile-hook';
 import useToast from '../../hooks/useToast';
@@ -36,7 +35,8 @@ const StudentProfiles = () => {
   const [filters, setFilters] = useState({
     program: 'all',
     yearLevel: 'all',
-    status: 'all'
+    skills: '',
+    activities: ''
   });
 
   // Build query params
@@ -45,7 +45,8 @@ const StudentProfiles = () => {
     if (searchTerm) params.search = searchTerm;
     if (filters.program !== 'all') params.program = filters.program;
     if (filters.yearLevel !== 'all') params.year_level = filters.yearLevel;
-    if (filters.status !== 'all') params.status = filters.status;
+    if (filters.skills) params.skills = filters.skills;
+    if (filters.activities) params.activities = filters.activities;
     return params;
   }, [searchTerm, filters]);
 
@@ -212,7 +213,6 @@ Generated on: ${new Date().toLocaleString()}
 
   const programs = getPrograms();
   const yearLevels = getYearLevels();
-  const statuses = getStatuses();
 
   return (
     <AdminLayout>
@@ -273,7 +273,7 @@ Generated on: ${new Date().toLocaleString()}
 
           {/* Filters Section */}
           <div className="mt-3 pt-3 border-t border-gray-200">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">
                   Program
@@ -306,20 +306,27 @@ Generated on: ${new Date().toLocaleString()}
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">
-                  Status
+                  Skills
                 </label>
-                <select
-                  value={filters.status}
-                  onChange={(e) => handleFilterChange('status', e.target.value)}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                >
-                  <option value="all">All Statuses</option>
-                  {statuses.map(status => (
-                    <option key={status} value={status}>
-                      {status.charAt(0).toUpperCase() + status.slice(1)}
-                    </option>
-                  ))}
-                </select>
+                <input
+                  type="text"
+                  placeholder="Filter by skills..."
+                  value={filters.skills}
+                  onChange={(e) => handleFilterChange('skills', e.target.value)}
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent placeholder:text-gray-400"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  Activities
+                </label>
+                <input
+                  type="text"
+                  placeholder="Filter by activities..."
+                  value={filters.activities}
+                  onChange={(e) => handleFilterChange('activities', e.target.value)}
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent placeholder:text-gray-400"
+                />
               </div>
             </div>
           </div>

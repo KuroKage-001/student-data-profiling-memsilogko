@@ -12,7 +12,9 @@ const StudentList = ({ searchTerm, onViewStudent, onEditStudent, onDeleteStudent
       student.name?.toLowerCase().includes(term) ||
       student.student_id?.toLowerCase().includes(term) ||
       student.program?.toLowerCase().includes(term) ||
-      student.email?.toLowerCase().includes(term)
+      student.email?.toLowerCase().includes(term) ||
+      student.skills?.toLowerCase().includes(term) ||
+      student.extracurricular_activities?.toLowerCase().includes(term)
     );
   }, [students, searchTerm]);
 
