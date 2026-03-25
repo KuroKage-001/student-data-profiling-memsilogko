@@ -88,6 +88,13 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    
+    // Prevent 'e', 'E', '+', '-' in phone number fields
+    if ((name === 'phone' || name === 'guardian_phone') && 
+        (value.includes('e') || value.includes('E') || value.includes('+') || value.includes('-'))) {
+      return;
+    }
+    
     setFormData(prev => ({
       ...prev,
       [name]: value
@@ -114,9 +121,10 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
     if (!formData.email.trim()) {
       newErrors.email = 'Email is required';
     } else {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      // Professional email validation
+      const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
       if (!emailRegex.test(formData.email)) {
-        newErrors.email = 'Invalid email format';
+        newErrors.email = 'Please enter a valid email address (e.g., user@example.com)';
       }
     }
     
@@ -135,6 +143,26 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
     // GPA validation
     if (formData.gpa && (parseFloat(formData.gpa) < 0 || parseFloat(formData.gpa) > 4)) {
       newErrors.gpa = 'GPA must be between 0.0 and 4.0';
+    }
+    
+    // Phone number validation
+    if (formData.phone && formData.phone.trim()) {
+      const phoneRegex = /^[\d\s()+-]+$/;
+      if (!phoneRegex.test(formData.phone)) {
+        newErrors.phone = 'Phone number can only contain digits, spaces, and symbols ( ) + -';
+      } else if (formData.phone.replace(/\D/g, '').length < 10) {
+        newErrors.phone = 'Phone number must be at least 10 digits';
+      }
+    }
+    
+    // Guardian phone validation
+    if (formData.guardian_phone && formData.guardian_phone.trim()) {
+      const phoneRegex = /^[\d\s()+-]+$/;
+      if (!phoneRegex.test(formData.guardian_phone)) {
+        newErrors.guardian_phone = 'Phone number can only contain digits, spaces, and symbols ( ) + -';
+      } else if (formData.guardian_phone.replace(/\D/g, '').length < 10) {
+        newErrors.guardian_phone = 'Phone number must be at least 10 digits';
+      }
     }
     
     // Graduation date validation - must be after enrollment date
@@ -287,10 +315,17 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
                       name="phone"
                       value={formData.phone}
                       onChange={handleChange}
-                      className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-orange-500 transition-all"
+                      className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all ${
+                        errors.phone 
+                          ? 'border-red-500 focus:border-red-600' 
+                          : 'border-gray-200 focus:border-orange-500'
+                      }`}
                       placeholder="Enter phone number"
                     />
                   </div>
+                  {errors.phone && (
+                    <p className="mt-1 text-sm text-red-600">{errors.phone}</p>
+                  )}
                 </div>
 
             {/* Academic Information */}
@@ -483,10 +518,17 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
                       name="guardian_phone"
                       value={formData.guardian_phone}
                       onChange={handleChange}
-                      className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-orange-500 transition-all"
+                      className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all ${
+                        errors.guardian_phone 
+                          ? 'border-red-500 focus:border-red-600' 
+                          : 'border-gray-200 focus:border-orange-500'
+                      }`}
                       placeholder="Enter guardian phone"
                     />
                   </div>
+                  {errors.guardian_phone && (
+                    <p className="mt-1 text-sm text-red-600">{errors.guardian_phone}</p>
+                  )}
                 </div>
 
             {/* Address */}

@@ -5,6 +5,8 @@
  * Includes institutional logo
  */
 
+import { jsPDF } from 'jspdf';
+
 /**
  * Load image as base64
  * @param {string} url - Image URL
@@ -33,9 +35,6 @@ const loadImageAsBase64 = (url) => {
  */
 export const generateStudentPDF = async (student) => {
   try {
-    // Dynamically import jsPDF
-    const { jsPDF } = await import('jspdf');
-    
     // Create new PDF document
     const doc = new jsPDF();
     
@@ -374,7 +373,6 @@ export const generateStudentPDF = async (student) => {
  */
 export const generateBulkStudentPDF = async (students) => {
   try {
-    const { jsPDF } = await import('jspdf');
     const doc = new jsPDF();
     
     const primaryColor = [234, 88, 12];
