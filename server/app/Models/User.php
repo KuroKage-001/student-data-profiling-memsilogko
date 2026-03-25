@@ -119,4 +119,20 @@ class User extends Authenticatable implements JWTSubject
     {
         return ucfirst($this->status);
     }
+
+    /**
+     * Get the skills for the student
+     */
+    public function skills()
+    {
+        return $this->hasMany(StudentSkill::class);
+    }
+
+    /**
+     * Get the activities for the student
+     */
+    public function activities()
+    {
+        return $this->hasMany(StudentActivity::class);
+    }
 }

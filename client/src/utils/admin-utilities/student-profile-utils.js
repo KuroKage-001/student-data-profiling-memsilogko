@@ -1,3 +1,5 @@
+import * as XLSX from 'xlsx';
+
 // Student Profile Utility Functions
 
 // Format student data for display
@@ -210,12 +212,75 @@ export const exportToCSV = (students, filename = 'students.csv') => {
   ];
 
   const csvContent = csvData.map(row => row.join(',')).join('\n');
-  const blob = new Blob([csvData], { type: 'text/csv' });
+  const blob = new Blob([csvContent], { type: 'text/csv' });
   const url = window.URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
   a.download = filename;
   a.click();
+  window.URL.revokeObjectURL(url);
+};
+
+// Export student data to Excel (XLSX)
+export const exportToExcel = (students, filename = 'students.xlsx') => {
+  if (!students || students.length === 0) return;
+
+  try {
+    // Prepare data with all fields
+    const data = students.map(student => ({
+      'ID': student.id || '',
+      'Student ID': student.student_id || '',
+      'Name': student.name || '',
+      'Email': student.email || '',
+      'Phone': student.phone || '',
+      'Address': student.address || '',
+      'Program': student.program || '',
+      'Year Level': student.year_level || '',
+      'GPA': student.gpa || '',
+      'Status': student.status || '',
+      'Enrollment Date': student.enrollment_date ? new Date(student.enrollment_date).toLocaleDateString() : '',
+      'Graduation Date': student.graduation_date ? new Date(student.graduation_date).toLocaleDateString() : '',
+      'Guardian Name': student.guardian_name || '',
+      'Guardian Phone': student.guardian_phone || '',
+      'Skills': student.skills || '',
+      'Extracurricular Activities': student.extracurricular_activities || '',
+      'Notes': student.notes || ''
+    }));
+
+    // Create worksheet
+    const worksheet = XLSX.utils.json_to_sheet(data);
+
+    // Set column widths
+    const columnWidths = [
+      { wch: 8 },  // ID
+      { wch: 15 }, // Student ID
+      { wch: 25 }, // Name
+      { wch: 30 }, // Email
+      { wch: 15 }, // Phone
+      { wch: 30 }, // Address
+      { wch: 25 }, // Program
+      { wch: 12 }, // Year Level
+      { wch: 8 },  // GPA
+      { wch: 10 }, // Status
+      { wch: 15 }, // Enrollment Date
+      { wch: 15 }, // Graduation Date
+      { wch: 20 }, // Guardian Name
+      { wch: 15 }, // Guardian Phone
+      { wch: 30 }, // Skills
+      { wch: 30 }, // Extracurricular Activities
+      { wch: 40 }  // Notes
+    ];
+    worksheet['!cols'] = columnWidths;
+
+    // Create workbook
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Students');
+
+    // Generate Excel file and trigger download
+    XLSX.writeFile(workbook, filename);
+  } catch (error) {
+    throw new Error('Failed to export to Excel');
+  }
 };
 
 // Filter and sort students

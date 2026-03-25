@@ -3,9 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\StudentSkill;
+use App\Models\StudentActivity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 
 class StudentController extends Controller
 {
@@ -15,7 +18,7 @@ class StudentController extends Controller
     public function index(Request $request)
     {
         try {
-            $query = User::where('role', 'student');
+            $query = User::where('role', 'student')->with(['skills', 'activities']);
 
             // Search functionality
             if ($request->has('search')) {
@@ -72,7 +75,6 @@ class StudentController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8',
             'student_id' => 'required|string|max:50|unique:users',
             'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string|max:500',
@@ -84,7 +86,19 @@ class StudentController extends Controller
             'guardian_name' => 'nullable|string|max:255',
             'guardian_phone' => 'nullable|string|max:20',
             'notes' => 'nullable|string',
-            'status' => 'sometimes|in:active,inactive,suspended'
+            'status' => 'sometimes|in:active,inactive,suspended',
+            'skills' => 'nullable|array',
+            'skills.*.skill_name' => 'required|string|max:255',
+            'skills.*.proficiency_level' => 'required|in:beginner,intermediate,advanced,expert',
+            'skills.*.description' => 'nullable|string',
+            'activities' => 'nullable|array',
+            'activities.*.activity_name' => 'required|string|max:255',
+            'activities.*.activity_type' => 'required|in:academic,extracurricular,volunteer,sports,arts,leadership,other',
+            'activities.*.organization' => 'nullable|string|max:255',
+            'activities.*.role' => 'nullable|string|max:255',
+            'activities.*.start_date' => 'nullable|date',
+            'activities.*.end_date' => 'nullable|date|after_or_equal:activities.*.start_date',
+            'activities.*.description' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -95,10 +109,15 @@ class StudentController extends Controller
         }
 
         try {
+            DB::beginTransaction();
+
+            // Generate a default password
+            $defaultPassword = 'Student@' . date('Y');
+
             $student = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
-                'password' => Hash::make($request->password),
+                'password' => Hash::make($defaultPassword),
                 'role' => 'student',
                 'status' => $request->get('status', 'active'),
                 'student_id' => $request->student_id,
@@ -114,12 +133,32 @@ class StudentController extends Controller
                 'notes' => $request->notes,
             ]);
 
+            // Add skills if provided
+            if ($request->has('skills') && is_array($request->skills)) {
+                foreach ($request->skills as $skill) {
+                    $student->skills()->create($skill);
+                }
+            }
+
+            // Add activities if provided
+            if ($request->has('activities') && is_array($request->activities)) {
+                foreach ($request->activities as $activity) {
+                    $student->activities()->create($activity);
+                }
+            }
+
+            DB::commit();
+
+            // Load relationships
+            $student->load(['skills', 'activities']);
+
             return response()->json([
                 'success' => true,
-                'message' => 'Student created successfully',
+                'message' => 'Student created successfully with default password: ' . $defaultPassword,
                 'data' => $student
             ], 201);
         } catch (\Exception $e) {
+            DB::rollBack();
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to create student: ' . $e->getMessage()
@@ -133,7 +172,9 @@ class StudentController extends Controller
     public function show($id)
     {
         try {
-            $student = User::where('role', 'student')->findOrFail($id);
+            $student = User::where('role', 'student')
+                ->with(['skills', 'activities'])
+                ->findOrFail($id);
             
             return response()->json([
                 'success' => true,
@@ -158,7 +199,6 @@ class StudentController extends Controller
             $validator = Validator::make($request->all(), [
                 'name' => 'sometimes|required|string|max:255',
                 'email' => 'sometimes|required|string|email|max:255|unique:users,email,' . $id,
-                'password' => 'sometimes|nullable|string|min:8',
                 'student_id' => 'sometimes|required|string|max:50|unique:users,student_id,' . $id,
                 'phone' => 'nullable|string|max:20',
                 'address' => 'nullable|string|max:500',
@@ -170,7 +210,19 @@ class StudentController extends Controller
                 'guardian_name' => 'nullable|string|max:255',
                 'guardian_phone' => 'nullable|string|max:20',
                 'notes' => 'nullable|string',
-                'status' => 'sometimes|required|in:active,inactive,suspended'
+                'status' => 'sometimes|required|in:active,inactive,suspended',
+                'skills' => 'nullable|array',
+                'skills.*.skill_name' => 'required|string|max:255',
+                'skills.*.proficiency_level' => 'required|in:beginner,intermediate,advanced,expert',
+                'skills.*.description' => 'nullable|string',
+                'activities' => 'nullable|array',
+                'activities.*.activity_name' => 'required|string|max:255',
+                'activities.*.activity_type' => 'required|in:academic,extracurricular,volunteer,sports,arts,leadership,other',
+                'activities.*.organization' => 'nullable|string|max:255',
+                'activities.*.role' => 'nullable|string|max:255',
+                'activities.*.start_date' => 'nullable|date',
+                'activities.*.end_date' => 'nullable|date|after_or_equal:activities.*.start_date',
+                'activities.*.description' => 'nullable|string',
             ]);
 
             if ($validator->fails()) {
@@ -180,18 +232,47 @@ class StudentController extends Controller
                 ], 422);
             }
 
+            DB::beginTransaction();
+
             $updateData = $request->only([
                 'name', 'email', 'student_id', 'phone', 'address', 
                 'program', 'year_level', 'gpa', 'enrollment_date', 
                 'graduation_date', 'guardian_name', 'guardian_phone', 
                 'notes', 'status'
             ]);
-            
-            if ($request->filled('password')) {
-                $updateData['password'] = Hash::make($request->password);
-            }
 
             $student->update($updateData);
+
+            // Update skills if provided
+            if ($request->has('skills')) {
+                // Delete existing skills
+                $student->skills()->delete();
+                
+                // Add new skills
+                if (is_array($request->skills)) {
+                    foreach ($request->skills as $skill) {
+                        $student->skills()->create($skill);
+                    }
+                }
+            }
+
+            // Update activities if provided
+            if ($request->has('activities')) {
+                // Delete existing activities
+                $student->activities()->delete();
+                
+                // Add new activities
+                if (is_array($request->activities)) {
+                    foreach ($request->activities as $activity) {
+                        $student->activities()->create($activity);
+                    }
+                }
+            }
+
+            DB::commit();
+
+            // Load relationships
+            $student->load(['skills', 'activities']);
 
             return response()->json([
                 'success' => true,
@@ -199,6 +280,7 @@ class StudentController extends Controller
                 'data' => $student
             ]);
         } catch (\Exception $e) {
+            DB::rollBack();
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to update student: ' . $e->getMessage()

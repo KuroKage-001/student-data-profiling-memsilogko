@@ -16,7 +16,7 @@ import {
   generateStudentId
 } from '../../hooks/student-profile-hook';
 import useToast from '../../hooks/useToast';
-import { exportToCSV } from '../../utils/admin-utilities/student-profile-utils';
+import { exportToExcel } from '../../utils/admin-utilities/student-profile-utils';
 import { FaUserGraduate, FaSearch, FaPlus, FaFileExport } from 'react-icons/fa';
 
 // Import auth debug utility (for development)
@@ -143,8 +143,8 @@ const StudentProfiles = () => {
         return;
       }
       
-      exportToCSV(students, `students_${new Date().toISOString().split('T')[0]}.csv`);
-      showSuccess(`Successfully exported ${students.length} student(s) to CSV`);
+      exportToExcel(students, `students_${new Date().toISOString().split('T')[0]}.xlsx`);
+      showSuccess(`Successfully exported ${students.length} student(s) to Excel`);
     } catch (err) {
       showError(err.message || 'Failed to export student list');
     }
@@ -182,6 +182,10 @@ Academic Information:
 Guardian Information:
 - Guardian Name: ${student.guardian_name || 'N/A'}
 - Guardian Phone: ${student.guardian_phone || 'N/A'}
+
+Skills & Activities:
+- Skills: ${student.skills || 'N/A'}
+- Extracurricular Activities: ${student.extracurricular_activities || 'N/A'}
 
 Additional Notes:
 ${student.notes || 'No additional notes'}

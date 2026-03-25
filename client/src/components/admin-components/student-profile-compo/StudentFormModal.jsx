@@ -1,12 +1,10 @@
 import { useState, useEffect } from 'react';
-import { FaTimes, FaUserGraduate, FaEnvelope, FaLock, FaPhone, FaMapMarkerAlt, FaGraduationCap, FaCalendarAlt, FaUserFriends, FaStickyNote, FaIdCard, FaToggleOn, FaEye, FaEyeSlash } from 'react-icons/fa';
+import { FaTimes, FaUserGraduate, FaEnvelope, FaPhone, FaMapMarkerAlt, FaGraduationCap, FaCalendarAlt, FaUserFriends, FaStickyNote, FaIdCard, FaToggleOn, FaTrophy, FaRunning } from 'react-icons/fa';
 
 const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors }) => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    password: '',
-    confirmPassword: '',
     student_id: '',
     phone: '',
     address: '',
@@ -17,14 +15,14 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
     graduation_date: '',
     guardian_name: '',
     guardian_phone: '',
+    skills: '',
+    extracurricular_activities: '',
     notes: '',
     status: 'active'
   });
 
   const [errors, setErrors] = useState({});
   const [isEditMode, setIsEditMode] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Update errors when serverErrors prop changes
   useEffect(() => {
@@ -57,8 +55,6 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
       setFormData({
         name: student.name || '',
         email: student.email || '',
-        password: '',
-        confirmPassword: '',
         student_id: student.student_id || '',
         phone: student.phone || '',
         address: student.address || '',
@@ -69,6 +65,8 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
         graduation_date: student.graduation_date || '',
         guardian_name: student.guardian_name || '',
         guardian_phone: student.guardian_phone || '',
+        skills: student.skills || '',
+        extracurricular_activities: student.extracurricular_activities || '',
         notes: student.notes || '',
         status: student.status || 'active'
       });
@@ -89,8 +87,6 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
       }));
     }
     setErrors({});
-    setShowPassword(false);
-    setShowConfirmPassword(false);
   }, [student]);
 
   const handleChange = (e) => {
@@ -127,21 +123,6 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
       }
     }
     
-    // Password validation
-    if (!isEditMode && !formData.password) {
-      newErrors.password = 'Password is required';
-    } else if (formData.password && formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
-    }
-    
-    // Confirm password validation
-    if (!isEditMode && formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
-    }
-    if (isEditMode && formData.password && formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
-    }
-    
     // Student ID validation
     if (!formData.student_id.trim()) newErrors.student_id = 'Student ID is required';
     
@@ -164,14 +145,7 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
       return;
     }
 
-    // Prepare data for submission
-    const submitData = { ...formData };
-    delete submitData.confirmPassword;
-    if (isEditMode && !submitData.password) {
-      delete submitData.password;
-    }
-
-    onSubmit(submitData, isEditMode);
+    onSubmit(formData, isEditMode);
   };
 
   return (
@@ -264,74 +238,6 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
                   </div>
                   {errors.email && (
                     <p className="mt-1 text-sm text-red-600">{errors.email}</p>
-                  )}
-                </div>
-
-                {/* Password Field */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Password {isEditMode && <span className="text-gray-500 font-normal">(leave blank to keep current)</span>}
-                  </label>
-                  <div className="relative">
-                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                      <FaLock />
-                    </div>
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      name="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      className={`w-full pl-10 pr-12 py-3 border-2 rounded-xl focus:outline-none transition-all ${
-                        errors.password 
-                          ? 'border-red-500 focus:border-red-600' 
-                          : 'border-gray-200 focus:border-orange-500'
-                      }`}
-                      placeholder={isEditMode ? 'Enter new password' : 'Enter password'}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-orange-500 transition-colors"
-                    >
-                      {showPassword ? <FaEyeSlash className="text-lg" /> : <FaEye className="text-lg" />}
-                    </button>
-                  </div>
-                  {errors.password && (
-                    <p className="mt-1 text-sm text-red-600">{errors.password}</p>
-                  )}
-                </div>
-
-                {/* Confirm Password Field */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Confirm Password {isEditMode && <span className="text-gray-500 font-normal">(if changing)</span>}
-                  </label>
-                  <div className="relative">
-                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                      <FaLock />
-                    </div>
-                    <input
-                      type={showConfirmPassword ? 'text' : 'password'}
-                      name="confirmPassword"
-                      value={formData.confirmPassword}
-                      onChange={handleChange}
-                      className={`w-full pl-10 pr-12 py-3 border-2 rounded-xl focus:outline-none transition-all ${
-                        errors.confirmPassword 
-                          ? 'border-red-500 focus:border-red-600' 
-                          : 'border-gray-200 focus:border-orange-500'
-                      }`}
-                      placeholder={isEditMode ? 'Confirm new password' : 'Confirm password'}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-orange-500 transition-colors"
-                    >
-                      {showConfirmPassword ? <FaEyeSlash className="text-lg" /> : <FaEye className="text-lg" />}
-                    </button>
-                  </div>
-                  {errors.confirmPassword && (
-                    <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
                   )}
                 </div>
 
@@ -610,6 +516,47 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
                 placeholder="Enter address"
               />
             </div>
+
+            {/* Skills & Activities */}
+            <div className="pt-4">
+              <h4 className="text-sm font-bold text-gray-700 mb-4 flex items-center gap-2 pb-2 border-b-2 border-orange-200">
+                <FaTrophy className="text-orange-600" />
+                Skills & Activities
+              </h4>
+            </div>
+
+                {/* Skills */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Skills
+                  </label>
+                  <textarea
+                    name="skills"
+                    value={formData.skills}
+                    onChange={handleChange}
+                    rows="3"
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-orange-500 transition-all resize-none"
+                    placeholder="e.g., Programming (Python, JavaScript), Data Analysis, Public Speaking"
+                  />
+                  <p className="mt-1 text-xs text-gray-500">List student's technical and soft skills</p>
+                </div>
+
+                {/* Extracurricular Activities */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                    <FaRunning className="text-orange-600" />
+                    Extracurricular Activities
+                  </label>
+                  <textarea
+                    name="extracurricular_activities"
+                    value={formData.extracurricular_activities}
+                    onChange={handleChange}
+                    rows="3"
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-orange-500 transition-all resize-none"
+                    placeholder="e.g., Basketball Team, Debate Club, Student Council, Volunteer Work"
+                  />
+                  <p className="mt-1 text-xs text-gray-500">List clubs, sports, organizations, and volunteer activities</p>
+                </div>
 
             {/* Notes */}
             <div>

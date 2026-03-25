@@ -1,4 +1,4 @@
-import { FaTimes, FaUser, FaEnvelope, FaIdCard, FaPhone, FaMapMarkerAlt, FaGraduationCap, FaCalendar, FaUserFriends, FaChartLine, FaFileAlt } from 'react-icons/fa';
+import { FaTimes, FaUser, FaEnvelope, FaIdCard, FaPhone, FaMapMarkerAlt, FaGraduationCap, FaCalendar, FaUserFriends, FaChartLine, FaFileAlt, FaTrophy, FaRunning } from 'react-icons/fa';
 
 const StudentProfileModal = ({ student, onClose, onEdit, onGenerateReport }) => {
   if (!student) return null;
@@ -74,6 +74,10 @@ Academic Information:
 Guardian Information:
 - Guardian Name: ${student.guardian_name || 'N/A'}
 - Guardian Phone: ${student.guardian_phone || 'N/A'}
+
+Skills & Activities:
+- Skills: ${student.skills || 'N/A'}
+- Extracurricular Activities: ${student.extracurricular_activities || 'N/A'}
 
 Additional Notes:
 ${student.notes || 'No additional notes'}
@@ -309,6 +313,43 @@ Generated on: ${new Date().toLocaleString()}
                             <p className="text-xs text-gray-500 font-medium">Guardian Phone</p>
                             <p className="text-sm text-gray-900 font-semibold">{student.guardian_phone}</p>
                           </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Skills & Activities */}
+                {(student.skills || student.extracurricular_activities) && (
+                  <div className="bg-white border border-gray-200 rounded-xl p-5">
+                    <h4 className="text-base font-bold text-gray-900 mb-4 flex items-center gap-2">
+                      <div className="w-7 h-7 bg-purple-100 rounded-lg flex items-center justify-center">
+                        <FaTrophy className="text-purple-600 text-xs" />
+                      </div>
+                      Skills & Activities
+                    </h4>
+                    <div className="space-y-4">
+                      {student.skills && (
+                        <div>
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="w-7 h-7 bg-purple-50 rounded-lg flex items-center justify-center shrink-0">
+                              <FaTrophy className="text-purple-600 text-xs" />
+                            </div>
+                            <p className="text-xs text-gray-500 font-semibold uppercase tracking-wide">Skills</p>
+                          </div>
+                          <p className="text-sm text-gray-900 leading-relaxed pl-9">{student.skills}</p>
+                        </div>
+                      )}
+
+                      {student.extracurricular_activities && (
+                        <div>
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="w-7 h-7 bg-blue-50 rounded-lg flex items-center justify-center shrink-0">
+                              <FaRunning className="text-blue-600 text-xs" />
+                            </div>
+                            <p className="text-xs text-gray-500 font-semibold uppercase tracking-wide">Extracurricular Activities</p>
+                          </div>
+                          <p className="text-sm text-gray-900 leading-relaxed pl-9">{student.extracurricular_activities}</p>
                         </div>
                       )}
                     </div>
