@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FaTimes, FaUserGraduate, FaEnvelope, FaPhone, FaMapMarkerAlt, FaGraduationCap, FaCalendarAlt, FaUserFriends, FaStickyNote, FaIdCard, FaToggleOn, FaTrophy, FaRunning } from 'react-icons/fa';
+import { FaTimes, FaUserGraduate, FaEnvelope, FaPhone, FaMapMarkerAlt, FaGraduationCap, FaCalendarAlt, FaUserFriends, FaStickyNote, FaIdCard, FaTrophy, FaRunning } from 'react-icons/fa';
 
 const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors }) => {
   const [formData, setFormData] = useState({
@@ -17,8 +17,7 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
     guardian_phone: '',
     skills: '',
     extracurricular_activities: '',
-    notes: '',
-    status: 'active'
+    notes: ''
   });
 
   const [errors, setErrors] = useState({});
@@ -46,7 +45,6 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
   ];
 
   const yearLevels = ['1st Year', '2nd Year', '3rd Year', '4th Year', '5th Year'];
-  const statuses = ['active', 'inactive', 'suspended'];
 
   // Initialize form data if editing
   useEffect(() => {
@@ -67,8 +65,7 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
         guardian_phone: student.guardian_phone || '',
         skills: student.skills || '',
         extracurricular_activities: student.extracurricular_activities || '',
-        notes: student.notes || '',
-        status: student.status || 'active'
+        notes: student.notes || ''
       });
     } else {
       setIsEditMode(false);
@@ -373,30 +370,6 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
                   {errors.gpa && (
                     <p className="mt-1 text-sm text-red-600">{errors.gpa}</p>
                   )}
-                </div>
-
-                {/* Status Field */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Status
-                  </label>
-                  <div className="relative">
-                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                      <FaToggleOn />
-                    </div>
-                    <select
-                      name="status"
-                      value={formData.status}
-                      onChange={handleChange}
-                      className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-orange-500 transition-all appearance-none"
-                    >
-                      {statuses.map(status => (
-                        <option key={status} value={status}>
-                          {status.charAt(0).toUpperCase() + status.slice(1)}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
                 </div>
 
             {/* Dates */}
