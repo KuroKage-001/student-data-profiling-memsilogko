@@ -1,5 +1,8 @@
 import { FaTimes, FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaGraduationCap, FaCalendar, FaUserFriends, FaFileAlt } from 'react-icons/fa';
 import { generateStudentPDF } from '../../../utils/admin-utilities/pdfGenerator';
+import ViolationsSection from './ViolationsSection';
+import AffiliationsSection from './AffiliationsSection';
+import AcademicHistorySection from './AcademicHistorySection';
 
 const StudentProfileModal = ({ student, onClose, onEdit, onGenerateReport }) => {
   if (!student) return null;
@@ -259,6 +262,16 @@ const StudentProfileModal = ({ student, onClose, onEdit, onGenerateReport }) => 
                   </div>
                 </div>
               )}
+
+              <div className="lg:col-span-3">
+                <ViolationsSection studentId={student.id} />
+              </div>
+              <div className="lg:col-span-3">
+                <AffiliationsSection studentId={student.id} />
+              </div>
+              <div className="lg:col-span-3">
+                <AcademicHistorySection studentId={student.id} />
+              </div>
             </div>
           </div>
         </div>

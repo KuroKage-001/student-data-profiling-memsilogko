@@ -5,6 +5,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ResearchMaterialController;
 use App\Http\Controllers\InstructionController;
+use App\Http\Controllers\StudentViolationController;
+use App\Http\Controllers\StudentAffiliationController;
+use App\Http\Controllers\StudentAcademicRecordController;
 
 // Handle preflight OPTIONS requests
 Route::options('{any}', function () {
@@ -45,4 +48,22 @@ Route::middleware(['auth:api', 'check.status'])->group(function () {
 Route::middleware(['auth:api', 'check.status'])->group(function () {
     Route::apiResource('students', App\Http\Controllers\StudentController::class);
     Route::get('students-statistics', [App\Http\Controllers\StudentController::class, 'statistics']);
+
+    // Student Violations Routes
+    Route::get('students/{student}/violations', [StudentViolationController::class, 'index']);
+    Route::post('students/{student}/violations', [StudentViolationController::class, 'store']);
+    Route::put('students/{student}/violations/{violation}', [StudentViolationController::class, 'update']);
+    Route::delete('students/{student}/violations/{violation}', [StudentViolationController::class, 'destroy']);
+
+    // Student Affiliations Routes
+    Route::get('students/{student}/affiliations', [StudentAffiliationController::class, 'index']);
+    Route::post('students/{student}/affiliations', [StudentAffiliationController::class, 'store']);
+    Route::put('students/{student}/affiliations/{affiliation}', [StudentAffiliationController::class, 'update']);
+    Route::delete('students/{student}/affiliations/{affiliation}', [StudentAffiliationController::class, 'destroy']);
+
+    // Student Academic Records Routes
+    Route::get('students/{student}/academic-records', [StudentAcademicRecordController::class, 'index']);
+    Route::post('students/{student}/academic-records', [StudentAcademicRecordController::class, 'store']);
+    Route::put('students/{student}/academic-records/{record}', [StudentAcademicRecordController::class, 'update']);
+    Route::delete('students/{student}/academic-records/{record}', [StudentAcademicRecordController::class, 'destroy']);
 });

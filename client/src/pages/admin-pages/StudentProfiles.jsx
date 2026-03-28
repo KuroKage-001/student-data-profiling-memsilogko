@@ -37,7 +37,8 @@ const StudentProfiles = () => {
     program: 'all',
     yearLevel: 'all',
     skills: '',
-    activities: ''
+    activities: '',
+    status: 'all'
   });
 
   // Build query params
@@ -48,6 +49,7 @@ const StudentProfiles = () => {
     if (filters.yearLevel !== 'all') params.year_level = filters.yearLevel;
     if (filters.skills) params.skills = filters.skills;
     if (filters.activities) params.activities = filters.activities;
+    if (filters.status !== 'all') params.status = filters.status;
     return params;
   }, [searchTerm, filters]);
 
@@ -230,7 +232,7 @@ const StudentProfiles = () => {
 
           {/* Filters Section */}
           <div className="mt-3 pt-3 border-t border-gray-200">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">
                   Program
@@ -284,6 +286,21 @@ const StudentProfiles = () => {
                   onChange={(e) => handleFilterChange('activities', e.target.value)}
                   className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent placeholder:text-gray-400"
                 />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  Status
+                </label>
+                <select
+                  value={filters.status}
+                  onChange={(e) => handleFilterChange('status', e.target.value)}
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                >
+                  <option value="all">All Statuses</option>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                  <option value="suspended">Suspended</option>
+                </select>
               </div>
             </div>
           </div>
