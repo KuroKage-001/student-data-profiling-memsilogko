@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { FaUser, FaLock, FaCheckCircle } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
+import { FaUser, FaLock, FaCheckCircle, FaArrowLeft } from 'react-icons/fa';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import AdminLayout from '../../layouts/AdminLayout';
@@ -10,6 +11,7 @@ import usePageTitle from '../../hooks/usePageTitle';
 
 const UserProfileSettings = () => {
   usePageTitle('Profile Settings');
+  const navigate = useNavigate();
   
   const [activeTab, setActiveTab] = useState('profile');
   const { profile, loading, updateProfile, changePassword } = useUserProfile();
@@ -53,9 +55,18 @@ const UserProfileSettings = () => {
   ];
 
   return (
-    <AdminLayout>
+    <AdminLayout hideSidebar>
       <ToastContainer />
       <div className="min-h-screen bg-linear-to-br from-gray-50 via-orange-50/30 to-gray-50 p-4 sm:p-6 lg:p-8">
+        {/* Back Button */}
+        <button
+          onClick={() => navigate('/admin/dashboard')}
+          className="group mb-6 flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-orange-50 text-gray-700 hover:text-orange-600 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border border-gray-200 hover:border-orange-300"
+        >
+          <FaArrowLeft className="text-sm group-hover:-translate-x-1 transition-transform duration-300" />
+          <span className="font-semibold text-sm">Back to Dashboard</span>
+        </button>
+
         {/* Header Section */}
         <div className="mb-8 sm:mb-10">
           <div className="flex items-center gap-3 mb-3">
