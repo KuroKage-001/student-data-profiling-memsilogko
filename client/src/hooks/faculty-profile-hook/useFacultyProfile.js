@@ -69,9 +69,7 @@ const useFacultyProfile = () => {
     setLoading(true);
     setError(null);
     try {
-      console.log('Creating faculty with data:', facultyData);
       const result = await facultyService.createFaculty(facultyData);
-      console.log('Create faculty result:', result);
       
       if (result.success) {
         await fetchFaculty();
@@ -81,7 +79,6 @@ const useFacultyProfile = () => {
         return { success: false, message: result.message, errors: result.errors };
       }
     } catch (err) {
-      console.error('Create faculty exception:', err);
       const message = 'An unexpected error occurred';
       setError(message);
       return { success: false, message };
@@ -95,9 +92,7 @@ const useFacultyProfile = () => {
     setLoading(true);
     setError(null);
     try {
-      console.log('Updating faculty ID:', id, 'with data:', facultyData);
       const result = await facultyService.updateFaculty(id, facultyData);
-      console.log('Update faculty result:', result);
       
       if (result.success) {
         await fetchFaculty();
@@ -107,7 +102,6 @@ const useFacultyProfile = () => {
         return { success: false, message: result.message, errors: result.errors };
       }
     } catch (err) {
-      console.error('Update faculty exception:', err);
       const message = 'An unexpected error occurred';
       setError(message);
       return { success: false, message };
@@ -121,9 +115,7 @@ const useFacultyProfile = () => {
     setLoading(true);
     setError(null);
     try {
-      console.log('Deleting faculty ID:', id);
       const result = await facultyService.deleteFaculty(id);
-      console.log('Delete faculty result:', result);
       
       if (result.success) {
         await fetchFaculty();
@@ -133,7 +125,6 @@ const useFacultyProfile = () => {
         return { success: false, message: result.message };
       }
     } catch (err) {
-      console.error('Delete faculty exception:', err);
       const message = 'An unexpected error occurred';
       setError(message);
       return { success: false, message };

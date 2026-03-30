@@ -158,7 +158,6 @@ export const exportFacultyToPDF = async (faculty) => {
 
     return { success: true, filename: link.download };
   } catch (error) {
-    console.error('PDF Export Error:', error);
     return { success: false, error: error.message };
   }
 };

@@ -52,7 +52,6 @@ export const generateFacultyPDF = async (faculty) => {
       logoData = await loadImageAsBase64('/ccs-logo.png');
     } catch (error) {
       // Logo loading failed, continue without logo
-      console.warn('Logo could not be loaded');
     }
     
     // Helper functions
