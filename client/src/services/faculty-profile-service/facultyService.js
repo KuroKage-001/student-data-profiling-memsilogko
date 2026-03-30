@@ -23,9 +23,7 @@ const facultyService = {
   // Get all faculty members with optional filters
   getFaculty: async (params = {}) => {
     try {
-      console.log('Fetching faculty with params:', params);
       const response = await axiosInstance.get('/faculty', { params });
-      console.log('Get faculty response:', response.data);
       
       // Normalize faculty data
       if (response.data.success && response.data.data) {
@@ -40,9 +38,6 @@ const facultyService = {
         data: response.data.data
       };
     } catch (error) {
-      console.error('Get faculty error:', error);
-      console.error('Error response:', error.response);
-      
       if (error.response?.status === 404) {
         return {
           success: false,
@@ -60,9 +55,7 @@ const facultyService = {
   // Get single faculty member by ID
   getFacultyById: async (id) => {
     try {
-      console.log('Fetching faculty by ID:', id);
       const response = await axiosInstance.get(`/faculty/${id}`);
-      console.log('Get faculty by ID response:', response.data);
       
       // Normalize faculty data
       if (response.data.success && response.data.data) {
@@ -73,9 +66,6 @@ const facultyService = {
         data: response.data.data
       };
     } catch (error) {
-      console.error('Get faculty error:', error);
-      console.error('Error response:', error.response);
-      
       if (error.response?.status === 404) {
         return {
           success: false,
@@ -93,10 +83,7 @@ const facultyService = {
   // Create new faculty member
   createFaculty: async (facultyData) => {
     try {
-      console.log('Creating faculty with data:', facultyData);
-      
       const response = await axiosInstance.post('/faculty', facultyData);
-      console.log('Create faculty response:', response.data);
       
       // Check if response indicates success
       if (response.data && response.data.success) {
@@ -118,10 +105,6 @@ const facultyService = {
         errors: response.data?.errors
       };
     } catch (error) {
-      console.error('Create faculty error:', error);
-      console.error('Error response:', error.response);
-      console.error('Request URL:', error.config?.url);
-      
       // Handle 404 specifically
       if (error.response?.status === 404) {
         return {
@@ -142,11 +125,7 @@ const facultyService = {
   // Update faculty member
   updateFaculty: async (id, facultyData) => {
     try {
-      console.log('Updating faculty with ID:', id);
-      console.log('Faculty data:', facultyData);
-      
       const response = await axiosInstance.put(`/faculty/${id}`, facultyData);
-      console.log('Update faculty response:', response.data);
       
       // Check if response indicates success
       if (response.data && response.data.success) {
@@ -168,12 +147,6 @@ const facultyService = {
         errors: response.data?.errors
       };
     } catch (error) {
-      console.error('Update faculty error:', error);
-      console.error('Error response:', error.response);
-      console.error('Error config:', error.config);
-      console.error('Request URL:', error.config?.url);
-      console.error('Request method:', error.config?.method);
-      
       // Handle timeout specifically
       if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
         return {
@@ -212,20 +185,13 @@ const facultyService = {
   // Delete faculty member
   deleteFaculty: async (id) => {
     try {
-      console.log('Deleting faculty with ID:', id);
-      
       const response = await axiosInstance.delete(`/faculty/${id}`);
-      console.log('Delete faculty response:', response.data);
       
       return {
         success: true,
         message: response.data.message || 'Faculty deleted successfully'
       };
     } catch (error) {
-      console.error('Delete faculty error:', error);
-      console.error('Error response:', error.response);
-      console.error('Request URL:', error.config?.url);
-      
       // Handle 404 specifically
       if (error.response?.status === 404) {
         return {
@@ -250,7 +216,6 @@ const facultyService = {
         data: response.data.data
       };
     } catch (error) {
-      console.error('Get statistics error:', error);
       return {
         success: false,
         message: error.response?.data?.message || 'Failed to fetch faculty statistics'

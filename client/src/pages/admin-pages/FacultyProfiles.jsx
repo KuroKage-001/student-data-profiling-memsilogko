@@ -1,13 +1,13 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import * as XLSX from 'xlsx';
 import AdminLayout from '../../layouts/AdminLayout';
 import { FacultyList, FacultyProfileModal, FacultyFormModal, DeleteConfirmModal } from '../../components/admin-components/faculty-profile-compo';
 import usePageTitle from '../../hooks/usePageTitle';
 import useToast from '../../hooks/useToast';
 import useFacultyProfile from '../../hooks/faculty-profile-hook/useFacultyProfile';
-import { generateFacultyPDF } from '../../utils/admin-utilities/faculty-profile-utils/facultyReportPdf.jsx';
+import { generateFacultyPDF } from '../../components/admin-components/faculty-profile-compo/facultyReportPdf.jsx';
+import { exportFacultyToExcel, SEARCH_DEBOUNCE_DELAY } from '../../utils/admin-utilities/faculty-profile-utils';
 import { FaChalkboardTeacher, FaSearch, FaPlus, FaFileExport } from 'react-icons/fa';
 
 const FacultyProfiles = () => {
@@ -50,16 +50,15 @@ const FacultyProfiles = () => {
     fetchFaculty();
   }, []);
 
-  // Handle search
+  // Handle search with debounce
   useEffect(() => {
     const searchTimeout = setTimeout(() => {
       try {
         searchFaculty(searchTerm, filters);
       } catch (err) {
-        console.error('Search error:', err);
         showError('Failed to search faculty');
       }
-    }, 500);
+    }, SEARCH_DEBOUNCE_DELAY);
 
     return () => clearTimeout(searchTimeout);
   }, [searchTerm, filters]);
@@ -116,24 +115,15 @@ const FacultyProfiles = () => {
   };
 
   const handleSubmitFaculty = async (facultyData, isEdit) => {
-    console.log('=== FACULTY SUBMIT DEBUG ===');
-    console.log('Is Edit Mode:', isEdit);
-    console.log('Selected Faculty ID:', selectedFaculty?.id);
-    console.log('Faculty Data:', JSON.stringify(facultyData, null, 2));
-    
     setServerErrors(null);
     
     try {
       let result;
       
       if (isEdit) {
-        console.log('Calling updateFaculty with ID:', selectedFaculty.id);
         result = await updateFaculty(selectedFaculty.id, facultyData);
-        console.log('Update result:', JSON.stringify(result, null, 2));
       } else {
-        console.log('Calling createFaculty');
         result = await createFaculty(facultyData);
-        console.log('Create result:', JSON.stringify(result, null, 2));
       }
       
       // Handle successful response
@@ -145,7 +135,6 @@ const FacultyProfiles = () => {
       
       // Handle validation errors from server
       if (result.errors) {
-        console.error('Server validation errors:', result.errors);
         setServerErrors(result.errors);
         
         // Show specific error message or generic validation error
@@ -162,7 +151,6 @@ const FacultyProfiles = () => {
       }
       
     } catch (err) {
-      console.error('Unexpected error:', err);
       showError(err.message || 'An unexpected error occurred while saving the faculty');
     }
   };
@@ -179,7 +167,6 @@ const FacultyProfiles = () => {
         showError(errorMessage);
       }
     } catch (err) {
-      console.error('Delete error:', err);
       showError(err.message || 'An unexpected error occurred while deleting the faculty');
     }
   };
@@ -191,64 +178,9 @@ const FacultyProfiles = () => {
         return;
       }
       
-      // Prepare data for export
-      const exportData = faculty.map((member, index) => ({
-        'No.': index + 1,
-        'Faculty ID': member.faculty_id || member.id,
-        'Name': member.name,
-        'Email': member.email || 'N/A',
-        'Phone': member.phone || 'N/A',
-        'Department': member.department || 'N/A',
-        'Position': member.position || 'N/A',
-        'Specialization': member.specialization || 'N/A',
-        'Office': member.office || 'N/A',
-        'Status': member.status ? member.status.charAt(0).toUpperCase() + member.status.slice(1) : 'N/A',
-        'Hire Date': member.hire_date || member.hireDate 
-          ? new Date(member.hire_date || member.hireDate).toLocaleDateString('en-US', { 
-              year: 'numeric', 
-              month: 'short', 
-              day: 'numeric' 
-            })
-          : 'N/A',
-        'Address': member.address || 'N/A',
-        'Notes': member.notes || 'N/A'
-      }));
-
-      // Create workbook and worksheet
-      const wb = XLSX.utils.book_new();
-      const ws = XLSX.utils.json_to_sheet(exportData);
-
-      // Set column widths
-      const colWidths = [
-        { wch: 5 },  // No.
-        { wch: 12 }, // Faculty ID
-        { wch: 25 }, // Name
-        { wch: 30 }, // Email
-        { wch: 15 }, // Phone
-        { wch: 25 }, // Department
-        { wch: 20 }, // Position
-        { wch: 25 }, // Specialization
-        { wch: 12 }, // Office
-        { wch: 10 }, // Status
-        { wch: 15 }, // Hire Date
-        { wch: 30 }, // Address
-        { wch: 40 }  // Notes
-      ];
-      ws['!cols'] = colWidths;
-
-      // Add worksheet to workbook
-      XLSX.utils.book_append_sheet(wb, ws, 'Faculty List');
-
-      // Generate filename with current date
-      const date = new Date().toISOString().split('T')[0];
-      const filename = `Faculty_List_${date}.xlsx`;
-
-      // Write file
-      XLSX.writeFile(wb, filename);
-
+      const filename = exportFacultyToExcel(faculty);
       showSuccess(`Faculty list exported successfully as ${filename}`);
     } catch (err) {
-      console.error('Export error:', err);
       showError(err.message || 'Failed to export faculty list');
     }
   };
@@ -258,7 +190,6 @@ const FacultyProfiles = () => {
       await generateFacultyPDF(faculty);
       showSuccess(`PDF report generated for ${faculty.name}`);
     } catch (err) {
-      console.error('Report generation error:', err);
       showError('Failed to generate PDF report');
     }
   };
@@ -271,7 +202,6 @@ const FacultyProfiles = () => {
       }));
       clearError(); // Clear any previous errors when filters change
     } catch (err) {
-      console.error('Filter change error:', err);
       showError('Failed to apply filter');
     }
   };
@@ -283,11 +213,11 @@ const FacultyProfiles = () => {
   return (
     <AdminLayout>
       <ToastContainer />
-      <div className="h-[calc(100vh-4rem)] overflow-hidden bg-gradient-to-br from-gray-50 via-orange-50/30 to-gray-50 p-4 sm:p-6 lg:p-8 flex flex-col">
+      <div className="h-[calc(100vh-4rem)] overflow-hidden bg-linear-to-br from-gray-50 via-orange-50/30 to-gray-50 p-4 sm:p-6 lg:p-8 flex flex-col">
         {/* Header Section with Enhanced Design */}
         <div className="mb-6 shrink-0">
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
+            <div className="w-10 h-10 bg-linear-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
               <FaChalkboardTeacher className="text-white text-lg" />
             </div>
             <div>
@@ -322,7 +252,7 @@ const FacultyProfiles = () => {
             <div className="flex flex-wrap gap-2 w-full lg:w-auto">
               <button 
                 onClick={handleAddFaculty}
-                className="group relative bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white px-4 py-2.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 font-semibold shadow-md hover:shadow-lg text-sm">
+                className="group relative bg-linear-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white px-4 py-2.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 font-semibold shadow-md hover:shadow-lg text-sm">
                 <FaPlus className="text-xs" />
                 <span>Add Faculty</span>
               </button>
