@@ -3,5 +3,11 @@
     "env": {
       "VITE_API_URL": "https://student-profiling-api-03.onrender.com/api"
     }
-  }
+  },
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
 }
