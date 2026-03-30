@@ -13,31 +13,31 @@ const DashboardStats = () => {
   const stats = [
     {
       title: 'Total Students',
-      value: isLoading ? '...' : formatNumber(statsData?.total_students || 0),
+      value: isLoading ? '...' : formatNumber(statsData?.students?.total_students || 0),
       icon: FaUserGraduate,
       iconBg: 'bg-orange-100',
       iconColor: 'text-orange-600'
     },
     {
       title: 'Active Faculty',
-      value: '89',
+      value: isLoading ? '...' : formatNumber(statsData?.faculty?.active || 0),
       icon: FaChalkboardTeacher,
       iconBg: 'bg-blue-100',
       iconColor: 'text-blue-600'
     },
     {
-      title: 'Profiles Completed',
-      value: '1,156',
+      title: 'Total Faculty',
+      value: isLoading ? '...' : formatNumber(statsData?.faculty?.total || 0),
       icon: FaClipboardCheck,
       iconBg: 'bg-green-100',
       iconColor: 'text-green-600'
     },
     {
-      title: 'Pending Reviews',
-      value: '23',
+      title: 'Faculty on Leave',
+      value: isLoading ? '...' : formatNumber(statsData?.faculty?.on_leave || 0),
       icon: FaClock,
-      iconBg: 'bg-red-100',
-      iconColor: 'text-red-600'
+      iconBg: 'bg-yellow-100',
+      iconColor: 'text-yellow-600'
     }
   ];
 

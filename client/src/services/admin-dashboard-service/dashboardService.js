@@ -2,14 +2,22 @@ import axiosInstance from '../login-service/axiosConfig';
 
 class DashboardService {
   /**
-   * Get dashboard statistics
+   * Get dashboard statistics (students and faculty combined)
    */
   async getDashboardStats() {
     try {
-      const response = await axiosInstance.get('/students-statistics');
+      // Fetch both student and faculty statistics in parallel
+      const [studentsResponse, facultyResponse] = await Promise.all([
+        axiosInstance.get('/students-statistics'),
+        axiosInstance.get('/faculty-statistics')
+      ]);
+
       return {
         success: true,
-        data: response.data.data
+        data: {
+          students: studentsResponse.data.data,
+          faculty: facultyResponse.data.data
+        }
       };
     } catch (error) {
       console.error('Get dashboard stats error:', error);
