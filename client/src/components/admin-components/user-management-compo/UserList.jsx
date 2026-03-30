@@ -31,14 +31,6 @@ const UserList = ({ users, searchTerm, onEditUser, onDeleteUser, loading }) => {
     setCurrentPage(Math.max(1, Math.min(page, totalPages)));
   };
 
-  if (loading) {
-    return (
-      <div className="h-full flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
-      </div>
-    );
-  }
-
   return (
     <div className="h-full flex flex-col">
       {/* Desktop Table View */}

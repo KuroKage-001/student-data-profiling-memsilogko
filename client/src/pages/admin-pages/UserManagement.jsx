@@ -6,6 +6,7 @@ import UserList from '../../components/admin-components/user-management-compo/Us
 import UserFormModal from '../../components/admin-components/user-management-compo/UserFormModal';
 import DeleteConfirmModal from '../../components/admin-components/user-management-compo/DeleteConfirmModal';
 import { useUsers, useCreateUser, useUpdateUser, useDeleteUser } from '../../hooks/user-management-hook';
+import { UserManagementSkeleton } from '../../layouts/skeleton-loading';
 import useToast from '../../hooks/useToast';
 import usePageTitle from '../../hooks/usePageTitle';
 import { FaUsers, FaSearch, FaPlus } from 'react-icons/fa';
@@ -13,7 +14,7 @@ import { FaUsers, FaSearch, FaPlus } from 'react-icons/fa';
 const UserManagement = () => {
   usePageTitle('User Management');
   
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState(''); 
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [userToEdit, setUserToEdit] = useState(null);
@@ -89,6 +90,16 @@ const UserManagement = () => {
     setUserToDelete(null);
   };
 
+  // Show skeleton loading while data is being fetched
+  if (isLoading) {
+    return (
+      <AdminLayout>
+        <ToastContainer />
+        <UserManagementSkeleton />
+      </AdminLayout>
+    );
+  }
+
   return (
     <AdminLayout>
       <ToastContainer />
@@ -96,7 +107,7 @@ const UserManagement = () => {
         {/* Header Section */}
         <div className="mb-6 shrink-0">
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
+            <div className="w-10 h-10 bg-linear-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
               <FaUsers className="text-white text-lg" />
             </div>
             <div>
@@ -131,7 +142,7 @@ const UserManagement = () => {
             <div className="flex flex-wrap gap-2 w-full lg:w-auto">
               <button
                 onClick={handleAddUser}
-                className="group relative bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white px-4 py-2.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 font-semibold shadow-md hover:shadow-lg text-sm"
+                className="group relative bg-linear-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white px-4 py-2.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 font-semibold shadow-md hover:shadow-lg text-sm"
               >
                 <FaPlus className="text-xs" />
                 <span>Add User</span>
