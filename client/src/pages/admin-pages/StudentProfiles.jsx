@@ -19,11 +19,6 @@ import { exportToExcel } from '../../utils/admin-utilities/student-profile-utils
 import { generateStudentPDF } from '../../utils/admin-utilities/pdfGenerator';
 import { FaUserGraduate, FaSearch, FaPlus, FaFileExport } from 'react-icons/fa';
 
-// Import auth debug utility (for development)
-if (import.meta.env.DEV) {
-  import('../../utils/admin-utilities/authDebug');
-}
-
 const StudentProfiles = () => {
   usePageTitle('Student Profiles');
   
