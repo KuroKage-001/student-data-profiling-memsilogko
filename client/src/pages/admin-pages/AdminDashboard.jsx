@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../../layouts/AdminLayout';
 import DashboardStats from '../../components/admin-components/dashboard/DashboardStats';
+import UniversityMap from '../../components/admin-components/dashboard/UniversityMap';
 import usePageTitle from '../../hooks/usePageTitle';
 import { useDashboardStats } from '../../hooks/admin-dashboard-hook';
 import { AdminDashboardSkeleton } from '../../layouts/skeleton-loading';
@@ -115,6 +116,11 @@ const AdminDashboard = () => {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* University Location Map */}
+        <div className="mb-8 sm:mb-10">
+          <UniversityMap />
         </div>
       </div>
     </AdminLayout>

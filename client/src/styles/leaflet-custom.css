@@ -1,0 +1,34 @@
+/* Custom Leaflet Marker Styles */
+.custom-marker {
+  background: transparent;
+  border: none;
+}
+
+/* Leaflet popup customization */
+.leaflet-popup-content-wrapper {
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.leaflet-popup-content {
+  margin: 0;
+  min-width: 200px;
+}
+
+.leaflet-popup-tip {
+  background: white;
+}
+
+/* Animation for marker */
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-bounce {
+  animation: bounce 2s infinite;
+}
