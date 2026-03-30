@@ -3,6 +3,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import AdminLayout from '../../layouts/AdminLayout';
 import { FacultyList, FacultyProfileModal, FacultyFormModal, DeleteConfirmModal } from '../../components/admin-components/faculty-profile-compo';
+import { FacultyProfilesSkeleton } from '../../layouts/skeleton-loading';
 import usePageTitle from '../../hooks/usePageTitle';
 import useToast from '../../hooks/useToast';
 import useFacultyProfile from '../../hooks/faculty-profile-hook/useFacultyProfile';
@@ -209,6 +210,16 @@ const FacultyProfiles = () => {
   const departments = getDepartments();
   const positions = getPositions();
   const statuses = getStatuses();
+
+  // Show skeleton loading while data is being fetched initially
+  if (loading && !faculty.length) {
+    return (
+      <AdminLayout>
+        <ToastContainer />
+        <FacultyProfilesSkeleton />
+      </AdminLayout>
+    );
+  }
 
   return (
     <AdminLayout>

@@ -5,6 +5,8 @@ export { default as UserManagementSkeleton } from './UserManagementSkeleton';
 export { default as UserListSkeleton } from './UserListSkeleton';
 export { default as StudentProfilesSkeleton } from './StudentProfilesSkeleton';
 export { default as StudentListSkeleton } from './StudentListSkeleton';
+export { default as FacultyProfilesSkeleton } from './FacultyProfilesSkeleton';
+export { default as FacultyListSkeleton } from './FacultyListSkeleton';
 export { default as UserProfileSettingsSkeleton } from './UserProfileSettingsSkeleton';
 export { default as ProfileTabSkeleton } from './ProfileTabSkeleton';
 export { default as PasswordTabSkeleton } from './PasswordTabSkeleton';

@@ -1,0 +1,53 @@
+import FacultyListSkeleton from './FacultyListSkeleton';
+
+const FacultyProfilesSkeleton = () => {
+  return (
+    <div className="h-[calc(100vh-4rem)] overflow-hidden bg-linear-to-br from-gray-50 via-orange-50/30 to-gray-50 p-4 sm:p-6 lg:p-8 flex flex-col">
+      {/* Header Section Skeleton */}
+      <div className="mb-6 shrink-0">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-10 h-10 bg-gray-200 rounded-xl animate-pulse"></div>
+          <div>
+            <div className="h-8 bg-gray-300 rounded w-48 animate-pulse"></div>
+          </div>
+        </div>
+        <div className="ml-13 h-5 bg-gray-200 rounded w-80 animate-pulse"></div>
+      </div>
+
+      {/* Search and Actions Section Skeleton */}
+      <div className="bg-white rounded-2xl p-4 shadow-lg border border-gray-100 mb-6 shrink-0">
+        <div className="space-y-3 lg:space-y-0 lg:flex lg:gap-3 lg:items-center lg:justify-between">
+          {/* Search Input Skeleton */}
+          <div className="relative w-full lg:flex-1 lg:max-w-md">
+            <div className="h-10 bg-gray-200 rounded-xl animate-pulse"></div>
+          </div>
+          
+          {/* Action Buttons Skeleton */}
+          <div className="flex flex-wrap gap-2 w-full lg:w-auto">
+            <div className="h-10 bg-gray-200 rounded-xl w-32 animate-pulse"></div>
+            <div className="h-10 bg-gray-200 rounded-xl w-24 animate-pulse"></div>
+          </div>
+        </div>
+
+        {/* Filters Section Skeleton */}
+        <div className="mt-3 pt-3 border-t border-gray-200">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {[1, 2, 3].map((index) => (
+              <div key={index}>
+                <div className="h-3 bg-gray-200 rounded w-16 mb-1 animate-pulse"></div>
+                <div className="h-9 bg-gray-200 rounded-lg animate-pulse"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Faculty List Skeleton - Scrollable */}
+      <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden flex-1 flex flex-col min-h-0">
+        <FacultyListSkeleton />
+      </div>
+    </div>
+  );
+};
+
+export default FacultyProfilesSkeleton;
