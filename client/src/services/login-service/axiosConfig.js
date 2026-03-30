@@ -39,7 +39,13 @@ axiosInstance.interceptors.response.use(
   async (error) => {
     // Handle network errors (no response from server)
     if (!error.response) {
-      console.error('Network error - no response from server:', error.message);
+      if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
+        console.error('Server timeout - backend server may not be running:', error.message);
+        error.message = 'Backend server is not responding. Please ensure the Laravel server is running on port 8000.';
+      } else {
+        console.error('Network error - no response from server:', error.message);
+        error.message = 'Cannot connect to backend server. Please check if the server is running.';
+      }
       return Promise.reject(error);
     }
 

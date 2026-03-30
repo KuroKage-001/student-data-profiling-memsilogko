@@ -10,11 +10,6 @@ import useToast from '../../hooks/useToast';
 import { exportToCSV } from '../../utils/admin-utilities/student-profile-utils';
 import { FaUserGraduate, FaSearch, FaPlus, FaFileExport, FaSync } from 'react-icons/fa';
 
-// Import auth debug utility (for development)
-if (import.meta.env.DEV) {
-  import('../../utils/admin-utilities/authDebug');
-}
-
 const StudentProfiles = () => {
   usePageTitle('Student Profiles');
   
