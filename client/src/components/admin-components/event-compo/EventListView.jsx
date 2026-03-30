@@ -80,10 +80,10 @@ const EventListView = ({ events, onEdit, onDelete, getStatusColor }) => {
       {/* Desktop Table View */}
       <div className="hidden lg:block overflow-x-auto flex-1">
         <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50 sticky top-0 z-10">
+          <thead className="bg-linear-to-r from-gray-50 to-gray-100 sticky top-0 z-10 shadow-sm">
             <tr>
               <th 
-                className="px-4 xl:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                className="px-4 xl:px-6 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wide cursor-pointer hover:bg-gray-200 transition-colors"
                 onClick={() => handleSort('title')}
               >
                 <div className="flex items-center gap-2">
@@ -92,7 +92,7 @@ const EventListView = ({ events, onEdit, onDelete, getStatusColor }) => {
                 </div>
               </th>
               <th 
-                className="px-4 xl:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                className="px-4 xl:px-6 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wide cursor-pointer hover:bg-gray-200 transition-colors"
                 onClick={() => handleSort('date')}
               >
                 <div className="flex items-center gap-2">
@@ -101,7 +101,7 @@ const EventListView = ({ events, onEdit, onDelete, getStatusColor }) => {
                 </div>
               </th>
               <th 
-                className="px-4 xl:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                className="px-4 xl:px-6 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wide cursor-pointer hover:bg-gray-200 transition-colors"
                 onClick={() => handleSort('location')}
               >
                 <div className="flex items-center gap-2">
@@ -110,7 +110,7 @@ const EventListView = ({ events, onEdit, onDelete, getStatusColor }) => {
                 </div>
               </th>
               <th 
-                className="px-4 xl:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                className="px-4 xl:px-6 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wide cursor-pointer hover:bg-gray-200 transition-colors"
                 onClick={() => handleSort('type')}
               >
                 <div className="flex items-center gap-2">
@@ -119,7 +119,7 @@ const EventListView = ({ events, onEdit, onDelete, getStatusColor }) => {
                 </div>
               </th>
               <th 
-                className="px-4 xl:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                className="px-4 xl:px-6 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wide cursor-pointer hover:bg-gray-200 transition-colors"
                 onClick={() => handleSort('status')}
               >
                 <div className="flex items-center gap-2">
@@ -128,7 +128,7 @@ const EventListView = ({ events, onEdit, onDelete, getStatusColor }) => {
                 </div>
               </th>
               <th 
-                className="px-4 xl:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                className="px-4 xl:px-6 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wide cursor-pointer hover:bg-gray-200 transition-colors"
                 onClick={() => handleSort('attendees')}
               >
                 <div className="flex items-center gap-2">
@@ -136,42 +136,42 @@ const EventListView = ({ events, onEdit, onDelete, getStatusColor }) => {
                   {getSortIcon('attendees')}
                 </div>
               </th>
-              <th className="px-4 xl:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              <th className="px-4 xl:px-6 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wide">Actions</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {currentEvents.map((event) => (
-              <tr key={event.id} className="hover:bg-gray-50">
-                <td className="px-4 xl:px-6 py-4">
+              <tr key={event.id} className="hover:bg-orange-50/30 transition-colors">
+                <td className="px-4 xl:px-6 py-5">
                   <div>
-                    <div className="text-sm font-medium text-black">{event.title}</div>
-                    <div className="text-sm text-gray-500 mt-1">{event.description}</div>
+                    <div className="text-base font-bold text-gray-900">{event.title}</div>
+                    <div className="text-sm text-gray-600 mt-1">{event.description}</div>
                   </div>
                 </td>
-                <td className="px-4 xl:px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-black">{event.date}</div>
-                  <div className="text-sm text-gray-500">{event.time}</div>
+                <td className="px-4 xl:px-6 py-5 whitespace-nowrap">
+                  <div className="text-base text-gray-900 font-medium">{event.date}</div>
+                  <div className="text-sm text-gray-600 mt-0.5">{event.time}</div>
                 </td>
-                <td className="px-4 xl:px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-black">{event.location}</div>
+                <td className="px-4 xl:px-6 py-5 whitespace-nowrap">
+                  <div className="text-base text-gray-800 font-medium">{event.location}</div>
                 </td>
-                <td className="px-4 xl:px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-black">{event.type}</div>
+                <td className="px-4 xl:px-6 py-5 whitespace-nowrap">
+                  <div className="text-base text-gray-800 font-medium">{event.type}</div>
                 </td>
-                <td className="px-4 xl:px-6 py-4 whitespace-nowrap">
-                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(event.status)}`}>
+                <td className="px-4 xl:px-6 py-5 whitespace-nowrap">
+                  <span className={`inline-flex px-3 py-1.5 text-sm font-bold rounded-full ${getStatusColor(event.status)}`}>
                     {event.status}
                   </span>
                 </td>
-                <td className="px-4 xl:px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-black">{event.attendees}</div>
+                <td className="px-4 xl:px-6 py-5 whitespace-nowrap">
+                  <div className="text-base text-gray-900 font-bold">{event.attendees}</div>
                 </td>
-                <td className="px-4 xl:px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <td className="px-4 xl:px-6 py-5 whitespace-nowrap text-sm font-medium">
                   <div className="flex flex-col xl:flex-row xl:space-x-3 space-y-1 xl:space-y-0">
-                    <button onClick={() => onEdit(event)} className="text-orange-600 hover:text-orange-700 transition-colors text-left">
+                    <button onClick={() => onEdit(event)} className="px-3 py-1.5 text-sm text-orange-600 hover:text-white hover:bg-orange-600 border border-orange-600 rounded-lg transition-all duration-200 font-semibold text-left">
                       Edit
                     </button>
-                    <button onClick={() => onDelete(event)} className="text-red-600 hover:text-red-700 transition-colors text-left">
+                    <button onClick={() => onDelete(event)} className="px-3 py-1.5 text-sm text-red-600 hover:text-white hover:bg-red-600 border border-red-600 rounded-lg transition-all duration-200 font-semibold text-left">
                       Delete
                     </button>
                   </div>
@@ -185,36 +185,36 @@ const EventListView = ({ events, onEdit, onDelete, getStatusColor }) => {
       {/* Mobile Card View */}
       <div className="lg:hidden flex-1 overflow-auto">
         {currentEvents.map((event) => (
-          <div key={event.id} className="border-b border-gray-200 last:border-b-0 p-4 hover:bg-gray-50">
+          <div key={event.id} className="border-b border-gray-200 last:border-b-0 p-5 hover:bg-orange-50/30 transition-colors">
             <div className="flex items-start justify-between mb-3">
               <div className="flex-1">
-                <h3 className="text-base font-semibold text-black mb-1">{event.title}</h3>
-                <p className="text-sm text-gray-600 mb-2 line-clamp-2">{event.description}</p>
-                <div className="space-y-1 text-sm">
-                  <div className="flex items-center text-gray-700">
-                    <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <h3 className="text-base font-bold text-gray-900 mb-1">{event.title}</h3>
+                <p className="text-sm text-gray-600 mb-3 line-clamp-2">{event.description}</p>
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center text-gray-800">
+                    <svg className="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
-                    <span>{event.date} • {event.time}</span>
+                    <span className="font-medium">{event.date} • {event.time}</span>
                   </div>
-                  <div className="flex items-center text-gray-700">
-                    <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="flex items-center text-gray-800">
+                    <svg className="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
-                    <span>{event.location}</span>
+                    <span className="font-medium">{event.location}</span>
                   </div>
                 </div>
               </div>
-              <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(event.status)} ml-2 shrink-0`}>
+              <span className={`inline-flex px-2.5 py-1 text-sm font-bold rounded-full ${getStatusColor(event.status)} ml-2 shrink-0`}>
                 {event.status}
               </span>
             </div>
-            <div className="flex justify-end space-x-3 text-sm">
-              <button onClick={() => onEdit(event)} className="text-orange-600 hover:text-orange-700 transition-colors font-medium">
+            <div className="flex justify-end space-x-2 text-sm mt-3 pt-3 border-t border-gray-200">
+              <button onClick={() => onEdit(event)} className="px-3 py-1.5 text-orange-600 hover:text-white hover:bg-orange-600 border border-orange-600 rounded-lg transition-all duration-200 font-semibold">
                 Edit
               </button>
-              <button onClick={() => onDelete(event.id)} className="text-red-600 hover:text-red-700 transition-colors font-medium">
+              <button onClick={() => onDelete(event.id)} className="px-3 py-1.5 text-red-600 hover:text-white hover:bg-red-600 border border-red-600 rounded-lg transition-all duration-200 font-semibold">
                 Delete
               </button>
             </div>
@@ -225,8 +225,8 @@ const EventListView = ({ events, onEdit, onDelete, getStatusColor }) => {
       {sortedEvents.length === 0 && (
         <div className="text-center py-12 px-4">
           <FaCalendarAlt className="mx-auto text-gray-300 text-5xl mb-4" />
-          <p className="text-gray-500 text-lg">No events found</p>
-          <p className="text-gray-400 text-sm mt-1">Create your first event to get started</p>
+          <p className="text-gray-500 text-lg font-medium">No events found</p>
+          <p className="text-gray-400 text-base mt-1">Create your first event to get started</p>
         </div>
       )}
 

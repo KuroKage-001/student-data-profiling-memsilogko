@@ -53,62 +53,62 @@ const StudentList = ({ searchTerm, onViewStudent, onEditStudent, onDeleteStudent
       {/* Desktop Table View */}
       <div className="hidden lg:block flex-1 overflow-auto">
         <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50 sticky top-0 z-10">
+          <thead className="bg-linear-to-r from-gray-50 to-gray-100 sticky top-0 z-10 shadow-sm">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              <th className="px-6 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wide">
                 Student
               </th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              <th className="px-6 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wide">
                 Program
               </th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              <th className="px-6 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wide">
                 Year
               </th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              <th className="px-6 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wide">
                 GPA
               </th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              <th className="px-6 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wide">
                 Actions
               </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {currentStudents.map((student) => (
-              <tr key={student.id} className="hover:bg-gray-50 transition-colors">
-                <td className="px-6 py-4 whitespace-nowrap">
+              <tr key={student.id} className="hover:bg-orange-50/30 transition-colors">
+                <td className="px-6 py-5 whitespace-nowrap">
                   <div>
-                    <div className="text-sm font-semibold text-gray-900">{student.name}</div>
-                    <div className="text-sm text-gray-500">{student.student_id || student.id}</div>
+                    <div className="text-base font-bold text-gray-900">{student.name}</div>
+                    <div className="text-sm text-gray-600 mt-0.5">{student.student_id || student.id}</div>
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-700">{student.program || 'N/A'}</div>
+                <td className="px-6 py-5 whitespace-nowrap">
+                  <div className="text-base text-gray-800 font-medium">{student.program || 'N/A'}</div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-700">{student.year_level || 'N/A'}</div>
+                <td className="px-6 py-5 whitespace-nowrap">
+                  <div className="text-base text-gray-800 font-medium">{student.year_level || 'N/A'}</div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900">
+                <td className="px-6 py-5 whitespace-nowrap">
+                  <div className="text-base font-bold text-gray-900">
                     {formatGPA(student.gpa)}
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <td className="px-6 py-5 whitespace-nowrap text-sm font-medium">
                   <div className="flex items-center space-x-3">
                     <button
                       onClick={() => onViewStudent(student)}
-                      className="text-blue-600 hover:text-blue-700 transition-colors font-medium"
+                      className="px-3 py-1.5 text-sm text-blue-600 hover:text-white hover:bg-blue-600 border border-blue-600 rounded-lg transition-all duration-200 font-semibold"
                     >
                       View
                     </button>
                     <button
                       onClick={() => onEditStudent(student)}
-                      className="text-orange-600 hover:text-orange-700 transition-colors font-medium"
+                      className="px-3 py-1.5 text-sm text-orange-600 hover:text-white hover:bg-orange-600 border border-orange-600 rounded-lg transition-all duration-200 font-semibold"
                     >
                       Edit
                     </button>
                     <button
                       onClick={() => onDeleteStudent(student)}
-                      className="text-red-600 hover:text-red-700 transition-colors font-medium"
+                      className="px-3 py-1.5 text-sm text-red-600 hover:text-white hover:bg-red-600 border border-red-600 rounded-lg transition-all duration-200 font-semibold"
                     >
                       Delete
                     </button>
@@ -123,43 +123,43 @@ const StudentList = ({ searchTerm, onViewStudent, onEditStudent, onDeleteStudent
       {/* Mobile Card View */}
       <div className="lg:hidden flex-1 overflow-auto">
         {currentStudents.map((student) => (
-          <div key={student.id} className="border-b border-gray-200 last:border-b-0 p-4 hover:bg-gray-50 transition-colors">
-            <div className="flex items-start justify-between gap-3 mb-2">
+          <div key={student.id} className="border-b border-gray-200 last:border-b-0 p-5 hover:bg-orange-50/30 transition-colors">
+            <div className="flex items-start justify-between gap-3 mb-3">
               <div className="flex-1 min-w-0">
-                <h3 className="text-sm font-semibold text-gray-900 mb-0.5 truncate">{student.name}</h3>
-                <p className="text-xs text-gray-500 mb-2 truncate">{student.student_id || student.id}</p>
-                <div className="flex flex-wrap gap-1.5">
-                  <span className="text-xs text-gray-700">{student.program || 'N/A'}</span>
-                  <span className="text-xs text-gray-400">•</span>
-                  <span className="text-xs text-gray-700">{student.year_level || 'N/A'}</span>
+                <h3 className="text-base font-bold text-gray-900 mb-1 truncate">{student.name}</h3>
+                <p className="text-sm text-gray-600 mb-2 truncate">{student.student_id || student.id}</p>
+                <div className="flex flex-wrap gap-2">
+                  <span className="text-sm text-gray-800 font-medium">{student.program || 'N/A'}</span>
+                  <span className="text-sm text-gray-400">•</span>
+                  <span className="text-sm text-gray-800 font-medium">{student.year_level || 'N/A'}</span>
                 </div>
               </div>
             </div>
             
-            <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-100">
-              <div className="text-xs text-gray-600">
+            <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-200">
+              <div className="text-sm text-gray-700">
                 <span className="text-gray-600">GPA: </span>
-                <span className="font-semibold text-gray-900">
+                <span className="font-bold text-gray-900">
                   {formatGPA(student.gpa)}
                 </span>
               </div>
               
-              <div className="flex space-x-3 text-xs">
+              <div className="flex space-x-2 text-sm">
                 <button
                   onClick={() => onViewStudent(student)}
-                  className="text-blue-600 hover:text-blue-700 transition-colors font-medium"
+                  className="px-3 py-1.5 text-blue-600 hover:text-white hover:bg-blue-600 border border-blue-600 rounded-lg transition-all duration-200 font-semibold"
                 >
                   View
                 </button>
                 <button
                   onClick={() => onEditStudent(student)}
-                  className="text-orange-600 hover:text-orange-700 transition-colors font-medium"
+                  className="px-3 py-1.5 text-orange-600 hover:text-white hover:bg-orange-600 border border-orange-600 rounded-lg transition-all duration-200 font-semibold"
                 >
                   Edit
                 </button>
                 <button
                   onClick={() => onDeleteStudent(student)}
-                  className="text-red-600 hover:text-red-700 transition-colors font-medium"
+                  className="px-3 py-1.5 text-red-600 hover:text-white hover:bg-red-600 border border-red-600 rounded-lg transition-all duration-200 font-semibold"
                 >
                   Delete
                 </button>
@@ -171,7 +171,7 @@ const StudentList = ({ searchTerm, onViewStudent, onEditStudent, onDeleteStudent
 
       {filteredStudents.length === 0 && (
         <div className="h-full flex items-center justify-center">
-          <p className="text-gray-500 text-sm">No students found matching your search criteria.</p>
+          <p className="text-gray-500 text-base font-medium">No students found matching your search criteria.</p>
         </div>
       )}
 

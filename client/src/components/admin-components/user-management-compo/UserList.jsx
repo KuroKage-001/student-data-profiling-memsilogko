@@ -36,60 +36,60 @@ const UserList = ({ users, searchTerm, onEditUser, onDeleteUser, loading }) => {
       {/* Desktop Table View */}
       <div className="hidden lg:block flex-1 overflow-auto">
         <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50 sticky top-0 z-10">
+          <thead className="bg-linear-to-r from-gray-50 to-gray-100 sticky top-0 z-10 shadow-sm">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              <th className="px-6 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wide">
                 User
               </th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              <th className="px-6 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wide">
                 Role
               </th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              <th className="px-6 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wide">
                 Status
               </th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              <th className="px-6 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wide">
                 Created At
               </th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              <th className="px-6 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wide">
                 Actions
               </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {currentUsers.map((user) => (
-              <tr key={user.id} className="hover:bg-gray-50 transition-colors">
-                <td className="px-6 py-4 whitespace-nowrap">
+              <tr key={user.id} className="hover:bg-orange-50/30 transition-colors">
+                <td className="px-6 py-5 whitespace-nowrap">
                   <div>
-                    <div className="text-sm font-semibold text-gray-900">{user.name}</div>
-                    <div className="text-sm text-gray-500">{user.email}</div>
+                    <div className="text-base font-bold text-gray-900">{user.name}</div>
+                    <div className="text-sm text-gray-600 mt-0.5">{user.email}</div>
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`inline-flex px-2.5 py-1 text-xs font-semibold rounded-full ${getRoleColor(user.role)}`}>
+                <td className="px-6 py-5 whitespace-nowrap">
+                  <span className={`inline-flex px-3 py-1.5 text-sm font-bold rounded-full ${getRoleColor(user.role)}`}>
                     {capitalize(user.role)}
                   </span>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`inline-flex px-2.5 py-1 text-xs font-semibold rounded-full ${getStatusColor(user.status)}`}>
+                <td className="px-6 py-5 whitespace-nowrap">
+                  <span className={`inline-flex px-3 py-1.5 text-sm font-bold rounded-full ${getStatusColor(user.status)}`}>
                     {capitalize(user.status)}
                   </span>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-700">
+                <td className="px-6 py-5 whitespace-nowrap">
+                  <div className="text-base text-gray-800 font-medium">
                     {new Date(user.created_at).toLocaleDateString()}
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <td className="px-6 py-5 whitespace-nowrap text-sm font-medium">
                   <div className="flex items-center space-x-3">
                     <button
                       onClick={() => onEditUser(user)}
-                      className="text-orange-600 hover:text-orange-700 transition-colors font-medium"
+                      className="px-3 py-1.5 text-sm text-orange-600 hover:text-white hover:bg-orange-600 border border-orange-600 rounded-lg transition-all duration-200 font-semibold"
                     >
                       Edit
                     </button>
                     <button
                       onClick={() => onDeleteUser(user)}
-                      className="text-red-600 hover:text-red-700 transition-colors font-medium"
+                      className="px-3 py-1.5 text-sm text-red-600 hover:text-white hover:bg-red-600 border border-red-600 rounded-lg transition-all duration-200 font-semibold"
                     >
                       Delete
                     </button>
@@ -104,37 +104,37 @@ const UserList = ({ users, searchTerm, onEditUser, onDeleteUser, loading }) => {
       {/* Mobile Card View */}
       <div className="lg:hidden flex-1 overflow-auto">
         {currentUsers.map((user) => (
-          <div key={user.id} className="border-b border-gray-200 last:border-b-0 p-4 hover:bg-gray-50 transition-colors">
-            <div className="flex items-start justify-between gap-3 mb-2">
+          <div key={user.id} className="border-b border-gray-200 last:border-b-0 p-5 hover:bg-orange-50/30 transition-colors">
+            <div className="flex items-start justify-between gap-3 mb-3">
               <div className="flex-1 min-w-0">
-                <h3 className="text-sm font-semibold text-gray-900 mb-0.5 truncate">{user.name}</h3>
-                <p className="text-xs text-gray-500 mb-2 truncate">{user.email}</p>
-                <div className="flex flex-wrap gap-1.5">
-                  <span className={`inline-flex px-2 py-0.5 text-xs font-semibold rounded-full ${getRoleColor(user.role)}`}>
+                <h3 className="text-base font-bold text-gray-900 mb-1 truncate">{user.name}</h3>
+                <p className="text-sm text-gray-600 mb-2 truncate">{user.email}</p>
+                <div className="flex flex-wrap gap-2">
+                  <span className={`inline-flex px-2.5 py-1 text-sm font-bold rounded-full ${getRoleColor(user.role)}`}>
                     {capitalize(user.role)}
                   </span>
-                  <span className={`inline-flex px-2 py-0.5 text-xs font-semibold rounded-full ${getStatusColor(user.status)}`}>
+                  <span className={`inline-flex px-2.5 py-1 text-sm font-bold rounded-full ${getStatusColor(user.status)}`}>
                     {capitalize(user.status)}
                   </span>
                 </div>
               </div>
             </div>
             
-            <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-100">
-              <div className="text-xs text-gray-600">
+            <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-200">
+              <div className="text-sm text-gray-700 font-medium">
                 {new Date(user.created_at).toLocaleDateString()}
               </div>
               
-              <div className="flex space-x-3 text-xs">
+              <div className="flex space-x-2 text-sm">
                 <button
                   onClick={() => onEditUser(user)}
-                  className="text-orange-600 hover:text-orange-700 transition-colors font-medium"
+                  className="px-3 py-1.5 text-orange-600 hover:text-white hover:bg-orange-600 border border-orange-600 rounded-lg transition-all duration-200 font-semibold"
                 >
                   Edit
                 </button>
                 <button
                   onClick={() => onDeleteUser(user)}
-                  className="text-red-600 hover:text-red-700 transition-colors font-medium"
+                  className="px-3 py-1.5 text-red-600 hover:text-white hover:bg-red-600 border border-red-600 rounded-lg transition-all duration-200 font-semibold"
                 >
                   Delete
                 </button>
@@ -146,7 +146,7 @@ const UserList = ({ users, searchTerm, onEditUser, onDeleteUser, loading }) => {
       
       {filteredUsers.length === 0 && !loading && (
         <div className="flex items-center justify-center py-12 px-4">
-          <p className="text-gray-500 text-sm">No users found matching your search criteria.</p>
+          <p className="text-gray-500 text-base font-medium">No users found matching your search criteria.</p>
         </div>
       )}
 
