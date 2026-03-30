@@ -253,13 +253,6 @@ function AdminSidebar({ isOpen, onClose, onCollapseChange }) {
             </>
           ) : (
             <div className="flex flex-col items-center gap-3">
-              <div className="relative">
-                <div className="w-8 h-8 bg-linear-to-br from-green-400 to-green-500 rounded-lg flex items-center justify-center shadow-md">
-                  <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-                </div>
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white animate-ping"></div>
-              </div>
-              <div className="w-full h-px bg-linear-to-r from-transparent via-gray-300 to-transparent"></div>
               <p className="text-gray-400 text-[9px] font-semibold text-center leading-tight tracking-wide">2026</p>
             </div>
           )}
