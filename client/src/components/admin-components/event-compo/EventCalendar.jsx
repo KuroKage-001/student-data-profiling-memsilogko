@@ -4,7 +4,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import listPlugin from '@fullcalendar/list';
-import { FaChevronLeft, FaChevronRight, FaTimes, FaMapMarkerAlt, FaClock, FaUsers, FaTag } from 'react-icons/fa';
+import { FaChevronLeft, FaChevronRight, FaTimes, FaMapMarkerAlt, FaClock, FaUsers, FaTag, FaAngleDoubleLeft, FaAngleDoubleRight } from 'react-icons/fa';
 
 const EventCalendar = ({ events, onEventClick, onDateSelect }) => {
   const calendarRef = useRef(null);
@@ -87,6 +87,24 @@ const EventCalendar = ({ events, onEventClick, onDateSelect }) => {
     if (calendarApi) calendarApi.today();
   };
 
+  const navigatePrevYear = () => {
+    const calendarApi = calendarRef.current?.getApi();
+    if (calendarApi) {
+      const currentDate = calendarApi.getDate();
+      currentDate.setFullYear(currentDate.getFullYear() - 1);
+      calendarApi.gotoDate(currentDate);
+    }
+  };
+
+  const navigateNextYear = () => {
+    const calendarApi = calendarRef.current?.getApi();
+    if (calendarApi) {
+      const currentDate = calendarApi.getDate();
+      currentDate.setFullYear(currentDate.getFullYear() + 1);
+      calendarApi.gotoDate(currentDate);
+    }
+  };
+
   const changeView = (viewName) => {
     const calendarApi = calendarRef.current?.getApi();
     if (calendarApi) {
@@ -120,8 +138,16 @@ const EventCalendar = ({ events, onEventClick, onDateSelect }) => {
           {/* Navigation Controls */}
           <div className="flex items-center gap-2 sm:gap-3">
             <button
+              onClick={navigatePrevYear}
+              className="p-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
+              title="Previous Year"
+            >
+              <FaAngleDoubleLeft className="text-white text-sm" />
+            </button>
+            <button
               onClick={navigatePrev}
               className="p-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
+              title="Previous Month"
             >
               <FaChevronLeft className="text-white text-sm" />
             </button>
@@ -134,8 +160,16 @@ const EventCalendar = ({ events, onEventClick, onDateSelect }) => {
             <button
               onClick={navigateNext}
               className="p-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
+              title="Next Month"
             >
               <FaChevronRight className="text-white text-sm" />
+            </button>
+            <button
+              onClick={navigateNextYear}
+              className="p-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
+              title="Next Year"
+            >
+              <FaAngleDoubleRight className="text-white text-sm" />
             </button>
             <h2 className="text-lg sm:text-xl font-bold text-white ml-2 sm:ml-4">
               {currentTitle}

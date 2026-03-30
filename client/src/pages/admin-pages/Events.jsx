@@ -7,7 +7,8 @@ import {
   EventControls, 
   EventListView, 
   EventFormModal, 
-  EventViewModal 
+  EventViewModal,
+  EventDeleteModal
 } from '../../components/admin-components/event-compo';
 import { FaCalendarAlt } from 'react-icons/fa';
 import { EventsSkeleton } from '../../layouts/skeleton-loading';
@@ -26,11 +27,14 @@ const Events = () => {
   // UI State
   const [showForm, setShowForm] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [viewingEvent, setViewingEvent] = useState(null);
+  const [eventToDelete, setEventToDelete] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('All');
   const [viewMode, setViewMode] = useState(VIEW_MODES.CALENDAR);
   const [submitting, setSubmitting] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   // Custom Hooks
   const { events, statistics, loading, refreshData } = useEventData(filterStatus, searchTerm);
@@ -56,8 +60,29 @@ const Events = () => {
     setShowForm(true);
   };
 
-  const handleDelete = async (eventId) => {
-    await handleEventDelete(eventId, refreshData);
+  const handleDelete = (event) => {
+    setEventToDelete(event);
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!eventToDelete) return;
+
+    setDeleting(true);
+    try {
+      await handleEventDelete(eventToDelete.id, refreshData);
+      setShowDeleteModal(false);
+      setEventToDelete(null);
+    } catch (error) {
+      console.error('Failed to delete event:', error);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const handleCloseDeleteModal = () => {
+    setShowDeleteModal(false);
+    setEventToDelete(null);
   };
 
   const handleEventClick = (event) => {
@@ -145,6 +170,17 @@ const Events = () => {
             onClose={() => { setShowViewModal(false); setViewingEvent(null); }}
             onEdit={handleViewModalEdit}
             getStatusColor={getStatusColor}
+          />
+        )}
+
+        {/* Delete Confirmation Modal */}
+        {showDeleteModal && (
+          <EventDeleteModal
+            isOpen={showDeleteModal}
+            onClose={handleCloseDeleteModal}
+            onConfirm={handleConfirmDelete}
+            event={eventToDelete}
+            loading={deleting}
           />
         )}
 

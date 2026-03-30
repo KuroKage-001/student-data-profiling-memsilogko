@@ -1,24 +1,146 @@
-import { FaCalendarAlt } from 'react-icons/fa';
+import { useMemo, useState } from 'react';
+import { FaCalendarAlt, FaSort, FaSortUp, FaSortDown } from 'react-icons/fa';
 
 const EventListView = ({ events, onEdit, onDelete, getStatusColor }) => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+  const itemsPerPage = 10;
+
+  // Sorting function
+  const sortedEvents = useMemo(() => {
+    if (!sortConfig.key) return events;
+
+    const sorted = [...events].sort((a, b) => {
+      let aValue = a[sortConfig.key];
+      let bValue = b[sortConfig.key];
+
+      // Handle date sorting
+      if (sortConfig.key === 'date') {
+        aValue = new Date(aValue);
+        bValue = new Date(bValue);
+      }
+
+      // Handle numeric sorting (attendees)
+      if (sortConfig.key === 'attendees') {
+        aValue = parseInt(aValue) || 0;
+        bValue = parseInt(bValue) || 0;
+      }
+
+      // Handle string sorting
+      if (typeof aValue === 'string') {
+        aValue = aValue.toLowerCase();
+        bValue = bValue.toLowerCase();
+      }
+
+      if (aValue < bValue) {
+        return sortConfig.direction === 'asc' ? -1 : 1;
+      }
+      if (aValue > bValue) {
+        return sortConfig.direction === 'asc' ? 1 : -1;
+      }
+      return 0;
+    });
+
+    return sorted;
+  }, [events, sortConfig]);
+
+  // Calculate pagination
+  const totalPages = Math.ceil(sortedEvents.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentEvents = sortedEvents.slice(startIndex, endIndex);
+
+  // Reset to page 1 when sorting changes
+  useMemo(() => {
+    setCurrentPage(1);
+  }, [sortConfig]);
+
+  const goToPage = (page) => {
+    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+  };
+
+  const handleSort = (key) => {
+    setSortConfig(prevConfig => ({
+      key,
+      direction: prevConfig.key === key && prevConfig.direction === 'asc' ? 'desc' : 'asc',
+    }));
+  };
+
+  const getSortIcon = (columnKey) => {
+    if (sortConfig.key !== columnKey) {
+      return <FaSort className="text-gray-400" />;
+    }
+    return sortConfig.direction === 'asc' ? 
+      <FaSortUp className="text-orange-600" /> : 
+      <FaSortDown className="text-orange-600" />;
+  };
+
   return (
-    <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+    <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden flex flex-col">
       {/* Desktop Table View */}
-      <div className="hidden lg:block overflow-x-auto">
+      <div className="hidden lg:block overflow-x-auto flex-1">
         <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+          <thead className="bg-gray-50 sticky top-0 z-10">
             <tr>
-              <th className="px-4 xl:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Event</th>
-              <th className="px-4 xl:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</th>
-              <th className="px-4 xl:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
-              <th className="px-4 xl:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-              <th className="px-4 xl:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              <th className="px-4 xl:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Attendees</th>
+              <th 
+                className="px-4 xl:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                onClick={() => handleSort('title')}
+              >
+                <div className="flex items-center gap-2">
+                  <span>Event</span>
+                  {getSortIcon('title')}
+                </div>
+              </th>
+              <th 
+                className="px-4 xl:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                onClick={() => handleSort('date')}
+              >
+                <div className="flex items-center gap-2">
+                  <span>Date & Time</span>
+                  {getSortIcon('date')}
+                </div>
+              </th>
+              <th 
+                className="px-4 xl:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                onClick={() => handleSort('location')}
+              >
+                <div className="flex items-center gap-2">
+                  <span>Location</span>
+                  {getSortIcon('location')}
+                </div>
+              </th>
+              <th 
+                className="px-4 xl:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                onClick={() => handleSort('type')}
+              >
+                <div className="flex items-center gap-2">
+                  <span>Type</span>
+                  {getSortIcon('type')}
+                </div>
+              </th>
+              <th 
+                className="px-4 xl:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                onClick={() => handleSort('status')}
+              >
+                <div className="flex items-center gap-2">
+                  <span>Status</span>
+                  {getSortIcon('status')}
+                </div>
+              </th>
+              <th 
+                className="px-4 xl:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                onClick={() => handleSort('attendees')}
+              >
+                <div className="flex items-center gap-2">
+                  <span>Attendees</span>
+                  {getSortIcon('attendees')}
+                </div>
+              </th>
               <th className="px-4 xl:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {events.map((event) => (
+            {currentEvents.map((event) => (
               <tr key={event.id} className="hover:bg-gray-50">
                 <td className="px-4 xl:px-6 py-4">
                   <div>
@@ -49,7 +171,7 @@ const EventListView = ({ events, onEdit, onDelete, getStatusColor }) => {
                     <button onClick={() => onEdit(event)} className="text-orange-600 hover:text-orange-700 transition-colors text-left">
                       Edit
                     </button>
-                    <button onClick={() => onDelete(event.id)} className="text-red-600 hover:text-red-700 transition-colors text-left">
+                    <button onClick={() => onDelete(event)} className="text-red-600 hover:text-red-700 transition-colors text-left">
                       Delete
                     </button>
                   </div>
@@ -61,8 +183,8 @@ const EventListView = ({ events, onEdit, onDelete, getStatusColor }) => {
       </div>
 
       {/* Mobile Card View */}
-      <div className="lg:hidden">
-        {events.map((event) => (
+      <div className="lg:hidden flex-1 overflow-auto">
+        {currentEvents.map((event) => (
           <div key={event.id} className="border-b border-gray-200 last:border-b-0 p-4 hover:bg-gray-50">
             <div className="flex items-start justify-between mb-3">
               <div className="flex-1">
@@ -100,11 +222,101 @@ const EventListView = ({ events, onEdit, onDelete, getStatusColor }) => {
         ))}
       </div>
       
-      {events.length === 0 && (
+      {sortedEvents.length === 0 && (
         <div className="text-center py-12 px-4">
           <FaCalendarAlt className="mx-auto text-gray-300 text-5xl mb-4" />
           <p className="text-gray-500 text-lg">No events found</p>
           <p className="text-gray-400 text-sm mt-1">Create your first event to get started</p>
+        </div>
+      )}
+
+      {/* Pagination */}
+      {sortedEvents.length > 0 && (
+        <div className="bg-white border-t border-gray-200 px-4 py-3 flex items-center justify-between shrink-0">
+          <div className="flex-1 flex justify-between sm:hidden">
+            <button
+              onClick={() => goToPage(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Previous
+            </button>
+            <button
+              onClick={() => goToPage(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Next
+            </button>
+          </div>
+          <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm text-gray-700">
+                Showing <span className="font-medium">{startIndex + 1}</span> to{' '}
+                <span className="font-medium">{Math.min(endIndex, sortedEvents.length)}</span> of{' '}
+                <span className="font-medium">{sortedEvents.length}</span> results
+              </p>
+            </div>
+            <div>
+              <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                <button
+                  onClick={() => goToPage(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <span className="sr-only">Previous</span>
+                  <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                </button>
+                
+                {[...Array(totalPages)].map((_, index) => {
+                  const page = index + 1;
+                  // Show first page, last page, current page, and pages around current
+                  if (
+                    page === 1 ||
+                    page === totalPages ||
+                    (page >= currentPage - 1 && page <= currentPage + 1)
+                  ) {
+                    return (
+                      <button
+                        key={page}
+                        onClick={() => goToPage(page)}
+                        className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                          currentPage === page
+                            ? 'z-10 bg-orange-50 border-orange-500 text-orange-600'
+                            : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    );
+                  } else if (page === currentPage - 2 || page === currentPage + 2) {
+                    return (
+                      <span
+                        key={page}
+                        className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700"
+                      >
+                        ...
+                      </span>
+                    );
+                  }
+                  return null;
+                })}
+                
+                <button
+                  onClick={() => goToPage(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <span className="sr-only">Next</span>
+                  <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                  </svg>
+                </button>
+              </nav>
+            </div>
+          </div>
         </div>
       )}
     </div>
