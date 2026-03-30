@@ -2,8 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import AdminLayout from '../../layouts/AdminLayout';
-import { StudentList, StudentFormModal, DeleteConfirmModal } from '../../components/admin-components/student-profile-compo';
-import StudentProfileModal from '../../components/student-components/student-profile/StudentProfileModal';
+import { StudentList, StudentFormModal, DeleteConfirmModal, StudentProfileModal } from '../../components/admin-components/student-profile-compo';
 import { StudentProfilesSkeleton } from '../../layouts/skeleton-loading';
 import usePageTitle from '../../hooks/usePageTitle';
 import { 
