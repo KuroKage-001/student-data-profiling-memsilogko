@@ -257,7 +257,7 @@ function AdminSidebar({ isOpen, onClose, onCollapseChange }) {
             </div>
           )}
         </div>
-      </div>G
+      </div>
     </>
   );
 }
