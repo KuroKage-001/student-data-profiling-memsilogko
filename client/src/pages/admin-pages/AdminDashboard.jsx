@@ -2,12 +2,15 @@ import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../../layouts/AdminLayout';
 import DashboardStats from '../../components/admin-components/dashboard/DashboardStats';
 import usePageTitle from '../../hooks/usePageTitle';
+import { useDashboardStats } from '../../hooks/admin-dashboard-hook';
+import { AdminDashboardSkeleton } from '../../layouts/skeleton-loading';
 import { FaUserGraduate, FaChalkboardTeacher, FaFileAlt, FaDownload, FaCog, FaArrowRight, FaChartLine } from 'react-icons/fa';
 
 const AdminDashboard = () => {
   usePageTitle('Dashboard');
   
   const navigate = useNavigate();
+  const { isLoading } = useDashboardStats();
 
   const handleNavigateToStudents = () => {
     navigate('/admin/students');
@@ -16,6 +19,15 @@ const AdminDashboard = () => {
   const handleNavigateToFaculty = () => {
     navigate('/admin/faculty');
   };
+
+  // Show skeleton loading while data is being fetched
+  if (isLoading) {
+    return (
+      <AdminLayout>
+        <AdminDashboardSkeleton />
+      </AdminLayout>
+    );
+  }
 
   return (
     <AdminLayout>
