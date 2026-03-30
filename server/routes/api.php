@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ResearchMaterialController;
 use App\Http\Controllers\InstructionController;
+use App\Http\Controllers\EventController;
 
 // Handle preflight OPTIONS requests
 Route::options('{any}', function () {
@@ -51,4 +52,10 @@ Route::middleware(['auth:api', 'check.status'])->group(function () {
 Route::middleware(['auth:api', 'check.status'])->group(function () {
     Route::apiResource('faculty', App\Http\Controllers\FacultyController::class);
     Route::get('faculty-statistics', [App\Http\Controllers\FacultyController::class, 'statistics']);
+});
+
+// Events API Routes (Protected)
+Route::middleware(['auth:api', 'check.status'])->group(function () {
+    Route::apiResource('events', EventController::class);
+    Route::get('events-statistics', [EventController::class, 'statistics']);
 });

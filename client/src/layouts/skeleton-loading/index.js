@@ -10,3 +10,4 @@ export { default as FacultyListSkeleton } from './FacultyListSkeleton';
 export { default as UserProfileSettingsSkeleton } from './UserProfileSettingsSkeleton';
 export { default as ProfileTabSkeleton } from './ProfileTabSkeleton';
 export { default as PasswordTabSkeleton } from './PasswordTabSkeleton';
+export { default as EventsSkeleton } from './EventsSkeleton';

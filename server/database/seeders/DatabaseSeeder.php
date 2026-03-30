@@ -38,5 +38,10 @@ class DatabaseSeeder extends Seeder
         } else {
             echo "Users already exist, skipping seeding.\n";
         }
+
+        // Seed events
+        $this->call([
+            EventSeeder::class,
+        ]);
     }
 }
