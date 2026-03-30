@@ -4,6 +4,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import AdminLayout from '../../layouts/AdminLayout';
 import { StudentList, StudentFormModal, DeleteConfirmModal } from '../../components/admin-components/student-profile-compo';
 import StudentProfileModal from '../../components/student-components/student-profile/StudentProfileModal';
+import { StudentProfilesSkeleton } from '../../layouts/skeleton-loading';
 import usePageTitle from '../../hooks/usePageTitle';
 import { 
   useStudents, 
@@ -170,6 +171,16 @@ const StudentProfiles = () => {
 
   const programs = getPrograms();
   const yearLevels = getYearLevels();
+
+  // Show skeleton loading while data is being fetched
+  if (isLoading) {
+    return (
+      <AdminLayout>
+        <ToastContainer />
+        <StudentProfilesSkeleton />
+      </AdminLayout>
+    );
+  }
 
   return (
     <AdminLayout>

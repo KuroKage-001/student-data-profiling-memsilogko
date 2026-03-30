@@ -40,14 +40,6 @@ const StudentList = ({ searchTerm, onViewStudent, onEditStudent, onDeleteStudent
     return gpaNumber.toFixed(2);
   };
 
-  if (loading) {
-    return (
-      <div className="h-full flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
-      </div>
-    );
-  }
-
   if (error) {
     return (
       <div className="h-full flex items-center justify-center">
@@ -177,7 +169,7 @@ const StudentList = ({ searchTerm, onViewStudent, onEditStudent, onDeleteStudent
         ))}
       </div>
 
-      {filteredStudents.length === 0 && !loading && (
+      {filteredStudents.length === 0 && (
         <div className="h-full flex items-center justify-center">
           <p className="text-gray-500 text-sm">No students found matching your search criteria.</p>
         </div>
