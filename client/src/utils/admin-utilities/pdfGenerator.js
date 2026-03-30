@@ -353,9 +353,359 @@ export const generateStudentPDF = async (student) => {
     doc.setFont('helvetica', 'normal');
     doc.text('© Student Data Profiling System', margin, footerY + 4);
     
+    doc.setTextColor(...textMedium);
+    doc.text('Page 1 of 2', pageWidth / 2, footerY + 4, { align: 'center' });
+    
     doc.setTextColor(...orange700);
     doc.setFont('helvetica', 'bold');
     doc.text('CONFIDENTIAL DOCUMENT', pageWidth - margin, footerY + 4, { align: 'right' });
+    
+    // ============================================
+    // PAGE 2: VIOLATIONS, AFFILIATIONS & ACADEMIC HISTORY
+    // ============================================
+    doc.addPage();
+    
+    // Header Section - Page 2
+    doc.setFillColor(...white);
+    doc.rect(0, 0, pageWidth, 35, 'F');
+    
+    // Add logo if available
+    if (logoData) {
+      doc.addImage(logoData, 'PNG', margin, 8, 20, 20);
+    }
+    
+    // Header text
+    doc.setTextColor(...orange600);
+    doc.setFontSize(20);
+    doc.setFont('helvetica', 'bold');
+    doc.text('STUDENT RECORDS', logoData ? margin + 25 : margin, 16);
+    
+    doc.setTextColor(...textMedium);
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Violations, Affiliations & Academic History', logoData ? margin + 25 : margin, 22);
+    
+    // Student name and ID on the right
+    doc.setTextColor(...textDark);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'bold');
+    doc.text(student.name || 'N/A', pageWidth - margin, 14, { align: 'right' });
+    doc.setTextColor(...textMedium);
+    doc.text(`ID: ${student.student_id || student.id}`, pageWidth - margin, 20, { align: 'right' });
+    
+    // Orange accent line
+    doc.setDrawColor(...orange600);
+    doc.setLineWidth(1.5);
+    doc.line(margin, 35, pageWidth - margin, 35);
+    
+    let page2Y = 42;
+    
+    // Helper function to add table header
+    const addTableHeader = (headers, x, y, columnWidths) => {
+      let currentX = x;
+      headers.forEach((header, index) => {
+        // Draw background for each header cell
+        doc.setFillColor(...orange600);
+        doc.rect(currentX, y, columnWidths[index], 6, 'F');
+        
+        // Add text for each header
+        doc.setTextColor(...white);
+        doc.setFontSize(7);
+        doc.setFont('helvetica', 'bold');
+        const headerLines = doc.splitTextToSize(header, columnWidths[index] - 2);
+        doc.text(headerLines[0], currentX + 1, y + 4);
+        
+        currentX += columnWidths[index];
+      });
+      return y + 6;
+    };
+    
+    // Helper function to add table row
+    const addTableRow = (values, x, y, columnWidths, isAlternate = false) => {
+      if (isAlternate) {
+        doc.setFillColor(255, 247, 237); // Orange-50
+        let currentX = x;
+        columnWidths.forEach(width => {
+          doc.rect(currentX, y, width, 6, 'F');
+          currentX += width;
+        });
+      }
+      
+      doc.setTextColor(...textDark);
+      doc.setFontSize(7);
+      doc.setFont('helvetica', 'normal');
+      let currentX = x;
+      values.forEach((value, index) => {
+        const lines = doc.splitTextToSize(value || 'N/A', columnWidths[index] - 2);
+        doc.text(lines[0], currentX + 1, y + 4);
+        currentX += columnWidths[index];
+      });
+      return y + 6;
+    };
+    
+    // VIOLATIONS SECTION
+    doc.setFillColor(255, 247, 237); // Orange-50
+    doc.roundedRect(margin, page2Y, contentWidth, 7, 1, 1, 'F');
+    
+    doc.setFillColor(...orange600);
+    doc.circle(margin + 2.5, page2Y + 3.5, 1.5, 'F');
+    
+    doc.setTextColor(...orange700);
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.text('VIOLATIONS', margin + 6, page2Y + 4.5);
+    
+    page2Y += 9;
+    
+    const violations = student.violations || [];
+    if (violations.length > 0) {
+      const violationHeaders = ['Violation Type', 'Severity', 'Date', 'Action Taken'];
+      const violationWidths = [50, 25, 30, 81];
+      
+      page2Y = addTableHeader(violationHeaders, margin, page2Y, violationWidths);
+      
+      violations.slice(0, 6).forEach((violation, index) => {
+        const violationType = violation.violation_type || 'N/A';
+        const severity = capitalize(violation.severity);
+        const violationDate = formatDate(violation.violation_date);
+        const action = violation.action_taken || 'N/A';
+        
+        page2Y = addTableRow(
+          [violationType, severity, violationDate, action],
+          margin,
+          page2Y,
+          violationWidths,
+          index % 2 === 1
+        );
+      });
+      
+      if (violations.length > 6) {
+        doc.setTextColor(...textLight);
+        doc.setFontSize(6);
+        doc.setFont('helvetica', 'italic');
+        doc.text(`+ ${violations.length - 6} more violation(s)`, margin, page2Y + 3);
+        page2Y += 5;
+      }
+    } else {
+      doc.setTextColor(...textMedium);
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'italic');
+      doc.text('No violations recorded', margin + 2, page2Y + 4);
+      page2Y += 8;
+    }
+    
+    page2Y += 4;
+    
+    // AFFILIATIONS SECTION
+    doc.setFillColor(255, 247, 237); // Orange-50
+    doc.roundedRect(margin, page2Y, contentWidth, 7, 1, 1, 'F');
+    
+    doc.setFillColor(...orange600);
+    doc.circle(margin + 2.5, page2Y + 3.5, 1.5, 'F');
+    
+    doc.setTextColor(...orange700);
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.text('AFFILIATIONS & ORGANIZATIONS', margin + 6, page2Y + 4.5);
+    
+    page2Y += 9;
+    
+    const affiliations = student.affiliations || [];
+    if (affiliations.length > 0) {
+      const affiliationHeaders = ['Organization Name', 'Type', 'Role', 'Status'];
+      const affiliationWidths = [60, 40, 40, 46];
+      
+      page2Y = addTableHeader(affiliationHeaders, margin, page2Y, affiliationWidths);
+      
+      affiliations.slice(0, 6).forEach((affiliation, index) => {
+        const orgName = affiliation.organization_name || 'N/A';
+        const type = capitalize(affiliation.affiliation_type?.replace(/_/g, ' ')) || 'N/A';
+        const role = affiliation.role || 'Member';
+        const status = affiliation.is_active ? 'Active' : 'Inactive';
+        
+        page2Y = addTableRow(
+          [orgName, type, role, status],
+          margin,
+          page2Y,
+          affiliationWidths,
+          index % 2 === 1
+        );
+      });
+      
+      if (affiliations.length > 6) {
+        doc.setTextColor(...textLight);
+        doc.setFontSize(6);
+        doc.setFont('helvetica', 'italic');
+        doc.text(`+ ${affiliations.length - 6} more affiliation(s)`, margin, page2Y + 3);
+        page2Y += 5;
+      }
+    } else {
+      doc.setTextColor(...textMedium);
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'italic');
+      doc.text('No affiliations recorded', margin + 2, page2Y + 4);
+      page2Y += 8;
+    }
+    
+    page2Y += 4;
+    
+    // ACADEMIC HISTORY SECTION
+    if (page2Y < 240) {
+      doc.setFillColor(255, 247, 237); // Orange-50
+      doc.roundedRect(margin, page2Y, contentWidth, 7, 1, 1, 'F');
+      
+      doc.setFillColor(...orange600);
+      doc.circle(margin + 2.5, page2Y + 3.5, 1.5, 'F');
+      
+      doc.setTextColor(...orange700);
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.text('ACADEMIC HISTORY', margin + 6, page2Y + 4.5);
+      
+      page2Y += 9;
+      
+      const academicRecords = student.academic_records || [];
+      if (academicRecords.length > 0) {
+        // Display each academic record with its subjects
+        academicRecords.slice(0, 3).forEach((record, recordIndex) => {
+          // Check if we have space
+          if (page2Y > 250) return;
+          
+          // Record header with semester info
+          doc.setFillColor(...orange600);
+          doc.roundedRect(margin, page2Y, contentWidth, 7, 1, 1, 'F');
+          
+          doc.setTextColor(...white);
+          doc.setFontSize(8);
+          doc.setFont('helvetica', 'bold');
+          const semesterText = `${record.semester || 'N/A'} — ${record.academic_year || 'N/A'}`;
+          doc.text(semesterText, margin + 2, page2Y + 4.5);
+          
+          // GPA and Status on the right
+          const gpaText = `GPA: ${formatGPA(record.semester_gpa)}`;
+          const statusText = record.remarks || 'N/A';
+          doc.text(`${gpaText}  |  ${statusText}`, pageWidth - margin - 2, page2Y + 4.5, { align: 'right' });
+          
+          page2Y += 7;
+          
+          // Subjects table
+          const subjects = record.subjects || [];
+          if (subjects.length > 0) {
+            // Subject headers
+            const subjectHeaders = ['Subject Code', 'Subject Name', 'Units', 'Grade'];
+            const subjectWidths = [35, 95, 20, 36];
+            
+            // Draw header background and text for each column
+            let currentX = margin;
+            subjectHeaders.forEach((header, index) => {
+              // Draw background
+              doc.setFillColor(255, 237, 213); // Lighter orange
+              doc.rect(currentX, page2Y, subjectWidths[index], 5, 'F');
+              
+              // Add text
+              doc.setTextColor(...textDark);
+              doc.setFontSize(6);
+              doc.setFont('helvetica', 'bold');
+              const headerLines = doc.splitTextToSize(header, subjectWidths[index] - 2);
+              doc.text(headerLines[0], currentX + 1, page2Y + 3.5);
+              
+              currentX += subjectWidths[index];
+            });
+            
+            page2Y += 5;
+            
+            // Subject rows
+            subjects.slice(0, 5).forEach((subject, subIndex) => {
+              if (page2Y > 260) return;
+              
+              if (subIndex % 2 === 1) {
+                doc.setFillColor(255, 251, 245); // Very light orange
+                let currentX = margin;
+                subjectWidths.forEach(width => {
+                  doc.rect(currentX, page2Y, width, 5, 'F');
+                  currentX += width;
+                });
+              }
+              
+              doc.setTextColor(...textDark);
+              doc.setFontSize(7);
+              doc.setFont('helvetica', 'normal');
+              
+              let currentX = margin;
+              const subjectCode = subject.subject_code || 'N/A';
+              const subjectName = subject.subject_name || 'N/A';
+              const units = subject.units ? subject.units.toString() : 'N/A';
+              const grade = subject.grade ? subject.grade.toString() : 'N/A';
+              
+              // Subject Code
+              const codeLines = doc.splitTextToSize(subjectCode, subjectWidths[0] - 2);
+              doc.text(codeLines[0], currentX + 1, page2Y + 3.5);
+              currentX += subjectWidths[0];
+              
+              // Subject Name
+              const nameLines = doc.splitTextToSize(subjectName, subjectWidths[1] - 2);
+              doc.text(nameLines[0], currentX + 1, page2Y + 3.5);
+              currentX += subjectWidths[1];
+              
+              // Units
+              doc.text(units, currentX + 1, page2Y + 3.5);
+              currentX += subjectWidths[2];
+              
+              // Grade
+              doc.text(grade, currentX + 1, page2Y + 3.5);
+              
+              page2Y += 5;
+            });
+            
+            if (subjects.length > 5) {
+              doc.setTextColor(...textLight);
+              doc.setFontSize(6);
+              doc.setFont('helvetica', 'italic');
+              doc.text(`+ ${subjects.length - 5} more subject(s)`, margin + 2, page2Y + 3);
+              page2Y += 4;
+            }
+          } else {
+            doc.setTextColor(...textMedium);
+            doc.setFontSize(7);
+            doc.setFont('helvetica', 'italic');
+            doc.text('No subjects recorded', margin + 2, page2Y + 3);
+            page2Y += 5;
+          }
+          
+          page2Y += 3; // Space between records
+        });
+        
+        if (academicRecords.length > 3) {
+          doc.setTextColor(...textLight);
+          doc.setFontSize(6);
+          doc.setFont('helvetica', 'italic');
+          doc.text(`+ ${academicRecords.length - 3} more academic record(s)`, margin, page2Y + 2);
+        }
+      } else {
+        doc.setTextColor(...textMedium);
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'italic');
+        doc.text('No academic records available', margin + 2, page2Y + 4);
+      }
+    }
+    
+    // Footer - Page 2
+    const footer2Y = pageHeight - 12;
+    doc.setDrawColor(...orange600);
+    doc.setLineWidth(1);
+    doc.line(margin, footer2Y, pageWidth - margin, footer2Y);
+    
+    doc.setTextColor(...textLight);
+    doc.setFontSize(6);
+    doc.setFont('helvetica', 'normal');
+    doc.text('© Student Data Profiling System', margin, footer2Y + 4);
+    
+    doc.setTextColor(...textMedium);
+    doc.text('Page 2 of 2', pageWidth / 2, footer2Y + 4, { align: 'center' });
+    
+    doc.setTextColor(...orange700);
+    doc.setFont('helvetica', 'bold');
+    doc.text('CONFIDENTIAL DOCUMENT', pageWidth - margin, footer2Y + 4, { align: 'right' });
     
     // Save PDF
     const filename = `student_report_${student.student_id || student.id}_${new Date().toISOString().split('T')[0]}.pdf`;

@@ -18,7 +18,7 @@ class StudentController extends Controller
     public function index(Request $request)
     {
         try {
-            $query = User::where('role', 'student')->with(['skills', 'activities']);
+            $query = User::where('role', 'student')->with(['skills', 'activities', 'violations', 'affiliations', 'academicRecords.subjects']);
 
             // Search functionality
             if ($request->has('search')) {
@@ -170,7 +170,7 @@ class StudentController extends Controller
             DB::commit();
 
             // Load relationships
-            $student->load(['skills', 'activities']);
+            $student->load(['skills', 'activities', 'violations', 'affiliations', 'academicRecords.subjects']);
 
             return response()->json([
                 'success' => true,
@@ -193,7 +193,7 @@ class StudentController extends Controller
     {
         try {
             $student = User::where('role', 'student')
-                ->with(['skills', 'activities'])
+                ->with(['skills', 'activities', 'violations', 'affiliations', 'academicRecords.subjects'])
                 ->findOrFail($id);
             
             return response()->json([
@@ -292,7 +292,7 @@ class StudentController extends Controller
             DB::commit();
 
             // Load relationships
-            $student->load(['skills', 'activities']);
+            $student->load(['skills', 'activities', 'violations', 'affiliations', 'academicRecords.subjects']);
 
             return response()->json([
                 'success' => true,
