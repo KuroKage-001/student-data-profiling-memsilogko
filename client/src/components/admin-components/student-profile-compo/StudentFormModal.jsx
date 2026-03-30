@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { FaTimes, FaUserGraduate, FaEnvelope, FaPhone, FaMapMarkerAlt, FaGraduationCap, FaCalendarAlt, FaUserFriends, FaStickyNote, FaIdCard, FaTrophy, FaRunning } from 'react-icons/fa';
 
 const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors }) => {
@@ -69,7 +69,6 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
       });
     } else {
       setIsEditMode(false);
-      // Generate student ID for new student
       const generateStudentId = () => {
         const prefix = 'STU';
         const randomNum = Math.floor(1000 + Math.random() * 9000);
@@ -86,86 +85,168 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
     setErrors({});
   }, [student]);
 
+  // Real-time validation function
+  const validateField = (name, value) => {
+    switch (name) {
+      case 'email':
+        if (!value.trim()) return 'Email is required';
+        if (value !== value.toLowerCase()) return 'Email address should be entered in lowercase letters only.';
+        const emailRegex = /^[a-z0-9._-]+@[a-z0-9.-]+\.[a-z]{2,}$/;
+        if (!emailRegex.test(value)) return 'Please enter a valid email address (e.g., user@example.com)';
+        return null;
+      
+      case 'phone':
+        if (value && value.trim()) {
+          if (/[^0-9]/.test(value)) return 'Phone number should contain numbers only.';
+          if (!value.startsWith('09')) return 'Phone number must start with 09.';
+          if (value.length !== 11) return 'Phone number must be exactly 11 digits.';
+        }
+        return null;
+      
+      case 'guardian_phone':
+        if (value && value.trim()) {
+          if (/[^0-9]/.test(value)) return 'Phone number should contain numbers only.';
+          if (!value.startsWith('09')) return 'Phone number must start with 09.';
+          if (value.length !== 11) return 'Phone number must be exactly 11 digits.';
+        }
+        return null;
+      
+      case 'gpa':
+        if (value) {
+          const gpaNum = parseFloat(value);
+          if (isNaN(gpaNum) || gpaNum < 0 || gpaNum > 4) return 'GPA must be between 0.0 and 4.0';
+          const decimalPart = value.toString().split('.')[1];
+          if (decimalPart && decimalPart.length > 2) return 'GPA should only contain up to two decimal places.';
+        }
+        return null;
+      
+      case 'name':
+        if (!value.trim()) return 'Name is required';
+        return null;
+      
+      case 'student_id':
+        if (!value.trim()) return 'Student ID is required';
+        return null;
+      
+      case 'program':
+        if (!value) return 'Program is required';
+        return null;
+      
+      case 'year_level':
+        if (!value) return 'Year level is required';
+        return null;
+      
+      case 'enrollment_date':
+        if (!value) return 'Enrollment date is required';
+        return null;
+      
+      default:
+        return null;
+    }
+  };
+
+  // Check if form is valid for enabling/disabling submit button
+  const isFormValid = useMemo(() => {
+    // Check required fields
+    if (!formData.name.trim()) return false;
+    if (!formData.email.trim()) return false;
+    if (!formData.student_id.trim()) return false;
+    if (!formData.program) return false;
+    if (!formData.year_level) return false;
+    if (!formData.enrollment_date) return false;
+
+    // Email must be lowercase
+    if (formData.email !== formData.email.toLowerCase()) return false;
+    const emailRegex = /^[a-z0-9._-]+@[a-z0-9.-]+\.[a-z]{2,}$/;
+    if (!emailRegex.test(formData.email)) return false;
+
+    // Phone validation (if provided)
+    if (formData.phone && formData.phone.trim()) {
+      if (/[^0-9]/.test(formData.phone)) return false;
+      if (!formData.phone.startsWith('09')) return false;
+      if (formData.phone.length !== 11) return false;
+    }
+
+    // Guardian phone validation (if provided)
+    if (formData.guardian_phone && formData.guardian_phone.trim()) {
+      if (/[^0-9]/.test(formData.guardian_phone)) return false;
+      if (!formData.guardian_phone.startsWith('09')) return false;
+      if (formData.guardian_phone.length !== 11) return false;
+    }
+
+    // GPA validation (if provided)
+    if (formData.gpa) {
+      const gpaNum = parseFloat(formData.gpa);
+      if (isNaN(gpaNum) || gpaNum < 0 || gpaNum > 4) return false;
+      const decimalPart = formData.gpa.toString().split('.')[1];
+      if (decimalPart && decimalPart.length > 2) return false;
+    }
+
+    // Graduation date validation
+    if (formData.graduation_date && formData.enrollment_date) {
+      const enrollmentDate = new Date(formData.enrollment_date);
+      const graduationDate = new Date(formData.graduation_date);
+      if (graduationDate <= enrollmentDate) return false;
+    }
+
+    return true;
+  }, [formData]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     
-    // Prevent 'e', 'E', '+', '-' in phone number fields
-    if ((name === 'phone' || name === 'guardian_phone') && 
-        (value.includes('e') || value.includes('E') || value.includes('+') || value.includes('-'))) {
+    // For phone fields, only allow numbers
+    if (name === 'phone' || name === 'guardian_phone') {
+      const numericValue = value.replace(/[^0-9]/g, '');
+      // Limit to 11 digits
+      const limitedValue = numericValue.slice(0, 11);
+      setFormData(prev => ({ ...prev, [name]: limitedValue }));
+      const error = validateField(name, limitedValue);
+      setErrors(prev => ({ ...prev, [name]: error }));
+      return;
+    }
+
+    // For GPA, limit decimal places
+    if (name === 'gpa') {
+      // Allow empty, or valid GPA format
+      if (value === '' || /^\d*\.?\d{0,2}$/.test(value)) {
+        const gpaNum = parseFloat(value);
+        if (value === '' || (gpaNum >= 0 && gpaNum <= 4) || value === '.' || /^\d\.$/.test(value)) {
+          setFormData(prev => ({ ...prev, [name]: value }));
+          const error = validateField(name, value);
+          setErrors(prev => ({ ...prev, [name]: error }));
+        }
+      }
+      return;
+    }
+
+    // For email, convert to lowercase automatically
+    if (name === 'email') {
+      const lowerValue = value.toLowerCase();
+      setFormData(prev => ({ ...prev, [name]: lowerValue }));
+      const error = validateField(name, lowerValue);
+      setErrors(prev => ({ ...prev, [name]: error }));
       return;
     }
     
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    // Clear error for this field
-    if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: null
-      }));
-    }
+    setFormData(prev => ({ ...prev, [name]: value }));
+    const error = validateField(name, value);
+    setErrors(prev => ({ ...prev, [name]: error }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    // Basic validation
+    // Final validation before submit
     const newErrors = {};
     
-    // Name validation
-    if (!formData.name.trim()) newErrors.name = 'Name is required';
-    
-    // Email validation
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
-    } else {
-      // Professional email validation
-      const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-      if (!emailRegex.test(formData.email)) {
-        newErrors.email = 'Please enter a valid email address (e.g., user@example.com)';
-      }
-    }
-    
-    // Student ID validation
-    if (!formData.student_id.trim()) newErrors.student_id = 'Student ID is required';
-    
-    // Program validation
-    if (!formData.program) newErrors.program = 'Program is required';
-    
-    // Year level validation
-    if (!formData.year_level) newErrors.year_level = 'Year level is required';
-    
-    // Enrollment date validation
-    if (!formData.enrollment_date) newErrors.enrollment_date = 'Enrollment date is required';
-    
-    // GPA validation
-    if (formData.gpa && (parseFloat(formData.gpa) < 0 || parseFloat(formData.gpa) > 4)) {
-      newErrors.gpa = 'GPA must be between 0.0 and 4.0';
-    }
-    
-    // Phone number validation
-    if (formData.phone && formData.phone.trim()) {
-      const phoneRegex = /^[\d\s()+-]+$/;
-      if (!phoneRegex.test(formData.phone)) {
-        newErrors.phone = 'Phone number can only contain digits, spaces, and symbols ( ) + -';
-      } else if (formData.phone.replace(/\D/g, '').length < 10) {
-        newErrors.phone = 'Phone number must be at least 10 digits';
-      }
-    }
-    
-    // Guardian phone validation
-    if (formData.guardian_phone && formData.guardian_phone.trim()) {
-      const phoneRegex = /^[\d\s()+-]+$/;
-      if (!phoneRegex.test(formData.guardian_phone)) {
-        newErrors.guardian_phone = 'Phone number can only contain digits, spaces, and symbols ( ) + -';
-      } else if (formData.guardian_phone.replace(/\D/g, '').length < 10) {
-        newErrors.guardian_phone = 'Phone number must be at least 10 digits';
-      }
-    }
-    
-    // Graduation date validation - must be after enrollment date
+    // Validate all fields
+    Object.keys(formData).forEach(key => {
+      const error = validateField(key, formData[key]);
+      if (error) newErrors[key] = error;
+    });
+
+    // Graduation date validation
     if (formData.graduation_date && formData.enrollment_date) {
       const enrollmentDate = new Date(formData.enrollment_date);
       const graduationDate = new Date(formData.graduation_date);
@@ -184,14 +265,12 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-      {/* Background overlay with blur */}
       <div 
         className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
         onClick={onClose}
         aria-hidden="true"
       ></div>
 
-      {/* Modal panel - Optimized size */}
       <div className="relative z-10 bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden">
         {/* Header */}
         <div className="bg-linear-to-r from-orange-500 to-orange-600 px-6 py-4 shrink-0">
@@ -199,17 +278,13 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
             <h3 className="text-xl font-bold text-white">
               {isEditMode ? 'Edit Student' : 'Add New Student'}
             </h3>
-            <button
-              onClick={onClose}
-              className="text-white hover:text-gray-200 transition-colors"
-              disabled={loading}
-            >
+            <button onClick={onClose} className="text-white hover:text-gray-200 transition-colors" disabled={loading}>
               <FaTimes className="text-xl" />
             </button>
           </div>
         </div>
 
-        {/* Form - Scrollable */}
+        {/* Form */}
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto">
           <div className="px-6 py-6 space-y-4">
             {/* Basic Information */}
@@ -220,113 +295,76 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
               </h4>
             </div>
 
-                {/* Name Field */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Full Name *
-                  </label>
-                  <div className="relative">
-                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                      <FaUserGraduate />
-                    </div>
-                    <input
-                      type="text"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleChange}
-                      className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all ${
-                        errors.name 
-                          ? 'border-red-500 focus:border-red-600' 
-                          : 'border-gray-200 focus:border-orange-500'
-                      }`}
-                      placeholder="Enter full name"
-                    />
-                  </div>
-                  {errors.name && (
-                    <p className="mt-1 text-sm text-red-600">{errors.name}</p>
-                  )}
-                </div>
+            {/* Name Field */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Full Name *</label>
+              <div className="relative">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><FaUserGraduate /></div>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all ${errors.name ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-orange-500'}`}
+                  placeholder="Enter full name"
+                />
+              </div>
+              {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
+            </div>
 
-                {/* Email Field */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Email Address *
-                  </label>
-                  <div className="relative">
-                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                      <FaEnvelope />
-                    </div>
-                    <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all ${
-                        errors.email 
-                          ? 'border-red-500 focus:border-red-600' 
-                          : 'border-gray-200 focus:border-orange-500'
-                      }`}
-                      placeholder="Enter email address"
-                    />
-                  </div>
-                  {errors.email && (
-                    <p className="mt-1 text-sm text-red-600">{errors.email}</p>
-                  )}
-                </div>
+            {/* Email Field */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Email Address *</label>
+              <div className="relative">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><FaEnvelope /></div>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all ${errors.email ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-orange-500'}`}
+                  placeholder="Enter email address (lowercase only)"
+                />
+              </div>
+              {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
+              <p className="mt-1 text-xs text-gray-500">Email will be automatically converted to lowercase</p>
+            </div>
 
-                {/* Student ID Field */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Student ID *
-                  </label>
-                  <div className="relative">
-                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                      <FaIdCard />
-                    </div>
-                    <input
-                      type="text"
-                      name="student_id"
-                      value={formData.student_id}
-                      onChange={handleChange}
-                      className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all ${
-                        errors.student_id 
-                          ? 'border-red-500 focus:border-red-600' 
-                          : 'border-gray-200 focus:border-orange-500'
-                      }`}
-                      placeholder="Enter student ID"
-                    />
-                  </div>
-                  {errors.student_id && (
-                    <p className="mt-1 text-sm text-red-600">{errors.student_id}</p>
-                  )}
-                </div>
+            {/* Student ID Field */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Student ID *</label>
+              <div className="relative">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><FaIdCard /></div>
+                <input
+                  type="text"
+                  name="student_id"
+                  value={formData.student_id}
+                  onChange={handleChange}
+                  className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all ${errors.student_id ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-orange-500'}`}
+                  placeholder="Enter student ID"
+                />
+              </div>
+              {errors.student_id && <p className="mt-1 text-sm text-red-600">{errors.student_id}</p>}
+            </div>
 
-                {/* Phone Field */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Phone Number
-                  </label>
-                  <div className="relative">
-                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                      <FaPhone />
-                    </div>
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all ${
-                        errors.phone 
-                          ? 'border-red-500 focus:border-red-600' 
-                          : 'border-gray-200 focus:border-orange-500'
-                      }`}
-                      placeholder="Enter phone number"
-                    />
-                  </div>
-                  {errors.phone && (
-                    <p className="mt-1 text-sm text-red-600">{errors.phone}</p>
-                  )}
-                </div>
+            {/* Phone Field */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Phone Number</label>
+              <div className="relative">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><FaPhone /></div>
+                <input
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  maxLength={11}
+                  className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all ${errors.phone ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-orange-500'}`}
+                  placeholder="09XXXXXXXXX"
+                />
+              </div>
+              {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone}</p>}
+              <p className="mt-1 text-xs text-gray-500">Philippine format: 09XXXXXXXXX (11 digits)</p>
+            </div>
 
             {/* Academic Information */}
             <div className="pt-4">
@@ -336,85 +374,53 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
               </h4>
             </div>
 
-                {/* Program Field */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Program *
-                  </label>
-                  <div className="relative">
-                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                      <FaGraduationCap />
-                    </div>
-                    <select
-                      name="program"
-                      value={formData.program}
-                      onChange={handleChange}
-                      className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all appearance-none ${
-                        errors.program 
-                          ? 'border-red-500 focus:border-red-600' 
-                          : 'border-gray-200 focus:border-orange-500'
-                      }`}
-                    >
-                      <option value="">Select program</option>
-                      {programs.map(program => (
-                        <option key={program} value={program}>{program}</option>
-                      ))}
-                    </select>
-                  </div>
-                  {errors.program && (
-                    <p className="mt-1 text-sm text-red-600">{errors.program}</p>
-                  )}
-                </div>
+            {/* Program Field */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Program *</label>
+              <div className="relative">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><FaGraduationCap /></div>
+                <select
+                  name="program"
+                  value={formData.program}
+                  onChange={handleChange}
+                  className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all appearance-none ${errors.program ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-orange-500'}`}
+                >
+                  <option value="">Select program</option>
+                  {programs.map(program => (<option key={program} value={program}>{program}</option>))}
+                </select>
+              </div>
+              {errors.program && <p className="mt-1 text-sm text-red-600">{errors.program}</p>}
+            </div>
 
-                {/* Year Level Field */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Year Level *
-                  </label>
-                  <select
-                    name="year_level"
-                    value={formData.year_level}
-                    onChange={handleChange}
-                    className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none transition-all appearance-none ${
-                      errors.year_level 
-                        ? 'border-red-500 focus:border-red-600' 
-                        : 'border-gray-200 focus:border-orange-500'
-                    }`}
-                  >
-                    <option value="">Select year level</option>
-                    {yearLevels.map(level => (
-                      <option key={level} value={level}>{level}</option>
-                    ))}
-                  </select>
-                  {errors.year_level && (
-                    <p className="mt-1 text-sm text-red-600">{errors.year_level}</p>
-                  )}
-                </div>
+            {/* Year Level Field */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Year Level *</label>
+              <select
+                name="year_level"
+                value={formData.year_level}
+                onChange={handleChange}
+                className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none transition-all appearance-none ${errors.year_level ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-orange-500'}`}
+              >
+                <option value="">Select year level</option>
+                {yearLevels.map(level => (<option key={level} value={level}>{level}</option>))}
+              </select>
+              {errors.year_level && <p className="mt-1 text-sm text-red-600">{errors.year_level}</p>}
+            </div>
 
-                {/* GPA Field */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    GPA (0.0 - 4.0)
-                  </label>
-                  <input
-                    type="number"
-                    name="gpa"
-                    value={formData.gpa}
-                    onChange={handleChange}
-                    min="0"
-                    max="4"
-                    step="0.01"
-                    className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none transition-all ${
-                      errors.gpa 
-                        ? 'border-red-500 focus:border-red-600' 
-                        : 'border-gray-200 focus:border-orange-500'
-                    }`}
-                    placeholder="Enter GPA"
-                  />
-                  {errors.gpa && (
-                    <p className="mt-1 text-sm text-red-600">{errors.gpa}</p>
-                  )}
-                </div>
+            {/* GPA Field */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">GPA (0.0 - 4.0)</label>
+              <input
+                type="text"
+                name="gpa"
+                value={formData.gpa}
+                onChange={handleChange}
+                className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none transition-all ${errors.gpa ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-orange-500'}`}
+                placeholder="e.g., 3.50"
+              />
+              {errors.gpa && <p className="mt-1 text-sm text-red-600">{errors.gpa}</p>}
+              <p className="mt-1 text-xs text-gray-500">Maximum 2 decimal places (e.g., 3.50, 2.75)</p>
+            </div>
 
             {/* Dates */}
             <div className="pt-4">
@@ -424,57 +430,37 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
               </h4>
             </div>
 
-                {/* Enrollment Date */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Enrollment Date *
-                  </label>
-                  <div className="relative">
-                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                      <FaCalendarAlt />
-                    </div>
-                    <input
-                      type="date"
-                      name="enrollment_date"
-                      value={formData.enrollment_date}
-                      onChange={handleChange}
-                      className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all ${
-                        errors.enrollment_date 
-                          ? 'border-red-500 focus:border-red-600' 
-                          : 'border-gray-200 focus:border-orange-500'
-                      }`}
-                    />
-                  </div>
-                  {errors.enrollment_date && (
-                    <p className="mt-1 text-sm text-red-600">{errors.enrollment_date}</p>
-                  )}
-                </div>
+            {/* Enrollment Date */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Enrollment Date *</label>
+              <div className="relative">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><FaCalendarAlt /></div>
+                <input
+                  type="date"
+                  name="enrollment_date"
+                  value={formData.enrollment_date}
+                  onChange={handleChange}
+                  className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all ${errors.enrollment_date ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-orange-500'}`}
+                />
+              </div>
+              {errors.enrollment_date && <p className="mt-1 text-sm text-red-600">{errors.enrollment_date}</p>}
+            </div>
 
-                {/* Graduation Date */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Expected Graduation Date
-                  </label>
-                  <div className="relative">
-                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                      <FaCalendarAlt />
-                    </div>
-                    <input
-                      type="date"
-                      name="graduation_date"
-                      value={formData.graduation_date}
-                      onChange={handleChange}
-                      className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all ${
-                        errors.graduation_date 
-                          ? 'border-red-500 focus:border-red-600' 
-                          : 'border-gray-200 focus:border-orange-500'
-                      }`}
-                    />
-                  </div>
-                  {errors.graduation_date && (
-                    <p className="mt-1 text-sm text-red-600">{errors.graduation_date}</p>
-                  )}
-                </div>
+            {/* Graduation Date */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Expected Graduation Date</label>
+              <div className="relative">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><FaCalendarAlt /></div>
+                <input
+                  type="date"
+                  name="graduation_date"
+                  value={formData.graduation_date}
+                  onChange={handleChange}
+                  className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all ${errors.graduation_date ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-orange-500'}`}
+                />
+              </div>
+              {errors.graduation_date && <p className="mt-1 text-sm text-red-600">{errors.graduation_date}</p>}
+            </div>
 
             {/* Guardian Information */}
             <div className="pt-4">
@@ -484,52 +470,40 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
               </h4>
             </div>
 
-                {/* Guardian Name */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Guardian Name
-                  </label>
-                  <div className="relative">
-                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                      <FaUserFriends />
-                    </div>
-                    <input
-                      type="text"
-                      name="guardian_name"
-                      value={formData.guardian_name}
-                      onChange={handleChange}
-                      className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-orange-500 transition-all"
-                      placeholder="Enter guardian name"
-                    />
-                  </div>
-                </div>
+            {/* Guardian Name */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Guardian Name</label>
+              <div className="relative">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><FaUserFriends /></div>
+                <input
+                  type="text"
+                  name="guardian_name"
+                  value={formData.guardian_name}
+                  onChange={handleChange}
+                  className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-orange-500 transition-all"
+                  placeholder="Enter guardian name"
+                />
+              </div>
+            </div>
 
-                {/* Guardian Phone */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Guardian Phone
-                  </label>
-                  <div className="relative">
-                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                      <FaPhone />
-                    </div>
-                    <input
-                      type="tel"
-                      name="guardian_phone"
-                      value={formData.guardian_phone}
-                      onChange={handleChange}
-                      className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all ${
-                        errors.guardian_phone 
-                          ? 'border-red-500 focus:border-red-600' 
-                          : 'border-gray-200 focus:border-orange-500'
-                      }`}
-                      placeholder="Enter guardian phone"
-                    />
-                  </div>
-                  {errors.guardian_phone && (
-                    <p className="mt-1 text-sm text-red-600">{errors.guardian_phone}</p>
-                  )}
-                </div>
+            {/* Guardian Phone */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Guardian Phone</label>
+              <div className="relative">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><FaPhone /></div>
+                <input
+                  type="tel"
+                  name="guardian_phone"
+                  value={formData.guardian_phone}
+                  onChange={handleChange}
+                  maxLength={11}
+                  className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all ${errors.guardian_phone ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-orange-500'}`}
+                  placeholder="09XXXXXXXXX"
+                />
+              </div>
+              {errors.guardian_phone && <p className="mt-1 text-sm text-red-600">{errors.guardian_phone}</p>}
+              <p className="mt-1 text-xs text-gray-500">Philippine format: 09XXXXXXXXX (11 digits)</p>
+            </div>
 
             {/* Address */}
             <div>
@@ -555,38 +529,36 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
               </h4>
             </div>
 
-                {/* Skills */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Skills
-                  </label>
-                  <textarea
-                    name="skills"
-                    value={formData.skills}
-                    onChange={handleChange}
-                    rows="3"
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-orange-500 transition-all resize-none"
-                    placeholder="e.g., Programming (Python, JavaScript), Data Analysis, Public Speaking"
-                  />
-                  <p className="mt-1 text-xs text-gray-500">List student's technical and soft skills</p>
-                </div>
+            {/* Skills */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Skills</label>
+              <textarea
+                name="skills"
+                value={formData.skills}
+                onChange={handleChange}
+                rows="3"
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-orange-500 transition-all resize-none"
+                placeholder="e.g., Programming (Python, JavaScript), Data Analysis, Public Speaking"
+              />
+              <p className="mt-1 text-xs text-gray-500">List student's technical and soft skills</p>
+            </div>
 
-                {/* Extracurricular Activities */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2 items-center gap-2">
-                    <FaRunning className="text-orange-600" />
-                    Extracurricular Activities
-                  </label>
-                  <textarea
-                    name="extracurricular_activities"
-                    value={formData.extracurricular_activities}
-                    onChange={handleChange}
-                    rows="3"
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-orange-500 transition-all resize-none"
-                    placeholder="e.g., Basketball Team, Debate Club, Student Council, Volunteer Work"
-                  />
-                  <p className="mt-1 text-xs text-gray-500">List clubs, sports, organizations, and volunteer activities</p>
-                </div>
+            {/* Extracurricular Activities */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2 items-center gap-2">
+                <FaRunning className="text-orange-600" />
+                Extracurricular Activities
+              </label>
+              <textarea
+                name="extracurricular_activities"
+                value={formData.extracurricular_activities}
+                onChange={handleChange}
+                rows="3"
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-orange-500 transition-all resize-none"
+                placeholder="e.g., Basketball Team, Debate Club, Student Council, Volunteer Work"
+              />
+              <p className="mt-1 text-xs text-gray-500">List clubs, sports, organizations, and volunteer activities</p>
+            </div>
 
             {/* Notes */}
             <div>
@@ -606,7 +578,7 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
           </div>
         </form>
 
-        {/* Action Buttons - Fixed at bottom */}
+        {/* Action Buttons */}
         <div className="px-6 py-4 bg-white border-t border-gray-200 shrink-0">
           <div className="flex gap-3">
             <button
@@ -620,12 +592,21 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
             <button
               type="submit"
               onClick={handleSubmit}
-              className="flex-1 px-4 py-3 bg-linear-to-r from-orange-600 to-orange-500 text-white rounded-xl hover:from-orange-700 hover:to-orange-600 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={loading}
+              className={`flex-1 px-4 py-3 rounded-xl transition-all font-semibold ${
+                isFormValid && !loading
+                  ? 'bg-linear-to-r from-orange-600 to-orange-500 text-white hover:from-orange-700 hover:to-orange-600'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              }`}
+              disabled={!isFormValid || loading}
             >
               {loading ? 'Saving...' : isEditMode ? 'Update Student' : 'Create Student'}
             </button>
           </div>
+          {!isFormValid && !isEditMode && (
+            <p className="mt-2 text-xs text-center text-gray-500">
+              Please fill in all required fields correctly to enable the Create button
+            </p>
+          )}
         </div>
       </div>
     </div>
