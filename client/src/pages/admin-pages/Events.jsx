@@ -112,20 +112,20 @@ const Events = () => {
 
   return (
     <AdminLayout>
-      <div className="min-h-screen bg-linear-to-br from-gray-50 via-orange-50/30 to-gray-50 p-4 sm:p-6 lg:p-8">
+      <div className="min-h-screen bg-linear-to-br from-gray-50 via-orange-50/30 to-gray-50 p-3 sm:p-4 md:p-6 lg:p-8">
         {/* Header Section */}
-        <div className="mb-8 sm:mb-10">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-12 h-12 bg-linear-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
-              <FaCalendarAlt className="text-white text-xl" />
+        <div className="mb-6 sm:mb-8 lg:mb-10">
+          <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-linear-to-br from-orange-500 to-orange-600 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg">
+              <FaCalendarAlt className="text-white text-lg sm:text-xl" />
             </div>
             <div>
-              <h1 className="text-3xl sm:text-4xl font-bold bg-linear-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-linear-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
                 Events Management
               </h1>
             </div>
           </div>
-          <p className="text-base sm:text-lg text-gray-600 ml-16 font-medium">
+          <p className="text-sm sm:text-base lg:text-lg text-gray-600 ml-12 sm:ml-16 font-medium">
             Manage academic and institutional events
           </p>
         </div>

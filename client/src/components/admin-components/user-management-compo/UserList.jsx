@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { FaSearch } from 'react-icons/fa';
 import { getStatusColor, getRoleColor, capitalize } from '../../../utils/admin-utilities/user-management-utils/userHelpers';
 
 const UserList = ({ users, searchTerm, onEditUser, onDeleteUser, loading }) => {
@@ -104,40 +105,46 @@ const UserList = ({ users, searchTerm, onEditUser, onDeleteUser, loading }) => {
       {/* Mobile Card View */}
       <div className="lg:hidden flex-1 overflow-auto">
         {currentUsers.map((user) => (
-          <div key={user.id} className="border-b border-gray-200 last:border-b-0 p-5 hover:bg-orange-50/30 transition-colors">
-            <div className="flex items-start justify-between gap-3 mb-3">
+          <div key={user.id} className="border-b border-gray-200 last:border-b-0 p-4 sm:p-5 hover:bg-orange-50/30 transition-colors active:bg-orange-50/50">
+            <div className="space-y-3">
+              {/* User Info */}
               <div className="flex-1 min-w-0">
-                <h3 className="text-base font-bold text-gray-900 mb-1 truncate">{user.name}</h3>
-                <p className="text-sm text-gray-600 mb-2 truncate">{user.email}</p>
-                <div className="flex flex-wrap gap-2">
-                  <span className={`inline-flex px-2.5 py-1 text-sm font-bold rounded-full ${getRoleColor(user.role)}`}>
+                <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-1.5 wrap-break-word">{user.name}</h3>
+                <p className="text-xs sm:text-sm text-gray-600 mb-2.5 break-all">{user.email}</p>
+                <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                  <span className={`inline-flex px-2 sm:px-2.5 py-1 text-xs sm:text-sm font-bold rounded-full ${getRoleColor(user.role)}`}>
                     {capitalize(user.role)}
                   </span>
-                  <span className={`inline-flex px-2.5 py-1 text-sm font-bold rounded-full ${getStatusColor(user.status)}`}>
+                  <span className={`inline-flex px-2 sm:px-2.5 py-1 text-xs sm:text-sm font-bold rounded-full ${getStatusColor(user.status)}`}>
                     {capitalize(user.status)}
                   </span>
                 </div>
               </div>
-            </div>
-            
-            <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-200">
-              <div className="text-sm text-gray-700 font-medium">
-                {new Date(user.created_at).toLocaleDateString()}
-              </div>
               
-              <div className="flex space-x-2 text-sm">
-                <button
-                  onClick={() => onEditUser(user)}
-                  className="px-3 py-1.5 text-orange-600 hover:text-white hover:bg-orange-600 border border-orange-600 rounded-lg transition-all duration-200 font-semibold"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => onDeleteUser(user)}
-                  className="px-3 py-1.5 text-red-600 hover:text-white hover:bg-red-600 border border-red-600 rounded-lg transition-all duration-200 font-semibold"
-                >
-                  Delete
-                </button>
+              {/* Date and Actions */}
+              <div className="flex flex-col xs:flex-row xs:items-center xs:justify-between gap-2.5 pt-3 border-t border-gray-200">
+                <div className="text-xs sm:text-sm text-gray-700 font-medium">
+                  Created: {new Date(user.created_at).toLocaleDateString('en-US', { 
+                    month: 'short', 
+                    day: 'numeric', 
+                    year: 'numeric' 
+                  })}
+                </div>
+                
+                <div className="flex gap-2 text-xs sm:text-sm">
+                  <button
+                    onClick={() => onEditUser(user)}
+                    className="flex-1 xs:flex-none px-4 sm:px-5 py-2 sm:py-2.5 text-orange-600 hover:text-white hover:bg-orange-600 active:bg-orange-700 border-2 border-orange-600 rounded-lg transition-all duration-200 font-semibold touch-manipulation"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => onDeleteUser(user)}
+                    className="flex-1 xs:flex-none px-4 sm:px-5 py-2 sm:py-2.5 text-red-600 hover:text-white hover:bg-red-600 active:bg-red-700 border-2 border-red-600 rounded-lg transition-all duration-200 font-semibold touch-manipulation"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -145,26 +152,35 @@ const UserList = ({ users, searchTerm, onEditUser, onDeleteUser, loading }) => {
       </div>
       
       {filteredUsers.length === 0 && !loading && (
-        <div className="flex items-center justify-center py-12 px-4">
-          <p className="text-gray-500 text-base font-medium">No users found matching your search criteria.</p>
+        <div className="flex items-center justify-center py-8 sm:py-12 px-4">
+          <div className="text-center">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-3 sm:mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+              <FaSearch className="text-gray-400 text-xl sm:text-2xl" />
+            </div>
+            <p className="text-gray-500 text-sm sm:text-base font-medium">No users found</p>
+            <p className="text-gray-400 text-xs sm:text-sm mt-1">Try adjusting your search criteria</p>
+          </div>
         </div>
       )}
 
       {/* Pagination */}
       {filteredUsers.length > 0 && (
-        <div className="bg-white border-t border-gray-200 px-4 py-3 flex items-center justify-between shrink-0">
-          <div className="flex-1 flex justify-between sm:hidden">
+        <div className="bg-white border-t border-gray-200 px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between shrink-0">
+          <div className="flex-1 flex justify-between items-center gap-2 sm:hidden">
             <button
               onClick={() => goToPage(currentPage - 1)}
               disabled={currentPage === 1}
-              className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="relative inline-flex items-center px-3 sm:px-4 py-2 border-2 border-gray-300 text-xs sm:text-sm font-semibold rounded-lg text-gray-700 bg-white hover:bg-gray-50 active:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation transition-all"
             >
               Previous
             </button>
+            <span className="text-xs sm:text-sm font-medium text-gray-700 px-2">
+              {currentPage} / {totalPages}
+            </span>
             <button
               onClick={() => goToPage(currentPage + 1)}
               disabled={currentPage === totalPages}
-              className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="relative inline-flex items-center px-3 sm:px-4 py-2 border-2 border-gray-300 text-xs sm:text-sm font-semibold rounded-lg text-gray-700 bg-white hover:bg-gray-50 active:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation transition-all"
             >
               Next
             </button>

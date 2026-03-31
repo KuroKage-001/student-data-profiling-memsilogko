@@ -16,6 +16,9 @@ const FacultyListSkeleton = () => {
                 <div className="h-3 bg-gray-300 rounded w-16 animate-pulse"></div>
               </th>
               <th className="px-6 py-3 text-left">
+                <div className="h-3 bg-gray-300 rounded w-24 animate-pulse"></div>
+              </th>
+              <th className="px-6 py-3 text-left">
                 <div className="h-3 bg-gray-300 rounded w-12 animate-pulse"></div>
               </th>
               <th className="px-6 py-3 text-left">
@@ -39,13 +42,16 @@ const FacultyListSkeleton = () => {
                   <div className="h-4 bg-gray-200 rounded w-28 animate-pulse"></div>
                 </td>
                 <td className="px-6 py-4">
+                  <div className="h-4 bg-gray-200 rounded w-32 animate-pulse"></div>
+                </td>
+                <td className="px-6 py-4">
                   <div className="h-6 bg-gray-200 rounded-full w-16 animate-pulse"></div>
                 </td>
                 <td className="px-6 py-4">
                   <div className="flex items-center space-x-3">
-                    <div className="h-4 bg-gray-200 rounded w-10 animate-pulse"></div>
-                    <div className="h-4 bg-gray-200 rounded w-10 animate-pulse"></div>
-                    <div className="h-4 bg-gray-200 rounded w-12 animate-pulse"></div>
+                    <div className="h-8 bg-gray-200 rounded-lg w-14 animate-pulse"></div>
+                    <div className="h-8 bg-gray-200 rounded-lg w-14 animate-pulse"></div>
+                    <div className="h-8 bg-gray-200 rounded-lg w-16 animate-pulse"></div>
                   </div>
                 </td>
               </tr>
@@ -57,24 +63,27 @@ const FacultyListSkeleton = () => {
       {/* Mobile Card View Skeleton */}
       <div className="lg:hidden flex-1 overflow-auto">
         {[1, 2, 3, 4, 5].map((index) => (
-          <div key={index} className="border-b border-gray-200 last:border-b-0 p-4">
-            <div className="flex items-start justify-between gap-3 mb-2">
+          <div key={index} className="border-b border-gray-200 last:border-b-0 p-4 sm:p-5">
+            <div className="space-y-3">
+              {/* Faculty Info Skeleton */}
               <div className="flex-1 min-w-0 space-y-2">
-                <div className="h-4 bg-gray-300 rounded w-32 animate-pulse"></div>
-                <div className="h-3 bg-gray-200 rounded w-24 animate-pulse"></div>
-                <div className="flex flex-wrap gap-1.5">
-                  <div className="h-3 bg-gray-200 rounded w-28 animate-pulse"></div>
-                  <div className="h-3 bg-gray-200 rounded w-20 animate-pulse"></div>
+                <div className="h-5 sm:h-6 bg-gray-300 rounded w-36 sm:w-44 animate-pulse"></div>
+                <div className="h-3.5 sm:h-4 bg-gray-200 rounded w-24 sm:w-28 animate-pulse"></div>
+                <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                  <div className="h-3.5 sm:h-4 bg-gray-200 rounded w-28 sm:w-32 animate-pulse"></div>
+                  <div className="h-3.5 sm:h-4 bg-gray-200 rounded w-24 sm:w-28 animate-pulse"></div>
                 </div>
+                <div className="h-6 sm:h-7 bg-gray-200 rounded-full w-16 sm:w-20 animate-pulse"></div>
               </div>
-            </div>
-            
-            <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-100">
-              <div className="h-6 bg-gray-200 rounded-full w-16 animate-pulse"></div>
-              <div className="flex space-x-3">
-                <div className="h-3 bg-gray-200 rounded w-10 animate-pulse"></div>
-                <div className="h-3 bg-gray-200 rounded w-10 animate-pulse"></div>
-                <div className="h-3 bg-gray-200 rounded w-12 animate-pulse"></div>
+              
+              {/* Specialization and Actions Skeleton */}
+              <div className="flex flex-col gap-2.5 pt-3 border-t border-gray-200">
+                <div className="h-3.5 sm:h-4 bg-gray-200 rounded w-32 sm:w-40 animate-pulse"></div>
+                <div className="flex gap-2">
+                  <div className="h-9 sm:h-10 bg-gray-200 rounded-lg flex-1 animate-pulse"></div>
+                  <div className="h-9 sm:h-10 bg-gray-200 rounded-lg flex-1 animate-pulse"></div>
+                  <div className="h-9 sm:h-10 bg-gray-200 rounded-lg flex-1 animate-pulse"></div>
+                </div>
               </div>
             </div>
           </div>
@@ -82,10 +91,11 @@ const FacultyListSkeleton = () => {
       </div>
 
       {/* Pagination Skeleton */}
-      <div className="bg-white border-t border-gray-200 px-4 py-3 flex items-center justify-between shrink-0">
-        <div className="flex-1 flex justify-between sm:hidden">
-          <div className="h-9 bg-gray-200 rounded-md w-20 animate-pulse"></div>
-          <div className="h-9 bg-gray-200 rounded-md w-16 animate-pulse"></div>
+      <div className="bg-white border-t border-gray-200 px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between shrink-0">
+        <div className="flex-1 flex justify-between items-center gap-2 sm:hidden">
+          <div className="h-9 bg-gray-200 rounded-lg w-20 animate-pulse"></div>
+          <div className="h-4 bg-gray-200 rounded w-12 animate-pulse"></div>
+          <div className="h-9 bg-gray-200 rounded-lg w-16 animate-pulse"></div>
         </div>
         <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
           <div className="h-5 bg-gray-200 rounded w-48 animate-pulse"></div>
