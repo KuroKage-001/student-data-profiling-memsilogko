@@ -17,7 +17,7 @@ import {
 import useToast from '../../hooks/useToast';
 import { exportToExcel } from '../../utils/admin-utilities/student-profile-utils';
 import { generateStudentPDF } from '../../utils/admin-utilities/pdfGenerator';
-import { FaUserGraduate, FaSearch, FaPlus, FaFileExport } from 'react-icons/fa';
+import { FaUserGraduate, FaSearch, FaPlus, FaFileExport, FaFilter, FaChevronDown, FaChevronUp } from 'react-icons/fa';
 
 const StudentProfiles = () => {
   usePageTitle('Student Profiles');
@@ -28,6 +28,7 @@ const StudentProfiles = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [serverErrors, setServerErrors] = useState(null);
+  const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({
     program: 'all',
     yearLevel: 'all',
@@ -235,8 +236,27 @@ const StudentProfiles = () => {
             </div>
           </div>
 
+          {/* Filters Toggle Button (Mobile Only) */}
+          <div className="mt-3 lg:hidden">
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="w-full flex items-center justify-between px-3 py-2.5 bg-gray-50 hover:bg-gray-100 active:bg-gray-200 border border-gray-200 rounded-lg transition-all text-gray-700 font-medium text-sm"
+            >
+              <div className="flex items-center gap-2">
+                <FaFilter className="text-xs text-orange-600" />
+                <span>Filters</span>
+                {(filters.program !== 'all' || filters.yearLevel !== 'all' || filters.skills || filters.activities || filters.status !== 'all') && (
+                  <span className="inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-orange-600 rounded-full">
+                    {[filters.program !== 'all', filters.yearLevel !== 'all', filters.skills, filters.activities, filters.status !== 'all'].filter(Boolean).length}
+                  </span>
+                )}
+              </div>
+              {showFilters ? <FaChevronUp className="text-xs" /> : <FaChevronDown className="text-xs" />}
+            </button>
+          </div>
+
           {/* Filters Section */}
-          <div className="mt-3 pt-3 border-t border-gray-200">
+          <div className={`mt-3 pt-3 border-t border-gray-200 ${showFilters ? 'block' : 'hidden'} lg:block`}>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 sm:gap-3">
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">
