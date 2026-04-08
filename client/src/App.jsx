@@ -1,7 +1,10 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './context/AuthContext';
-import ProtectedRoute from './context/ProtectedRoute';
+import DynamicRouteGuard from './context/DynamicRouteGuard';
+import RouteLoader from './components/system-components/RouteLoader';
+import { useDynamicRoutes } from './hooks/useDynamicRoutes';
+import { specialRoutes } from './config/routeConfig';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -13,83 +16,62 @@ const queryClient = new QueryClient({
     },
   },
 });
-import HomePage from './pages/system-page/HomePage';
-import LoginPage from './pages/system-page/LoginPage';
-import UserProfileSettings from './pages/system-page/UserProfileSettings';
-import AdminDashboard from './pages/admin-pages/AdminDashboard';
-import StudentProfiles from './pages/admin-pages/StudentProfiles';
-import FacultyProfiles from './pages/admin-pages/FacultyProfiles';
-import Events from './pages/admin-pages/Events';
-import Scheduling from './pages/admin-pages/Scheduling';
-import Research from './pages/admin-pages/Research';
-import InstructionsPage from './pages/admin-pages/InstructionsPage';
-import UserManagement from './pages/admin-pages/UserManagement';
+
+// Dynamic Routes Component
+const DynamicRoutes = () => {
+  const { routes, loading } = useDynamicRoutes();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <p className="text-gray-600">Loading application...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <Routes>
+      {/* Dynamically generated routes */}
+      {routes.map((route) => (
+        <Route
+          key={route.id}
+          path={route.path}
+          element={
+            <DynamicRouteGuard route={route}>
+              <RouteLoader>
+                <route.component />
+              </RouteLoader>
+            </DynamicRouteGuard>
+          }
+        />
+      ))}
+
+      {/* Special routes - redirects */}
+      <Route 
+        path={specialRoutes.adminRedirect.from} 
+        element={<Navigate to={specialRoutes.adminRedirect.to} replace />} 
+      />
+      
+      {/* Catch all route */}
+      <Route 
+        path={specialRoutes.notFound.from} 
+        element={<Navigate to={specialRoutes.notFound.to} replace />} 
+      />
+    </Routes>
+  );
+};
 
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <Router>
-        <Routes>
-          {/* System Routes */}
-          <Route path="/" element={<HomePage />} />
-          
-          {/* Admin Routes */}
-          <Route path="/admin/login" element={<LoginPage />} />
-          <Route path="/profile/settings" element={
-            <ProtectedRoute>
-              <UserProfileSettings />
-            </ProtectedRoute>
-          } />
-          <Route path="/admin/dashboard" element={
-            <ProtectedRoute>
-              <AdminDashboard />
-            </ProtectedRoute>
-          } />
-          <Route path="/admin/user-management" element={
-            <ProtectedRoute>
-              <UserManagement />
-            </ProtectedRoute>
-          } />
-          <Route path="/admin/students" element={
-            <ProtectedRoute>
-              <StudentProfiles />
-            </ProtectedRoute>
-          } />
-          <Route path="/admin/faculty" element={
-            <ProtectedRoute>
-              <FacultyProfiles />
-            </ProtectedRoute>
-          } />
-          <Route path="/admin/events" element={
-            <ProtectedRoute>
-              <Events />
-            </ProtectedRoute>
-          } />
-          <Route path="/admin/scheduling" element={
-            <ProtectedRoute>
-              <Scheduling />
-            </ProtectedRoute>
-          } />
-          <Route path="/admin/research" element={
-            <ProtectedRoute>
-              <Research />
-            </ProtectedRoute>
-          } />
-          <Route path="/admin/instructions" element={
-            <ProtectedRoute>
-              <InstructionsPage />
-            </ProtectedRoute>
-          } />
-          
-          {/* Redirect /admin to /admin/login */}
-          <Route path="/admin" element={<Navigate to="/admin/login" replace />} />
-          
-          {/* Catch all route */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </Router>
-    </AuthProvider>
+          <DynamicRoutes />
+        </Router>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

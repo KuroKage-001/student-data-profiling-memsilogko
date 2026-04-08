@@ -80,3 +80,9 @@ Route::middleware(['auth:api', 'check.status'])->group(function () {
     Route::apiResource('events', EventController::class);
     Route::get('events-statistics', [EventController::class, 'statistics']);
 });
+
+// Dynamic Routes API (Optional - for database-driven routing)
+Route::middleware(['auth:api', 'check.status'])->group(function () {
+    Route::get('routes', [App\Http\Controllers\RouteController::class, 'index']);
+    Route::post('routes/check-access', [App\Http\Controllers\RouteController::class, 'checkAccess']);
+});
