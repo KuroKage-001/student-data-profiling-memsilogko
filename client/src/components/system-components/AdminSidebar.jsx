@@ -274,6 +274,25 @@ function AdminSidebar({ isOpen, onClose, onCollapseChange }) {
         <div className={`py-4 border-t border-gray-200 bg-linear-to-br from-gray-50 to-white transition-all duration-300 ${isCollapsed ? 'px-2' : 'px-6'}`}>
           {!isCollapsed ? (
             <>
+              {/* Date and Day Display */}
+              <div className="mb-4 px-4 py-3 bg-linear-to-r from-orange-50 to-orange-100 rounded-xl border border-orange-200">
+                <div className="flex items-center gap-3">
+                  <div className="text-left flex-1">
+                    <p className="text-xs font-medium text-gray-600">Today</p>
+                    <p className="text-sm font-bold text-orange-600">
+                      {new Date().toLocaleDateString('en-US', { weekday: 'long' })}
+                    </p>
+                  </div>
+                  <div className="w-px h-10 bg-orange-300"></div>
+                  <div className="text-left flex-1">
+                    <p className="text-xs font-medium text-gray-600">Date</p>
+                    <p className="text-sm font-bold text-gray-900">
+                      {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
               <div className="flex items-center justify-center gap-2 mb-2">
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                 <p className="text-gray-600 text-xs font-medium">System Online</p>

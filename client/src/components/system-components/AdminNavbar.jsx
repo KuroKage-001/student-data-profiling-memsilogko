@@ -69,25 +69,6 @@ const AdminNavbar = ({ onToggleSidebar }) => {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-4">
-            {/* Date and Day Display */}
-            <div className="hidden lg:flex items-center gap-4 px-6 py-2 bg-linear-to-r from-orange-50 to-orange-100 rounded-xl border border-orange-200">
-              <div className="flex items-center gap-3">
-                <div className="text-left">
-                  <p className="text-xs font-medium text-gray-600">Today</p>
-                  <p className="text-sm font-bold text-orange-600">
-                    {new Date().toLocaleDateString('en-US', { weekday: 'long' })}
-                  </p>
-                </div>
-                <div className="w-px h-8 bg-orange-300"></div>
-                <div className="text-left">
-                  <p className="text-xs font-medium text-gray-600">Date</p>
-                  <p className="text-sm font-bold text-gray-900">
-                    {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                  </p>
-                </div>
-              </div>
-            </div>
-
           {/* User Menu */}
           <div className="relative" ref={dropdownRef}>
             <button
