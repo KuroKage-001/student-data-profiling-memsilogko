@@ -7,12 +7,16 @@ import { FacultyProfilesSkeleton } from '../../layouts/skeleton-loading';
 import usePageTitle from '../../hooks/usePageTitle';
 import useToast from '../../hooks/useToast';
 import useFacultyProfile from '../../hooks/faculty-profile-hook/useFacultyProfile';
+import { useAuth } from '../../context/AuthContext';
 import { generateFacultyPDF } from '../../components/admin-components/faculty-profile-compo/facultyReportPdf.jsx';
 import { exportFacultyToExcel, SEARCH_DEBOUNCE_DELAY } from '../../utils/admin-utilities/faculty-profile-utils';
 import { FaChalkboardTeacher, FaSearch, FaPlus, FaFileExport, FaFilter, FaChevronDown, FaChevronUp } from 'react-icons/fa';
 
 const FacultyProfiles = () => {
   usePageTitle('Faculty Profiles');
+  
+  const { user } = useAuth();
+  const isDeptChair = user?.role === 'dept_chair';
   
   const [selectedFaculty, setSelectedFaculty] = useState(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
@@ -234,12 +238,15 @@ const FacultyProfiles = () => {
             </div>
             <div>
               <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
-                Faculty Profiles
+                {isDeptChair && user?.department ? `${user.department} Faculty Profiles` : 'Faculty Profiles'}
               </h1>
             </div>
           </div>
           <p className="text-xs sm:text-sm text-gray-600 ml-10 sm:ml-13 font-medium">
-            Faculty information and professional development management
+            {isDeptChair && user?.department 
+              ? `${user.department} department faculty information and professional development`
+              : 'Faculty information and professional development management'
+            }
           </p>
         </div>
 
@@ -299,21 +306,24 @@ const FacultyProfiles = () => {
           {/* Filters Section */}
           <div className={`mt-3 pt-3 border-t border-gray-200 ${showFilters ? 'block' : 'hidden'} lg:block`}>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3">
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">
-                  Department
-                </label>
-                <select
-                  value={filters.department}
-                  onChange={(e) => handleFilterChange('department', e.target.value)}
-                  className="w-full px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                >
-                  <option value="all">All Departments</option>
-                  {departments.map(dept => (
-                    <option key={dept} value={dept}>{dept}</option>
-                  ))}
-                </select>
-              </div>
+              {/* Department Filter - Hidden for Dept Chair */}
+              {!isDeptChair && (
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                    Department
+                  </label>
+                  <select
+                    value={filters.department}
+                    onChange={(e) => handleFilterChange('department', e.target.value)}
+                    className="w-full px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  >
+                    <option value="all">All Departments</option>
+                    {departments.map(dept => (
+                      <option key={dept} value={dept}>{dept}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">
                   Position

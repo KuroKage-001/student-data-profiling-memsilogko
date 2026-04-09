@@ -23,6 +23,7 @@ class User extends Authenticatable implements JWTSubject
         'email',
         'password',
         'role',
+        'department',
         'status',
         'student_id',
         'phone',
@@ -118,6 +119,42 @@ class User extends Authenticatable implements JWTSubject
     public function getStatusLabelAttribute()
     {
         return ucfirst($this->status);
+    }
+
+    /**
+     * Check if user is department chairman
+     *
+     * @return bool
+     */
+    public function isDeptChair()
+    {
+        return $this->role === 'dept_chair';
+    }
+
+    /**
+     * Check if user is admin
+     *
+     * @return bool
+     */
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }
+
+    /**
+     * Get role label
+     *
+     * @return string
+     */
+    public function getRoleLabelAttribute()
+    {
+        return match($this->role) {
+            'dept_chair' => 'Department Chairman',
+            'admin' => 'Administrator',
+            'faculty' => 'Faculty',
+            'student' => 'Student',
+            default => ucfirst($this->role)
+        };
     }
 
     /**

@@ -32,7 +32,15 @@ export const routeConfig = [
     path: '/admin/login',
     component: LoginPage,
     isPublic: true,
-    title: 'Login',
+    title: 'Admin Login',
+    roles: ['*'],
+  },
+  {
+    id: 'student-login',
+    path: '/login',
+    component: LoginPage,
+    isPublic: true,
+    title: 'Student Login',
     roles: ['*'],
   },
   {
@@ -41,7 +49,7 @@ export const routeConfig = [
     component: UserProfileSettings,
     isPublic: false,
     title: 'Profile Settings',
-    roles: ['admin', 'faculty', 'student'],
+    roles: ['admin', 'dept_chair', 'faculty', 'student'],
     requiresAuth: true,
   },
   {
@@ -50,7 +58,7 @@ export const routeConfig = [
     component: AdminDashboard,
     isPublic: false,
     title: 'Dashboard',
-    roles: ['admin'],
+    roles: ['admin', 'dept_chair'],
     requiresAuth: true,
   },
   {
@@ -77,7 +85,7 @@ export const routeConfig = [
     component: FacultyProfiles,
     isPublic: false,
     title: 'Faculty Profiles',
-    roles: ['admin'],
+    roles: ['admin', 'dept_chair'],
     requiresAuth: true,
   },
   {
@@ -95,7 +103,7 @@ export const routeConfig = [
     component: Scheduling,
     isPublic: false,
     title: 'Scheduling',
-    roles: ['admin', 'faculty'],
+    roles: ['admin', 'dept_chair', 'faculty'],
     requiresAuth: true,
   },
   {

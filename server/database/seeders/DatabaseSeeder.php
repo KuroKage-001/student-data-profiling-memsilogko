@@ -39,9 +39,10 @@ class DatabaseSeeder extends Seeder
             echo "Users already exist, skipping seeding.\n";
         }
 
-        // Seed events
+        // Seed events and department chairmen
         $this->call([
             EventSeeder::class,
+            DepartmentChairmanSeeder::class,
         ]);
     }
 }

@@ -66,9 +66,16 @@ const UserList = ({ users, searchTerm, onEditUser, onDeleteUser, loading }) => {
                   </div>
                 </td>
                 <td className="px-6 py-5 whitespace-nowrap">
-                  <span className={`inline-flex px-3 py-1.5 text-sm font-bold rounded-full ${getRoleColor(user.role)}`}>
-                    {capitalize(user.role)}
-                  </span>
+                  <div>
+                    <span className={`inline-flex px-3 py-1.5 text-sm font-bold rounded-full ${getRoleColor(user.role)}`}>
+                      {user.role === 'dept_chair' ? 'Dept. Chairman' : capitalize(user.role)}
+                    </span>
+                    {user.role === 'dept_chair' && user.department && (
+                      <div className="text-xs text-gray-600 mt-1 font-medium">
+                        {user.department} Department
+                      </div>
+                    )}
+                  </div>
                 </td>
                 <td className="px-6 py-5 whitespace-nowrap">
                   <span className={`inline-flex px-3 py-1.5 text-sm font-bold rounded-full ${getStatusColor(user.status)}`}>
@@ -113,8 +120,13 @@ const UserList = ({ users, searchTerm, onEditUser, onDeleteUser, loading }) => {
                 <p className="text-xs sm:text-sm text-gray-600 mb-2.5 break-all">{user.email}</p>
                 <div className="flex flex-wrap gap-1.5 sm:gap-2">
                   <span className={`inline-flex px-2 sm:px-2.5 py-1 text-xs sm:text-sm font-bold rounded-full ${getRoleColor(user.role)}`}>
-                    {capitalize(user.role)}
+                    {user.role === 'dept_chair' ? 'Dept. Chairman' : capitalize(user.role)}
                   </span>
+                  {user.role === 'dept_chair' && user.department && (
+                    <span className="inline-flex px-2 sm:px-2.5 py-1 text-xs sm:text-sm font-medium rounded-full bg-blue-100 text-blue-800">
+                      {user.department}
+                    </span>
+                  )}
                   <span className={`inline-flex px-2 sm:px-2.5 py-1 text-xs sm:text-sm font-bold rounded-full ${getStatusColor(user.status)}`}>
                     {capitalize(user.status)}
                   </span>

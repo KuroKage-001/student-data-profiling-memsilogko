@@ -12,15 +12,25 @@ class FacultyController extends Controller
     {
         try {
             $query = Faculty::query();
+            
+            // Get authenticated user
+            $user = auth('api')->user();
+
+            // Department-based filtering for department chairmen
+            if ($user && $user->role === 'dept_chair' && $user->department) {
+                // Department chairmen can only see faculty from their department
+                $query->where('department', $user->department);
+            }
 
             // Search functionality
-            if ($request->has('search')) {
+            if ($request->has('search') && $request->search) {
                 $search = $request->search;
                 $query->where(function($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
                       ->orWhere('faculty_id', 'like', "%{$search}%")
                       ->orWhere('department', 'like', "%{$search}%")
-                      ->orWhere('specialization', 'like', "%{$search}%");
+                      ->orWhere('specialization', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%");
                 });
             }
 
@@ -29,9 +39,12 @@ class FacultyController extends Controller
                 $query->where('status', $request->status);
             }
 
-            // Filter by department
+            // Filter by department (only for admins)
             if ($request->has('department') && $request->department !== 'all') {
-                $query->where('department', $request->department);
+                // Only apply if user is admin (dept chairs already filtered above)
+                if (!$user || $user->role !== 'dept_chair') {
+                    $query->where('department', $request->department);
+                }
             }
 
             // Filter by position
@@ -39,11 +52,27 @@ class FacultyController extends Controller
                 $query->where('position', $request->position);
             }
 
-            $faculty = $query->orderBy('created_at', 'desc')->get();
+            // Sorting
+            $sortBy = $request->get('sort_by', 'created_at');
+            $sortOrder = $request->get('sort_order', 'desc');
+            
+            // Validate sort fields
+            $allowedSortFields = ['name', 'faculty_id', 'department', 'position', 'hire_date', 'created_at', 'status'];
+            if (in_array($sortBy, $allowedSortFields)) {
+                $query->orderBy($sortBy, $sortOrder);
+            } else {
+                $query->orderBy('created_at', 'desc');
+            }
+
+            $faculty = $query->get();
 
             return response()->json([
                 'success' => true,
-                'data' => $faculty
+                'data' => $faculty,
+                'meta' => [
+                    'total' => $faculty->count(),
+                    'filtered_by_department' => $user && $user->role === 'dept_chair' ? $user->department : null
+                ]
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
@@ -189,12 +218,22 @@ class FacultyController extends Controller
     public function statistics()
     {
         try {
-            $total = Faculty::count();
-            $active = Faculty::where('status', 'active')->count();
-            $inactive = Faculty::where('status', 'inactive')->count();
-            $onLeave = Faculty::where('status', 'on_leave')->count();
+            // Get authenticated user
+            $user = auth('api')->user();
+            
+            $query = Faculty::query();
+            
+            // Filter by department for department chairmen
+            if ($user && $user->role === 'dept_chair' && $user->department) {
+                $query->where('department', $user->department);
+            }
+            
+            $total = (clone $query)->count();
+            $active = (clone $query)->where('status', 'active')->count();
+            $inactive = (clone $query)->where('status', 'inactive')->count();
+            $onLeave = (clone $query)->where('status', 'on_leave')->count();
 
-            $byDepartment = Faculty::selectRaw('department, count(*) as count')
+            $byDepartment = (clone $query)->selectRaw('department, count(*) as count')
                 ->groupBy('department')
                 ->get();
 
@@ -205,7 +244,8 @@ class FacultyController extends Controller
                     'active' => $active,
                     'inactive' => $inactive,
                     'on_leave' => $onLeave,
-                    'by_department' => $byDepartment
+                    'by_department' => $byDepartment,
+                    'filtered_by_department' => $user && $user->role === 'dept_chair' ? $user->department : null
                 ]
             ], 200);
         } catch (\Exception $e) {

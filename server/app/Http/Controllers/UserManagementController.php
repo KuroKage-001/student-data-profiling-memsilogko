@@ -66,7 +66,8 @@ class UserManagementController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
-            'role' => 'required|in:admin,faculty,student',
+            'role' => 'required|in:admin,faculty,student,dept_chair',
+            'department' => 'required_if:role,dept_chair|nullable|in:IT,CS',
             'status' => 'sometimes|in:active,inactive,suspended'
         ]);
 
@@ -78,13 +79,20 @@ class UserManagementController extends Controller
         }
 
         try {
-            $user = User::create([
+            $userData = [
                 'name' => $request->name,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
                 'role' => $request->role,
                 'status' => $request->get('status', 'active')
-            ]);
+            ];
+
+            // Add department if role is dept_chair
+            if ($request->role === 'dept_chair') {
+                $userData['department'] = $request->department;
+            }
+
+            $user = User::create($userData);
 
             return response()->json([
                 'success' => true,
@@ -131,7 +139,8 @@ class UserManagementController extends Controller
                 'name' => 'sometimes|required|string|max:255',
                 'email' => 'sometimes|required|string|email|max:255|unique:users,email,' . $id,
                 'password' => 'sometimes|nullable|string|min:8',
-                'role' => 'sometimes|required|in:admin,faculty,student',
+                'role' => 'sometimes|required|in:admin,faculty,student,dept_chair',
+                'department' => 'required_if:role,dept_chair|nullable|in:IT,CS',
                 'status' => 'sometimes|required|in:active,inactive,suspended'
             ]);
 
@@ -143,6 +152,15 @@ class UserManagementController extends Controller
             }
 
             $updateData = $request->only(['name', 'email', 'role', 'status']);
+            
+            // Handle department for dept_chair role
+            if ($request->has('role')) {
+                if ($request->role === 'dept_chair' && $request->has('department')) {
+                    $updateData['department'] = $request->department;
+                } elseif ($request->role !== 'dept_chair') {
+                    $updateData['department'] = null;
+                }
+            }
             
             if ($request->filled('password')) {
                 $updateData['password'] = Hash::make($request->password);
@@ -207,6 +225,9 @@ class UserManagementController extends Controller
                 'admins' => User::where('role', 'admin')->count(),
                 'faculty' => User::where('role', 'faculty')->count(),
                 'students' => User::where('role', 'student')->count(),
+                'dept_chairs' => User::where('role', 'dept_chair')->count(),
+                'dept_chair_it' => User::where('role', 'dept_chair')->where('department', 'IT')->count(),
+                'dept_chair_cs' => User::where('role', 'dept_chair')->where('department', 'CS')->count(),
             ];
 
             return response()->json([

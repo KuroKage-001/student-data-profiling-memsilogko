@@ -1,8 +1,12 @@
 import { FaUserGraduate, FaChalkboardTeacher, FaClipboardCheck, FaClock } from 'react-icons/fa';
 import { useDashboardStats } from '../../../hooks/admin-dashboard-hook';
+import { useAuth } from '../../../context/AuthContext';
 
 const DashboardStats = () => {
   const { data: statsData, isLoading, isError } = useDashboardStats();
+  const { user } = useAuth();
+  
+  const isDeptChair = user?.role === 'dept_chair';
 
   // Format number with commas
   const formatNumber = (num) => {
@@ -10,36 +14,45 @@ const DashboardStats = () => {
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   };
 
-  const stats = [
+  const allStats = [
     {
       title: 'Total Students',
       value: isLoading ? '...' : formatNumber(statsData?.students?.total_students || 0),
       icon: FaUserGraduate,
       iconBg: 'bg-orange-100',
-      iconColor: 'text-orange-600'
+      iconColor: 'text-orange-600',
+      hideForDeptChair: true
     },
     {
       title: 'Active Faculty',
       value: isLoading ? '...' : formatNumber(statsData?.faculty?.active || 0),
       icon: FaChalkboardTeacher,
       iconBg: 'bg-blue-100',
-      iconColor: 'text-blue-600'
+      iconColor: 'text-blue-600',
+      hideForDeptChair: false
     },
     {
       title: 'Total Faculty',
       value: isLoading ? '...' : formatNumber(statsData?.faculty?.total || 0),
       icon: FaClipboardCheck,
       iconBg: 'bg-green-100',
-      iconColor: 'text-green-600'
+      iconColor: 'text-green-600',
+      hideForDeptChair: false
     },
     {
       title: 'Faculty on Leave',
       value: isLoading ? '...' : formatNumber(statsData?.faculty?.on_leave || 0),
       icon: FaClock,
       iconBg: 'bg-yellow-100',
-      iconColor: 'text-yellow-600'
+      iconColor: 'text-yellow-600',
+      hideForDeptChair: false
     }
   ];
+
+  // Filter stats based on user role
+  const stats = isDeptChair 
+    ? allStats.filter(stat => !stat.hideForDeptChair)
+    : allStats;
 
   if (isError) {
     return (
@@ -50,7 +63,7 @@ const DashboardStats = () => {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+    <div className={`grid grid-cols-1 ${isDeptChair ? 'md:grid-cols-3' : 'md:grid-cols-2 lg:grid-cols-4'} gap-4 sm:gap-5`}>
       {stats.map((stat, index) => (
         <div key={index} className="bg-white rounded-2xl p-5 sm:p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300">
           <div className="flex items-start justify-between">

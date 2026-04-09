@@ -45,8 +45,19 @@ export const useLoginForm = () => {
         setUser(result.user);
         showSuccess('Login Successful...');
         
-        // Navigate immediately for better UX
-        navigate('/admin/dashboard');
+        // Role-based navigation
+        const userRole = result.user?.role;
+        
+        if (userRole === 'admin' || userRole === 'dept_chair') {
+          navigate('/admin/dashboard');
+        } else if (userRole === 'faculty') {
+          navigate('/admin/dashboard'); // Faculty can access dashboard
+        } else if (userRole === 'student') {
+          navigate('/profile/settings'); // Students go to their profile
+        } else {
+          // Default fallback
+          navigate('/');
+        }
       } else {
         showError(result.message || 'Login failed. Please check your credentials.');
       }

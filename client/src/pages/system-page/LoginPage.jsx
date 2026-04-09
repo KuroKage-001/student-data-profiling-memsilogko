@@ -1,3 +1,5 @@
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import '../../styles/LoginPage.css';
@@ -9,9 +11,19 @@ import {
   MobileCarousel 
 } from '../../components/system-components/login-compo';
 import usePageTitle from '../../hooks/usePageTitle';
+import { useAuth } from '../../context/AuthContext';
 
 const LoginPage = () => {
   usePageTitle('Login');
+  const navigate = useNavigate();
+  const { isAuthenticated, loading } = useAuth();
+
+  // Redirect authenticated users to dashboard
+  useEffect(() => {
+    if (!loading && isAuthenticated) {
+      navigate('/admin/dashboard', { replace: true });
+    }
+  }, [isAuthenticated, loading, navigate]);
   
   return (
     <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 flex flex-col lg:flex-row">

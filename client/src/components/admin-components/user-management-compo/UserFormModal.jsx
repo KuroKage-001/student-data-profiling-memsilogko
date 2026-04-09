@@ -11,6 +11,7 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, user, loading }) => {
     password: '',
     confirmPassword: '',
     role: 'student',
+    department: '',
     status: 'active'
   });
   
@@ -26,6 +27,7 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, user, loading }) => {
         password: '',
         confirmPassword: '',
         role: user.role || 'student',
+        department: user.department || '',
         status: user.status || 'active'
       });
     } else {
@@ -35,6 +37,7 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, user, loading }) => {
         password: '',
         confirmPassword: '',
         role: 'student',
+        department: '',
         status: 'active'
       });
     }
@@ -259,12 +262,46 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, user, loading }) => {
                     <option value="student">Student</option>
                     <option value="faculty">Faculty</option>
                     <option value="admin">Admin</option>
+                    <option value="dept_chair">Department Chairman</option>
                   </select>
                 </div>
                 {errors.role && (
                   <p className="mt-1 text-sm text-red-600">{errors.role}</p>
                 )}
               </div>
+
+              {/* Department Field - Only show for Department Chairman */}
+              {formData.role === 'dept_chair' && (
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Department
+                  </label>
+                  <div className="relative">
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                      </svg>
+                    </div>
+                    <select
+                      name="department"
+                      value={formData.department}
+                      onChange={handleChange}
+                      className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all appearance-none ${
+                        errors.department 
+                          ? 'border-red-500 focus:border-red-600' 
+                          : 'border-gray-200 focus:border-orange-500'
+                      }`}
+                    >
+                      <option value="">Select Department</option>
+                      <option value="IT">Information Technology (IT)</option>
+                      <option value="CS">Computer Science (CS)</option>
+                    </select>
+                  </div>
+                  {errors.department && (
+                    <p className="mt-1 text-sm text-red-600">{errors.department}</p>
+                  )}
+                </div>
+              )}
 
               {/* Status Field - Only show when editing */}
               {isEdit && (
