@@ -43,6 +43,8 @@ class DatabaseSeeder extends Seeder
         $this->call([
             EventSeeder::class,
             DepartmentChairmanSeeder::class,
+            ITFacultySeeder::class,
+            CSFacultySeeder::class,
         ]);
     }
 }
