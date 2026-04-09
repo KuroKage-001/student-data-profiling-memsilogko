@@ -5,6 +5,17 @@ const FacultyList = ({ searchTerm, onViewFaculty, onEditFaculty, onDeleteFaculty
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
+  // Department display names mapping
+  const departmentDisplayNames = {
+    'IT': 'Information Technology',
+    'CS': 'Computer Science'
+  };
+
+  // Helper function to get display name
+  const getDepartmentDisplayName = (dept) => {
+    return departmentDisplayNames[dept] || dept;
+  };
+
   // Use faculty from props (from API)
   const facultyData = faculty || [];
 
@@ -106,7 +117,9 @@ const FacultyList = ({ searchTerm, onViewFaculty, onEditFaculty, onDeleteFaculty
                   </div>
                 </td>
                 <td className="px-6 py-5 whitespace-nowrap">
-                  <div className="text-base text-gray-800 font-medium">{member.department}</div>
+                  <div className="text-base text-gray-800 font-medium">
+                    {getDepartmentDisplayName(member.department)}
+                  </div>
                 </td>
                 <td className="px-6 py-5 whitespace-nowrap">
                   <div className="text-base text-gray-800 font-medium">{member.position}</div>
@@ -157,7 +170,9 @@ const FacultyList = ({ searchTerm, onViewFaculty, onEditFaculty, onDeleteFaculty
                 <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-1.5 wrap-break-word">{member.name}</h3>
                 <p className="text-xs sm:text-sm text-gray-600 mb-2.5 break-all">{member.faculty_id || member.id}</p>
                 <div className="flex flex-wrap items-center gap-1.5 text-xs sm:text-sm mb-2">
-                  <span className="text-gray-800 font-medium">{member.department}</span>
+                  <span className="text-gray-800 font-medium">
+                    {getDepartmentDisplayName(member.department)}
+                  </span>
                   <span className="text-gray-400">•</span>
                   <span className="text-gray-800 font-medium">{member.position}</span>
                 </div>

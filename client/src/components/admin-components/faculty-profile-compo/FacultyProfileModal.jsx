@@ -3,6 +3,17 @@ import { FaTimes, FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaBuilding, FaBri
 const FacultyProfileModal = ({ faculty, onClose, onEdit, onGenerateReport }) => {
   if (!faculty) return null;
 
+  // Department display names mapping
+  const departmentDisplayNames = {
+    'IT': 'Information Technology',
+    'CS': 'Computer Science'
+  };
+
+  // Helper function to get display name
+  const getDepartmentDisplayName = (dept) => {
+    return departmentDisplayNames[dept] || dept;
+  };
+
   // Helper functions
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
@@ -88,7 +99,9 @@ const FacultyProfileModal = ({ faculty, onClose, onEdit, onGenerateReport }) => 
                     </div>
                     <div className="flex items-center gap-1 text-sm">
                       <span className="text-gray-500">Department:</span>
-                      <span className="font-semibold text-gray-900">{faculty.department || 'N/A'}</span>
+                      <span className="font-semibold text-gray-900">
+                        {getDepartmentDisplayName(faculty.department) || 'N/A'}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -139,7 +152,9 @@ const FacultyProfileModal = ({ faculty, onClose, onEdit, onGenerateReport }) => 
                     <FaBuilding className="text-gray-400 text-sm mt-0.5 shrink-0" />
                     <div className="flex-1">
                       <p className="text-xs text-gray-500">Department</p>
-                      <p className="text-sm text-gray-900">{faculty.department || 'N/A'}</p>
+                      <p className="text-sm text-gray-900">
+                        {getDepartmentDisplayName(faculty.department) || 'N/A'}
+                      </p>
                     </div>
                   </div>
 

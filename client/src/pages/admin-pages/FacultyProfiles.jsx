@@ -212,7 +212,28 @@ const FacultyProfiles = () => {
     }
   };
 
-  const departments = getDepartments();
+  // Get departments and filter for Admin role (only IT and CS)
+  const allDepartments = getDepartments();
+  const departments = isDeptChair 
+    ? allDepartments 
+    : allDepartments.filter(dept => 
+        dept === 'IT' || dept === 'CS'
+      );
+  
+  // Department display names mapping
+  const departmentDisplayNames = {
+    'IT': 'Information Technology',
+    'CS': 'Computer Science',
+    'Computer Engineering': 'Computer Engineering',
+    'Data Science': 'Data Science',
+    'Software Engineering': 'Software Engineering',
+    'Information Systems': 'Information Systems',
+    'Cybersecurity': 'Cybersecurity',
+    'Artificial Intelligence': 'Artificial Intelligence',
+    'Computer Networks': 'Computer Networks',
+    'Web Development': 'Web Development'
+  };
+  
   const positions = getPositions();
   const statuses = getStatuses();
 
@@ -319,7 +340,9 @@ const FacultyProfiles = () => {
                   >
                     <option value="all">All Departments</option>
                     {departments.map(dept => (
-                      <option key={dept} value={dept}>{dept}</option>
+                      <option key={dept} value={dept}>
+                        {departmentDisplayNames[dept] || dept}
+                      </option>
                     ))}
                   </select>
                 </div>

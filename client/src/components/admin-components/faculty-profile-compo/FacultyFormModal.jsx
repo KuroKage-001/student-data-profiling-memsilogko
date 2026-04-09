@@ -34,6 +34,12 @@ const FacultyFormModal = ({ faculty, onClose, onSubmit, loading, serverErrors })
 
   // Available options - Updated departments to match seeder data
   const departments = ['IT', 'CS'];
+  
+  // Department display names
+  const departmentDisplayNames = {
+    'IT': 'Information Technology',
+    'CS': 'Computer Science'
+  };
 
   const positions = [
     'Professor',
@@ -299,7 +305,9 @@ const FacultyFormModal = ({ faculty, onClose, onSubmit, loading, serverErrors })
                   >
                     <option value="">Select department</option>
                     {departments.map(dept => (
-                      <option key={dept} value={dept}>{dept}</option>
+                      <option key={dept} value={dept}>
+                        {departmentDisplayNames[dept] || dept}
+                      </option>
                     ))}
                   </select>
                 </div>

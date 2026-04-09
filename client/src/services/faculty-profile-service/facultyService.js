@@ -234,8 +234,8 @@ const facultyService = {
   // Get available departments
   getDepartments: () => {
     return [
-      'Computer Science',
-      'Information Technology',
+      'CS',
+      'IT',
       'Computer Engineering',
       'Data Science',
       'Software Engineering',
