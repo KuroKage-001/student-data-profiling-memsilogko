@@ -26,7 +26,8 @@ class DatabaseSeeder extends Seeder
                 'password' => Hash::make('Admin@2024'),
                 'role' => 'admin',
                 'status' => 'active',
-                'department' => 'Administration',
+                'department' => 'IT',
+                'position' => 'Department Head',
             ]);
 
             // Create Department Chair User (IT Department)
@@ -37,7 +38,8 @@ class DatabaseSeeder extends Seeder
                 'password' => Hash::make('DeptChair@2024'),
                 'role' => 'dept_chair',
                 'status' => 'active',
-                'department' => 'Information Technology',
+                'department' => 'IT',
+                'position' => 'Department Head',
             ]);
 
             // Create Department Chair User (CS Department)
@@ -48,7 +50,8 @@ class DatabaseSeeder extends Seeder
                 'password' => Hash::make('DeptChair@2024'),
                 'role' => 'dept_chair',
                 'status' => 'active',
-                'department' => 'Computer Science',
+                'department' => 'CS',
+                'position' => 'Department Head',
             ]);
 
             // Create Faculty User (IT)
@@ -59,7 +62,8 @@ class DatabaseSeeder extends Seeder
                 'password' => Hash::make('Faculty@2024'),
                 'role' => 'faculty',
                 'status' => 'active',
-                'department' => 'Information Technology',
+                'department' => 'IT',
+                'position' => 'Associate Professor',
             ]);
 
             // Create Faculty User (CS)
@@ -70,7 +74,8 @@ class DatabaseSeeder extends Seeder
                 'password' => Hash::make('Faculty@2024'),
                 'role' => 'faculty',
                 'status' => 'active',
-                'department' => 'Computer Science',
+                'department' => 'CS',
+                'position' => 'Assistant Professor',
             ]);
 
             // Create Student User 1
@@ -82,7 +87,8 @@ class DatabaseSeeder extends Seeder
                 'role' => 'student',
                 'status' => 'active',
                 'student_id' => '2024-00001',
-                'department' => 'Information Technology',
+                'student_number' => '2026-IT00001',
+                'department' => 'IT',
                 'program' => 'Bachelor of Science in Information Technology',
                 'year_level' => '3rd Year',
                 'phone' => '09123456789',
@@ -98,7 +104,8 @@ class DatabaseSeeder extends Seeder
                 'role' => 'student',
                 'status' => 'active',
                 'student_id' => '2024-00002',
-                'department' => 'Computer Science',
+                'student_number' => '2026-CS00001',
+                'department' => 'CS',
                 'program' => 'Bachelor of Science in Computer Science',
                 'year_level' => '2nd Year',
                 'phone' => '09187654321',
@@ -114,7 +121,8 @@ class DatabaseSeeder extends Seeder
                 'role' => 'student',
                 'status' => 'inactive',
                 'student_id' => '2024-00003',
-                'department' => 'Information Technology',
+                'student_number' => '2026-IT00002',
+                'department' => 'IT',
             ]);
 
             // Create Suspended User (for testing)
@@ -125,7 +133,8 @@ class DatabaseSeeder extends Seeder
                 'password' => Hash::make('Suspended@2024'),
                 'role' => 'faculty',
                 'status' => 'suspended',
-                'department' => 'Computer Science',
+                'department' => 'CS',
+                'position' => 'Instructor',
             ]);
             
             echo "\n";
@@ -146,21 +155,29 @@ class DatabaseSeeder extends Seeder
             echo "   Email: deptchair.it@ccs.edu\n";
             echo "   Password: DeptChair@2024\n";
             echo "   Role: Department Chairman\n";
+            echo "   Department: IT\n";
+            echo "   Position: Department Head\n";
             echo "\n";
             echo "3. CS Department Chair\n";
             echo "   Email: deptchair.cs@ccs.edu\n";
             echo "   Password: DeptChair@2024\n";
             echo "   Role: Department Chairman\n";
+            echo "   Department: CS\n";
+            echo "   Position: Department Head\n";
             echo "\n";
             echo "4. IT Faculty\n";
             echo "   Email: faculty.it@ccs.edu\n";
             echo "   Password: Faculty@2024\n";
             echo "   Role: Faculty\n";
+            echo "   Department: IT\n";
+            echo "   Position: Associate Professor\n";
             echo "\n";
             echo "5. CS Faculty\n";
             echo "   Email: faculty.cs@ccs.edu\n";
             echo "   Password: Faculty@2024\n";
             echo "   Role: Faculty\n";
+            echo "   Department: CS\n";
+            echo "   Position: Assistant Professor\n";
             echo "\n";
             echo "----------------------------------------\n";
             echo "STUDENT PORTAL ACCOUNTS:\n";
@@ -169,13 +186,13 @@ class DatabaseSeeder extends Seeder
             echo "   Email: student1@ccs.edu\n";
             echo "   Password: Student@2024\n";
             echo "   Role: Student\n";
-            echo "   ID: 2024-00001\n";
+            echo "   Student Number: 2026-IT00001\n";
             echo "\n";
             echo "7. Student 2 (CS)\n";
             echo "   Email: student2@ccs.edu\n";
             echo "   Password: Student@2024\n";
             echo "   Role: Student\n";
-            echo "   ID: 2024-00002\n";
+            echo "   Student Number: 2026-CS00001\n";
             echo "\n";
             echo "----------------------------------------\n";
             echo "TEST ACCOUNTS (Status Testing):\n";
