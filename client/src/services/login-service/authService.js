@@ -30,9 +30,17 @@ class AuthService {
       if (error.response) {
         const status = error.response.status;
         const message = error.response.data?.message;
+        const portalMismatch = error.response.data?.portal_mismatch;
         
         if (status === 401) {
           return { success: false, message: 'Invalid email or password' };
+        } else if (status === 403) {
+          // Handle portal mismatch or account status issues
+          return { 
+            success: false, 
+            message: message || 'Access denied',
+            portal_mismatch: portalMismatch 
+          };
         } else if (status === 422) {
           return { success: false, message: message || 'Validation error' };
         } else if (status === 429) {

@@ -1,8 +1,39 @@
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { BubbleWrap, PortalCards, FeaturesSection } from '../../components/system-components/home-compo';
 import usePageTitle from '../../hooks/usePageTitle';
+import { useAuth } from '../../context/AuthContext';
 
 const HomePage = () => {
   usePageTitle('Home');
+  const navigate = useNavigate();
+  const { isAuthenticated, user, loading } = useAuth();
+
+  // Redirect authenticated users to their appropriate dashboard
+  useEffect(() => {
+    if (!loading && isAuthenticated && user) {
+      const userRole = user.role;
+      
+      // Redirect based on role
+      if (userRole === 'admin' || userRole === 'dept_chair' || userRole === 'faculty') {
+        navigate('/admin/dashboard', { replace: true });
+      } else if (userRole === 'student') {
+        navigate('/profile/settings', { replace: true });
+      }
+    }
+  }, [isAuthenticated, user, loading, navigate]);
+
+  // Show loading state while checking authentication
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-orange-200 border-t-orange-600"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
   
   return (
     <div className="min-h-screen relative flex items-center justify-center px-4 py-8 overflow-x-hidden" style={{ backgroundColor: '#FFFFFF' }}>

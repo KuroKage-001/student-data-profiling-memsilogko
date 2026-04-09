@@ -15,9 +15,9 @@ return new class extends Migration
         // Modify the role enum to include dept_chair
         DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('admin', 'faculty', 'student', 'dept_chair') DEFAULT 'student'");
         
-        // Add department column for department chairmen
+        // Add department column - using string instead of enum for flexibility
         Schema::table('users', function (Blueprint $table) {
-            $table->enum('department', ['IT', 'CS'])->nullable()->after('role');
+            $table->string('department', 100)->nullable()->after('role');
         });
     }
 

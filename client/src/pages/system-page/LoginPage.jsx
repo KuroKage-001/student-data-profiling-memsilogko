@@ -16,14 +16,21 @@ import { useAuth } from '../../context/AuthContext';
 const LoginPage = () => {
   usePageTitle('Login');
   const navigate = useNavigate();
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, user, loading } = useAuth();
 
-  // Redirect authenticated users to dashboard
+  // Redirect authenticated users to their appropriate dashboard
   useEffect(() => {
-    if (!loading && isAuthenticated) {
-      navigate('/admin/dashboard', { replace: true });
+    if (!loading && isAuthenticated && user) {
+      const userRole = user.role;
+      
+      // Redirect based on role
+      if (userRole === 'admin' || userRole === 'dept_chair' || userRole === 'faculty') {
+        navigate('/admin/dashboard', { replace: true });
+      } else if (userRole === 'student') {
+        navigate('/profile/settings', { replace: true });
+      }
     }
-  }, [isAuthenticated, loading, navigate]);
+  }, [isAuthenticated, user, loading, navigate]);
   
   return (
     <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 flex flex-col lg:flex-row">

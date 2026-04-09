@@ -1,7 +1,12 @@
 import { useState, useEffect } from 'react';
 import { FaTimes, FaChalkboardTeacher, FaEnvelope, FaPhone, FaMapMarkerAlt, FaGraduationCap, FaCalendarAlt, FaStickyNote, FaIdCard, FaBriefcase, FaUniversity } from 'react-icons/fa';
+import { useAuth } from '../../../context/AuthContext';
 
 const FacultyFormModal = ({ faculty, onClose, onSubmit, loading, serverErrors }) => {
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
+  const isDeptChair = user?.role === 'dept_chair';
+  
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -27,19 +32,8 @@ const FacultyFormModal = ({ faculty, onClose, onSubmit, loading, serverErrors })
     }
   }, [serverErrors]);
 
-  // Available options
-  const departments = [
-    'Computer Science',
-    'Information Technology',
-    'Computer Engineering',
-    'Data Science',
-    'Software Engineering',
-    'Information Systems',
-    'Cybersecurity',
-    'Artificial Intelligence',
-    'Computer Networks',
-    'Web Development'
-  ];
+  // Available options - Updated departments to match seeder data
+  const departments = ['IT', 'CS'];
 
   const positions = [
     'Professor',
@@ -81,14 +75,18 @@ const FacultyFormModal = ({ faculty, onClose, onSubmit, loading, serverErrors })
         return `${prefix}${year}${randomNum}`;
       };
       
+      // Auto-set department for dept_chair users
+      const defaultDepartment = isDeptChair ? (user?.department || '') : '';
+      
       setFormData(prev => ({
         ...prev,
         faculty_id: generateFacultyId(),
-        hire_date: new Date().toISOString().split('T')[0]
+        hire_date: new Date().toISOString().split('T')[0],
+        department: defaultDepartment
       }));
     }
     setErrors({});
-  }, [faculty]);
+  }, [faculty, isDeptChair, user]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -144,7 +142,7 @@ const FacultyFormModal = ({ faculty, onClose, onSubmit, loading, serverErrors })
       {/* Modal panel - Optimized size */}
       <div className="relative z-10 bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden">
         {/* Header - Fixed */}
-        <div className="bg-gradient-to-r from-orange-500 to-orange-600 px-6 py-4 shrink-0">
+        <div className="bg-linear-to-r from-orange-500 to-orange-600 px-6 py-4 shrink-0">
           <div className="flex items-center justify-between">
             <h3 className="text-xl font-bold text-white">
               {isEditMode ? 'Edit Faculty' : 'Add New Faculty'}
@@ -279,35 +277,59 @@ const FacultyFormModal = ({ faculty, onClose, onSubmit, loading, serverErrors })
               </h4>
             </div>
 
-            {/* Department Field */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Department *
-              </label>
-              <div className="relative">
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                  <FaUniversity />
+            {/* Department Field - Conditional rendering based on role */}
+            {isAdmin ? (
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Department *
+                </label>
+                <div className="relative">
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                    <FaUniversity />
+                  </div>
+                  <select
+                    name="department"
+                    value={formData.department}
+                    onChange={handleChange}
+                    className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all appearance-none ${
+                      errors.department 
+                        ? 'border-red-500 focus:border-red-600' 
+                        : 'border-gray-200 focus:border-orange-500'
+                    }`}
+                  >
+                    <option value="">Select department</option>
+                    {departments.map(dept => (
+                      <option key={dept} value={dept}>{dept}</option>
+                    ))}
+                  </select>
                 </div>
-                <select
-                  name="department"
-                  value={formData.department}
-                  onChange={handleChange}
-                  className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all appearance-none ${
-                    errors.department 
-                      ? 'border-red-500 focus:border-red-600' 
-                      : 'border-gray-200 focus:border-orange-500'
-                  }`}
-                >
-                  <option value="">Select department</option>
-                  {departments.map(dept => (
-                    <option key={dept} value={dept}>{dept}</option>
-                  ))}
-                </select>
+                {errors.department && (
+                  <p className="mt-1 text-sm text-red-600">{errors.department}</p>
+                )}
               </div>
-              {errors.department && (
-                <p className="mt-1 text-sm text-red-600">{errors.department}</p>
-              )}
-            </div>
+            ) : isDeptChair ? (
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Department *
+                </label>
+                <div className="relative">
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                    <FaUniversity />
+                  </div>
+                  <input
+                    type="text"
+                    name="department"
+                    value={formData.department}
+                    readOnly
+                    className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 text-gray-600 cursor-not-allowed"
+                    placeholder="Department"
+                  />
+                </div>
+                <p className="mt-1 text-xs text-gray-500">
+                  Department is automatically set based on your role
+                </p>
+              </div>
+            ) : null}
 
             {/* Position Field */}
             <div>
@@ -434,7 +456,7 @@ const FacultyFormModal = ({ faculty, onClose, onSubmit, loading, serverErrors })
 
             {/* Address */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+              <label className="block text-sm font-semibold text-gray-700 mb-2 items-center gap-2">
                 <FaMapMarkerAlt className="text-orange-600" />
                 Address
               </label>
@@ -450,7 +472,7 @@ const FacultyFormModal = ({ faculty, onClose, onSubmit, loading, serverErrors })
 
             {/* Notes */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+              <label className="block text-sm font-semibold text-gray-700 mb-2 items-center gap-2">
                 <FaStickyNote className="text-orange-600" />
                 Additional Notes
               </label>
@@ -467,7 +489,7 @@ const FacultyFormModal = ({ faculty, onClose, onSubmit, loading, serverErrors })
         </form>
 
         {/* Action Buttons - Fixed at bottom */}
-        <div className="px-6 py-4 bg-gradient-to-r from-gray-50 to-gray-100 border-t border-gray-200 shrink-0">
+        <div className="px-6 py-4 bg-linear-to-r from-gray-50 to-gray-100 border-t border-gray-200 shrink-0">
           <div className="flex gap-3">
             <button
               type="button"
@@ -480,7 +502,7 @@ const FacultyFormModal = ({ faculty, onClose, onSubmit, loading, serverErrors })
             <button
               type="submit"
               onClick={handleSubmit}
-              className="flex-1 px-5 py-3 bg-gradient-to-r from-orange-600 to-orange-500 text-white rounded-xl hover:from-orange-700 hover:to-orange-600 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
+              className="flex-1 px-5 py-3 bg-linear-to-r from-orange-600 to-orange-500 text-white rounded-xl hover:from-orange-700 hover:to-orange-600 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
               disabled={loading}
             >
               {loading ? (

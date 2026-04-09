@@ -59,6 +59,7 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'email' => 'required|email',
             'password' => 'required|string',
+            'portal_type' => 'nullable|string|in:admin,student', // Optional portal type
         ]);
 
         if ($validator->fails()) {
@@ -69,6 +70,7 @@ class AuthController extends Controller
         }
 
         $credentials = $request->only('email', 'password');
+        $portalType = $request->input('portal_type');
 
         // Attempt authentication with optimized query
         if (!$token = auth('api')->attempt($credentials)) {
@@ -98,6 +100,29 @@ class AuthController extends Controller
                 'message' => 'Your account has been suspended. Please contact the administrator.',
                 'status' => 'suspended'
             ], 403);
+        }
+
+        // Portal-based role validation
+        if ($portalType === 'admin') {
+            // Admin portal: only admin, dept_chair, and faculty allowed
+            if (!in_array($user->role, ['admin', 'dept_chair', 'faculty'])) {
+                auth('api')->logout();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Access denied. This portal is for administrators and faculty only.',
+                    'portal_mismatch' => true
+                ], 403);
+            }
+        } elseif ($portalType === 'student') {
+            // Student portal: only students allowed
+            if ($user->role !== 'student') {
+                auth('api')->logout();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Access denied. This portal is for students only. Please use the Admin Portal.',
+                    'portal_mismatch' => true
+                ], 403);
+            }
         }
         
         return response()->json([
