@@ -1,4 +1,5 @@
 export { default as AdminDashboardSkeleton } from './AdminDashboardSkeleton';
+export { default as StudentDashboardSkeleton } from './StudentDashboardSkeleton';
 export { default as DashboardStatsSkeleton } from './DashboardStatsSkeleton';
 export { default as DashboardCardSkeleton } from './DashboardCardSkeleton';
 export { default as UserManagementSkeleton } from './UserManagementSkeleton';

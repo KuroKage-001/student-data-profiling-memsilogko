@@ -18,7 +18,7 @@ const HomePage = () => {
       if (userRole === 'admin' || userRole === 'dept_chair' || userRole === 'faculty') {
         navigate('/admin/dashboard', { replace: true });
       } else if (userRole === 'student') {
-        navigate('/profile/settings', { replace: true });
+        navigate('/student/dashboard', { replace: true });
       }
     }
   }, [isAuthenticated, user, loading, navigate]);

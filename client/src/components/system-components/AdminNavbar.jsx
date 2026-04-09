@@ -55,7 +55,7 @@ const AdminNavbar = ({ onToggleSidebar }) => {
 
             {/* Logo */}
             <div 
-              onClick={() => navigate('/admin/dashboard')}
+              onClick={() => navigate(user?.role === 'student' ? '/student/dashboard' : '/admin/dashboard')}
               className="cursor-pointer flex items-center space-x-2 sm:space-x-3 group"
             >
               <div className="w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden">

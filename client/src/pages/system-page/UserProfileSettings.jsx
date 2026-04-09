@@ -9,14 +9,24 @@ import { useUserProfile } from '../../hooks/user-profile-setting-hook/useUserPro
 import { UserProfileSettingsSkeleton } from '../../layouts/skeleton-loading';
 import useToast from '../../hooks/useToast';
 import usePageTitle from '../../hooks/usePageTitle';
+import { useAuth } from '../../context/AuthContext';
 
 const UserProfileSettings = () => {
   usePageTitle('Profile Settings');
   const navigate = useNavigate();
+  const { user } = useAuth();
   
   const [activeTab, setActiveTab] = useState('profile');
   const { profile, loading, updateProfile, changePassword } = useUserProfile();
   const { showSuccess, showError } = useToast();
+
+  // Determine dashboard route based on user role
+  const getDashboardRoute = () => {
+    if (user?.role === 'student') {
+      return '/student/dashboard';
+    }
+    return '/admin/dashboard';
+  };
 
   const handleUpdateProfile = async (profileData) => {
     const result = await updateProfile(profileData);
@@ -70,7 +80,7 @@ const UserProfileSettings = () => {
       <div className="min-h-screen bg-linear-to-br from-gray-50 via-orange-50/30 to-gray-50 p-3 sm:p-4 md:p-6 lg:p-8">
         {/* Back Button */}
         <button
-          onClick={() => navigate('/admin/dashboard')}
+          onClick={() => navigate(getDashboardRoute())}
           className="group mb-4 sm:mb-6 flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-white hover:bg-orange-50 text-gray-700 hover:text-orange-600 rounded-lg sm:rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border border-gray-200 hover:border-orange-300 text-sm sm:text-base"
         >
           <FaArrowLeft className="text-xs sm:text-sm group-hover:-translate-x-1 transition-transform duration-300" />

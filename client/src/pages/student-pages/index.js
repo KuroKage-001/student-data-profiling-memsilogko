@@ -1,2 +1,2 @@
 // Student Pages Exports
-// StudentProfiles moved to admin-pages
+export { default as StudentDashboard } from './StudentDashboard';
