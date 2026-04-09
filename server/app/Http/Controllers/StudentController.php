@@ -93,8 +93,7 @@ class StudentController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
+            'user_id' => 'required|exists:users,id',
             'student_id' => 'required|string|max:50|unique:users',
             'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string|max:500',
@@ -131,14 +130,26 @@ class StudentController extends Controller
         try {
             DB::beginTransaction();
 
-            // Generate a default password
-            $defaultPassword = 'Student@' . date('Y');
+            // Get the user and verify it's a student role
+            $user = User::findOrFail($request->user_id);
+            
+            if ($user->role !== 'student') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Selected user must have student role'
+                ], 422);
+            }
 
-            $student = User::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'password' => Hash::make($defaultPassword),
-                'role' => 'student',
+            // Check if user already has student profile data
+            if ($user->student_id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'This user already has a student profile'
+                ], 422);
+            }
+
+            // Update the user with student profile data
+            $user->update([
                 'status' => $request->get('status', 'active'),
                 'student_id' => $request->student_id,
                 'phone' => $request->phone,
@@ -156,32 +167,32 @@ class StudentController extends Controller
             // Add skills if provided
             if ($request->has('skills') && is_array($request->skills)) {
                 foreach ($request->skills as $skill) {
-                    $student->skills()->create($skill);
+                    $user->skills()->create($skill);
                 }
             }
 
             // Add activities if provided
             if ($request->has('activities') && is_array($request->activities)) {
                 foreach ($request->activities as $activity) {
-                    $student->activities()->create($activity);
+                    $user->activities()->create($activity);
                 }
             }
 
             DB::commit();
 
             // Load relationships
-            $student->load(['skills', 'activities', 'violations', 'affiliations', 'academicRecords.subjects']);
+            $user->load(['skills', 'activities', 'violations', 'affiliations', 'academicRecords.subjects']);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Student created successfully with default password: ' . $defaultPassword,
-                'data' => $student
+                'message' => 'Student profile created successfully',
+                'data' => $user
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to create student: ' . $e->getMessage()
+                'message' => 'Failed to create student profile: ' . $e->getMessage()
             ], 500);
         }
     }

@@ -1,8 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
 import { FaTimes, FaUserGraduate, FaEnvelope, FaPhone, FaMapMarkerAlt, FaGraduationCap, FaCalendarAlt, FaUserFriends, FaStickyNote, FaIdCard, FaTrophy, FaRunning } from 'react-icons/fa';
+import UserSearchDropdown from './UserSearchDropdown';
+import { useUsers } from '../../../hooks/user-management-hook';
 
 const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors }) => {
   const [formData, setFormData] = useState({
+    user_id: '',
     name: '',
     email: '',
     student_id: '',
@@ -22,6 +25,10 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
 
   const [errors, setErrors] = useState({});
   const [isEditMode, setIsEditMode] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+
+  // Fetch users with student role
+  const { data: allUsers = [], isLoading: usersLoading, error: usersError } = useUsers({ role: 'student' });
 
   // Update errors when serverErrors prop changes
   useEffect(() => {
@@ -51,6 +58,7 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
     if (student) {
       setIsEditMode(true);
       setFormData({
+        user_id: student.id || '',
         name: student.name || '',
         email: student.email || '',
         student_id: student.student_id || '',
@@ -67,8 +75,15 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
         extracurricular_activities: student.extracurricular_activities || '',
         notes: student.notes || ''
       });
+      // Set selected user for edit mode
+      setSelectedUser({
+        id: student.id,
+        name: student.name,
+        email: student.email
+      });
     } else {
       setIsEditMode(false);
+      setSelectedUser(null);
       const generateStudentId = () => {
         const prefix = 'STU';
         const randomNum = Math.floor(1000 + Math.random() * 9000);
@@ -78,12 +93,40 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
       
       setFormData(prev => ({
         ...prev,
+        user_id: '',
         student_id: generateStudentId(),
         enrollment_date: new Date().toISOString().split('T')[0]
       }));
     }
     setErrors({});
   }, [student]);
+
+  // Handle user selection from dropdown
+  const handleUserSelect = (user) => {
+    setSelectedUser(user);
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        user_id: user.id,
+        name: user.name || '',
+        email: user.email || ''
+      }));
+      // Clear name and email errors since they're auto-filled
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors.name;
+        delete newErrors.email;
+        return newErrors;
+      });
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        user_id: '',
+        name: '',
+        email: ''
+      }));
+    }
+  };
 
   // Real-time validation function
   const validateField = (name, value) => {
@@ -147,6 +190,9 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
 
   // Check if form is valid for enabling/disabling submit button
   const isFormValid = useMemo(() => {
+    // For new students, user must be selected
+    if (!isEditMode && !formData.user_id) return false;
+    
     // Check required fields
     if (!formData.name.trim()) return false;
     if (!formData.email.trim()) return false;
@@ -190,7 +236,7 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
     }
 
     return true;
-  }, [formData]);
+  }, [formData, isEditMode]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -295,6 +341,18 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
               </h4>
             </div>
 
+            {/* User Selection Dropdown - Only show for new students */}
+            {!isEditMode && (
+              <UserSearchDropdown
+                users={allUsers}
+                selectedUser={selectedUser}
+                onSelect={handleUserSelect}
+                loading={usersLoading}
+                error={usersError?.message}
+                disabled={loading}
+              />
+            )}
+
             {/* Name Field */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">Full Name *</label>
@@ -305,11 +363,17 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all ${errors.name ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-orange-500'}`}
+                  disabled={!isEditMode && selectedUser}
+                  className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all ${
+                    (!isEditMode && selectedUser) ? 'bg-gray-50 cursor-not-allowed' : ''
+                  } ${errors.name ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-orange-500'}`}
                   placeholder="Enter full name"
                 />
               </div>
               {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
+              {!isEditMode && selectedUser && (
+                <p className="mt-1 text-xs text-gray-500">Auto-filled from selected user account</p>
+              )}
             </div>
 
             {/* Email Field */}
@@ -322,12 +386,19 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all ${errors.email ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-orange-500'}`}
+                  disabled={!isEditMode && selectedUser}
+                  className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all ${
+                    (!isEditMode && selectedUser) ? 'bg-gray-50 cursor-not-allowed' : ''
+                  } ${errors.email ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-orange-500'}`}
                   placeholder="Enter email address (lowercase only)"
                 />
               </div>
               {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
-              <p className="mt-1 text-xs text-gray-500">Email will be automatically converted to lowercase</p>
+              {!isEditMode && selectedUser ? (
+                <p className="mt-1 text-xs text-gray-500">Auto-filled from selected user account</p>
+              ) : (
+                <p className="mt-1 text-xs text-gray-500">Email will be automatically converted to lowercase</p>
+              )}
             </div>
 
             {/* Student ID Field */}

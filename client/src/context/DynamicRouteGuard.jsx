@@ -1,6 +1,7 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import { hasRouteAccess } from '../config/routeConfig';
+import LoadingPage from '../components/system-components/LoadingPage';
 
 /**
  * Unified Route Guard Component
@@ -17,11 +18,7 @@ const DynamicRouteGuard = ({ children, route }) => {
 
   // Show loading state while checking authentication
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading...</div>
-      </div>
-    );
+    return <LoadingPage message="Verifying access..." subMessage="Please wait..." />;
   }
 
   // Simple Mode: Basic authentication check (legacy ProtectedRoute behavior)

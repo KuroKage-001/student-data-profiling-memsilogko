@@ -201,12 +201,13 @@ class DatabaseSeeder extends Seeder
             echo "Users already exist, skipping user seeding.\n";
         }
 
-        // Seed events and department chairmen
+        // Seed events, department chairmen, faculty, and student accounts
         $this->call([
             EventSeeder::class,
             DepartmentChairmanSeeder::class,
             ITFacultySeeder::class,
             CSFacultySeeder::class,
+            StudentAccountSeeder::class,
         ]);
     }
 }

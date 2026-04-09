@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BubbleWrap, PortalCards, FeaturesSection } from '../../components/system-components/home-compo';
+import LoadingPage from '../../components/system-components/LoadingPage';
 import usePageTitle from '../../hooks/usePageTitle';
 import { useAuth } from '../../context/AuthContext';
 
@@ -25,14 +26,7 @@ const HomePage = () => {
 
   // Show loading state while checking authentication
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-orange-200 border-t-orange-600"></div>
-          <p className="text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
+    return <LoadingPage message="Checking authentication..." subMessage="Please wait..." />;
   }
   
   return (
