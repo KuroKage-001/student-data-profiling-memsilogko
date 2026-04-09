@@ -6,8 +6,13 @@ const UserSearchDropdown = ({ users, selectedUser, onSelect, loading, error, dis
   const [searchTerm, setSearchTerm] = useState('');
   const dropdownRef = useRef(null);
 
-  // Filter users based on search term
+  // Filter users based on search term and exclude users with student_id (already have profile)
   const filteredUsers = users.filter(user => {
+    // Exclude users who already have a student profile (student_id is set)
+    if (user.student_id) {
+      return false;
+    }
+    
     const search = searchTerm.toLowerCase();
     return (
       user.name?.toLowerCase().includes(search) ||
@@ -62,7 +67,10 @@ const UserSearchDropdown = ({ users, selectedUser, onSelect, loading, error, dis
           {selectedUser ? (
             <div className="flex flex-col">
               <span className="text-sm font-medium text-gray-900">{selectedUser.name}</span>
-              <span className="text-xs text-gray-500">{selectedUser.email}</span>
+              <span className="text-xs text-gray-500">
+                {selectedUser.email}
+                {selectedUser.student_number && ` • ${selectedUser.student_number}`}
+              </span>
             </div>
           ) : (
             <span className="text-gray-400">Select a student user...</span>
@@ -131,6 +139,11 @@ const UserSearchDropdown = ({ users, selectedUser, onSelect, loading, error, dis
                     <div className="flex-1 min-w-0">
                       <div className="font-medium text-gray-900 truncate">{user.name}</div>
                       <div className="text-sm text-gray-500 truncate">{user.email}</div>
+                      {user.student_number && (
+                        <div className="text-xs text-orange-600 font-medium mt-0.5">
+                          {user.student_number} • {user.department === 'IT' ? 'IT' : 'CS'}
+                        </div>
+                      )}
                     </div>
                     {selectedUser?.id === user.id && (
                       <div className="w-2 h-2 bg-orange-600 rounded-full shrink-0"></div>
@@ -144,7 +157,7 @@ const UserSearchDropdown = ({ users, selectedUser, onSelect, loading, error, dis
       )}
 
       <p className="mt-1 text-xs text-gray-500">
-        Select an existing user account with student role, then fill in additional student information
+        Only showing student users without existing profiles. Users with profiles are automatically excluded.
       </p>
     </div>
   );

@@ -49,6 +49,7 @@ Route::middleware(['auth:api', 'check.status'])->group(function () {
 Route::middleware(['auth:api', 'check.status'])->group(function () {
     Route::apiResource('students', App\Http\Controllers\StudentController::class);
     Route::get('students-statistics', [App\Http\Controllers\StudentController::class, 'statistics']);
+    Route::get('next-student-number', [App\Http\Controllers\StudentController::class, 'getNextStudentNumber']);
 
     // Student Violations Routes
     Route::get('students/{student}/violations', [StudentViolationController::class, 'index']);

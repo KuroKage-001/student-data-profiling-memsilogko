@@ -12,6 +12,8 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, user, loading }) => {
     confirmPassword: '',
     role: 'student',
     department: '',
+    position: '',
+    student_number: '',
     status: 'active'
   });
   
@@ -28,6 +30,8 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, user, loading }) => {
         confirmPassword: '',
         role: user.role || 'student',
         department: user.department || '',
+        position: user.position || '',
+        student_number: user.student_number || '',
         status: user.status || 'active'
       });
     } else {
@@ -38,6 +42,8 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, user, loading }) => {
         confirmPassword: '',
         role: 'student',
         department: '',
+        position: '',
+        student_number: '',
         status: 'active'
       });
     }
@@ -270,11 +276,11 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, user, loading }) => {
                 )}
               </div>
 
-              {/* Department Field - Only show for Department Chairman */}
-              {formData.role === 'dept_chair' && (
+              {/* Department Field - Show for all roles */}
+              {(formData.role === 'student' || formData.role === 'dept_chair' || formData.role === 'faculty' || formData.role === 'admin') && (
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Department
+                    Department *
                   </label>
                   <div className="relative">
                     <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
@@ -300,6 +306,77 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, user, loading }) => {
                   {errors.department && (
                     <p className="mt-1 text-sm text-red-600">{errors.department}</p>
                   )}
+                </div>
+              )}
+
+              {/* Position Field - Show for Faculty, Admin, and Dept Chair */}
+              {(formData.role === 'faculty' || formData.role === 'admin' || formData.role === 'dept_chair') && (
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Position *
+                  </label>
+                  <div className="relative">
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                    <select
+                      name="position"
+                      value={formData.position}
+                      onChange={handleChange}
+                      className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all appearance-none ${
+                        errors.position 
+                          ? 'border-red-500 focus:border-red-600' 
+                          : 'border-gray-200 focus:border-orange-500'
+                      }`}
+                    >
+                      <option value="">Select Position</option>
+                      <option value="Professor">Professor</option>
+                      <option value="Associate Professor">Associate Professor</option>
+                      <option value="Assistant Professor">Assistant Professor</option>
+                      <option value="Lecturer">Lecturer</option>
+                      <option value="Instructor">Instructor</option>
+                      <option value="Adjunct Professor">Adjunct Professor</option>
+                      <option value="Department Head">Department Head</option>
+                      <option value="Dean">Dean</option>
+                    </select>
+                  </div>
+                  {errors.position && (
+                    <p className="mt-1 text-sm text-red-600">{errors.position}</p>
+                  )}
+                </div>
+              )}
+
+              {/* Student Number Field - Only show for Student role */}
+              {formData.role === 'student' && (
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Student Number *
+                  </label>
+                  <div className="relative">
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
+                      </svg>
+                    </div>
+                    <input
+                      type="text"
+                      name="student_number"
+                      value={formData.student_number}
+                      onChange={handleChange}
+                      className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all ${
+                        errors.student_number 
+                          ? 'border-red-500 focus:border-red-600' 
+                          : 'border-gray-200 focus:border-orange-500'
+                      }`}
+                      placeholder="e.g., 2026-IT00001"
+                    />
+                  </div>
+                  {errors.student_number && (
+                    <p className="mt-1 text-sm text-red-600">{errors.student_number}</p>
+                  )}
+                  <p className="mt-1 text-xs text-gray-500">Format: YYYY-DDDDD (e.g., 2026-IT00001)</p>
                 </div>
               )}
 

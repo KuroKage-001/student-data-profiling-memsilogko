@@ -238,6 +238,24 @@ const studentService = {
     }
   },
 
+  // Get next available student number
+  getNextStudentNumber: async (department = 'IT') => {
+    try {
+      const response = await axiosInstance.get('/next-student-number', {
+        params: { department }
+      });
+      return {
+        success: true,
+        data: response.data.data.next_student_number
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to fetch next student number'
+      };
+    }
+  },
+
   // Generate student ID
   generateStudentId: () => {
     const prefix = 'STU';
@@ -246,19 +264,11 @@ const studentService = {
     return `${prefix}${year}${randomNum}`;
   },
 
-  // Get available programs
+  // Get available programs (IT and CS only)
   getPrograms: () => {
     return [
-      'Computer Science',
-      'Information Technology',
-      'Computer Engineering',
-      'Data Science',
-      'Software Engineering',
-      'Information Systems',
-      'Cybersecurity',
-      'Artificial Intelligence',
-      'Computer Networks',
-      'Web Development'
+      'Bachelor of Science in Information Technology',
+      'Bachelor of Science in Computer Science'
     ];
   },
 

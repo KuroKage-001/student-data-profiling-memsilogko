@@ -67,7 +67,9 @@ class UserManagementController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
             'role' => 'required|in:admin,faculty,student,dept_chair',
-            'department' => 'required_if:role,dept_chair|nullable|in:IT,CS',
+            'department' => 'required_if:role,dept_chair,student,faculty,admin|nullable|in:IT,CS',
+            'position' => 'required_if:role,faculty,admin,dept_chair|nullable|string|max:100',
+            'student_number' => 'required_if:role,student|nullable|string|max:50|unique:users',
             'status' => 'sometimes|in:active,inactive,suspended'
         ]);
 
@@ -87,9 +89,26 @@ class UserManagementController extends Controller
                 'status' => $request->get('status', 'active')
             ];
 
-            // Add department if role is dept_chair
-            if ($request->role === 'dept_chair') {
+            // Add department if role requires it
+            if (in_array($request->role, ['dept_chair', 'student', 'faculty', 'admin'])) {
                 $userData['department'] = $request->department;
+            }
+
+            // Add position if role is faculty, admin, or dept_chair
+            if (in_array($request->role, ['faculty', 'admin', 'dept_chair']) && $request->filled('position')) {
+                $userData['position'] = $request->position;
+            }
+
+            // Add student_number and program if role is student
+            if ($request->role === 'student' && $request->filled('student_number')) {
+                $userData['student_number'] = $request->student_number;
+                
+                // Auto-set program based on department
+                if ($request->department === 'IT') {
+                    $userData['program'] = 'Bachelor of Science in Information Technology';
+                } elseif ($request->department === 'CS') {
+                    $userData['program'] = 'Bachelor of Science in Computer Science';
+                }
             }
 
             $user = User::create($userData);
@@ -140,7 +159,9 @@ class UserManagementController extends Controller
                 'email' => 'sometimes|required|string|email|max:255|unique:users,email,' . $id,
                 'password' => 'sometimes|nullable|string|min:8',
                 'role' => 'sometimes|required|in:admin,faculty,student,dept_chair',
-                'department' => 'required_if:role,dept_chair|nullable|in:IT,CS',
+                'department' => 'required_if:role,dept_chair,student,faculty,admin|nullable|in:IT,CS',
+                'position' => 'required_if:role,faculty,admin,dept_chair|nullable|string|max:100',
+                'student_number' => 'required_if:role,student|nullable|string|max:50|unique:users,student_number,' . $id,
                 'status' => 'sometimes|required|in:active,inactive,suspended'
             ]);
 
@@ -153,12 +174,37 @@ class UserManagementController extends Controller
 
             $updateData = $request->only(['name', 'email', 'role', 'status']);
             
-            // Handle department for dept_chair role
+            // Handle department and position based on role
             if ($request->has('role')) {
-                if ($request->role === 'dept_chair' && $request->has('department')) {
+                // Handle department
+                if (in_array($request->role, ['dept_chair', 'student', 'faculty', 'admin']) && $request->has('department')) {
                     $updateData['department'] = $request->department;
-                } elseif ($request->role !== 'dept_chair') {
+                    
+                    // Auto-set program for student based on department
+                    if ($request->role === 'student') {
+                        if ($request->department === 'IT') {
+                            $updateData['program'] = 'Bachelor of Science in Information Technology';
+                        } elseif ($request->department === 'CS') {
+                            $updateData['program'] = 'Bachelor of Science in Computer Science';
+                        }
+                    }
+                } else {
                     $updateData['department'] = null;
+                    $updateData['program'] = null;
+                }
+
+                // Handle position for faculty, admin, and dept_chair
+                if (in_array($request->role, ['faculty', 'admin', 'dept_chair']) && $request->has('position')) {
+                    $updateData['position'] = $request->position;
+                } else {
+                    $updateData['position'] = null;
+                }
+
+                // Handle student_number for student role
+                if ($request->role === 'student' && $request->has('student_number')) {
+                    $updateData['student_number'] = $request->student_number;
+                } else {
+                    $updateData['student_number'] = null;
                 }
             }
             

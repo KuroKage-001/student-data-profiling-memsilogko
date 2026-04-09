@@ -75,6 +75,25 @@ const UserList = ({ users, searchTerm, onEditUser, onDeleteUser, loading }) => {
                         {user.department} Department
                       </div>
                     )}
+                    {user.role === 'student' && (
+                      <div className="mt-1 space-y-0.5">
+                        {user.student_number && (
+                          <div className="text-xs text-gray-600 font-medium">
+                            {user.student_number}
+                          </div>
+                        )}
+                        {user.program && (
+                          <div className="text-xs text-gray-600 font-medium">
+                            {user.program}
+                          </div>
+                        )}
+                        {user.department && !user.program && (
+                          <div className="text-xs text-gray-600 font-medium">
+                            {user.department === 'IT' ? 'Information Technology' : 'Computer Science'}
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </td>
                 <td className="px-6 py-5 whitespace-nowrap">
@@ -125,6 +144,23 @@ const UserList = ({ users, searchTerm, onEditUser, onDeleteUser, loading }) => {
                   {user.role === 'dept_chair' && user.department && (
                     <span className="inline-flex px-2 sm:px-2.5 py-1 text-xs sm:text-sm font-medium rounded-full bg-blue-100 text-blue-800">
                       {user.department}
+                    </span>
+                  )}
+                  {user.role === 'student' && user.student_number && (
+                    <span className="inline-flex px-2 sm:px-2.5 py-1 text-xs sm:text-sm font-medium rounded-full bg-indigo-100 text-indigo-800">
+                      {user.student_number}
+                    </span>
+                  )}
+                  {user.role === 'student' && user.program && (
+                    <span className="inline-flex px-2 sm:px-2.5 py-1 text-xs sm:text-sm font-medium rounded-full bg-purple-100 text-purple-800">
+                      {user.program === 'Bachelor of Science in Information Technology' ? 'BSIT' : 
+                       user.program === 'Bachelor of Science in Computer Science' ? 'BSCS' : 
+                       user.program}
+                    </span>
+                  )}
+                  {user.role === 'student' && user.department && !user.program && (
+                    <span className="inline-flex px-2 sm:px-2.5 py-1 text-xs sm:text-sm font-medium rounded-full bg-purple-100 text-purple-800">
+                      {user.department === 'IT' ? 'IT' : 'CS'}
                     </span>
                   )}
                   <span className={`inline-flex px-2 sm:px-2.5 py-1 text-xs sm:text-sm font-bold rounded-full ${getStatusColor(user.status)}`}>

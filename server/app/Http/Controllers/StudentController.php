@@ -373,4 +373,49 @@ class StudentController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Get next available student number
+     */
+    public function getNextStudentNumber(Request $request)
+    {
+        try {
+            $department = $request->query('department', 'IT'); // Default to IT
+            $year = date('Y');
+            
+            // Get the last student number for this department and year
+            $lastStudent = User::where('role', 'student')
+                ->where('student_number', 'like', "{$year}-{$department}%")
+                ->orderBy('student_number', 'desc')
+                ->first();
+            
+            if ($lastStudent && $lastStudent->student_number) {
+                // Extract the sequence number from format: YYYY-DDDDD
+                preg_match('/^\d{4}-(IT|CS)(\d{5})$/', $lastStudent->student_number, $matches);
+                if (isset($matches[2])) {
+                    $lastSequence = intval($matches[2]);
+                    $nextSequence = $lastSequence + 1;
+                } else {
+                    $nextSequence = 1;
+                }
+            } else {
+                $nextSequence = 1;
+            }
+            
+            // Format: YYYY-DDDDD (e.g., 2026-IT00001)
+            $nextStudentNumber = sprintf('%s-%s%05d', $year, $department, $nextSequence);
+            
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'next_student_number' => $nextStudentNumber
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to generate next student number: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

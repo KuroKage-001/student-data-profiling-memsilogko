@@ -12,6 +12,7 @@ const StudentList = ({ searchTerm, onViewStudent, onEditStudent, onDeleteStudent
     return students.filter(student =>
       student.name?.toLowerCase().includes(term) ||
       student.student_id?.toLowerCase().includes(term) ||
+      student.student_number?.toLowerCase().includes(term) ||
       student.program?.toLowerCase().includes(term) ||
       student.email?.toLowerCase().includes(term) ||
       student.skills?.toLowerCase().includes(term) ||
@@ -79,7 +80,9 @@ const StudentList = ({ searchTerm, onViewStudent, onEditStudent, onDeleteStudent
                 <td className="px-6 py-5 whitespace-nowrap">
                   <div>
                     <div className="text-base font-bold text-gray-900">{student.name}</div>
-                    <div className="text-sm text-gray-600 mt-0.5">{student.student_id || student.id}</div>
+                    <div className="text-sm text-gray-600 mt-0.5">
+                      {student.student_number || student.student_id || student.id}
+                    </div>
                   </div>
                 </td>
                 <td className="px-6 py-5 whitespace-nowrap">
@@ -129,7 +132,9 @@ const StudentList = ({ searchTerm, onViewStudent, onEditStudent, onDeleteStudent
               {/* Student Info */}
               <div className="flex-1 min-w-0">
                 <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-1.5 wrap-break-word">{student.name}</h3>
-                <p className="text-xs sm:text-sm text-gray-600 mb-2.5 break-all">{student.student_id || student.id}</p>
+                <p className="text-xs sm:text-sm text-gray-600 mb-2.5 break-all">
+                  {student.student_number || student.student_id || student.id}
+                </p>
                 <div className="flex flex-wrap items-center gap-1.5 text-xs sm:text-sm">
                   <span className="text-gray-800 font-medium">{student.program || 'N/A'}</span>
                   <span className="text-gray-400">•</span>

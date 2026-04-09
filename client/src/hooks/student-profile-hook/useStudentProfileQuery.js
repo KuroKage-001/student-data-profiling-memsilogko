@@ -18,7 +18,9 @@ export const useStudents = (params = {}) => {
   return useQuery({
     queryKey: studentKeys.list(params),
     queryFn: async () => {
-      const result = await studentService.getStudents(params);
+      // Add per_page parameter to get all students
+      const queryParams = { ...params, per_page: 1000 };
+      const result = await studentService.getStudents(queryParams);
       if (!result.success) {
         throw new Error(result.message);
       }
@@ -131,6 +133,24 @@ export const useStudentStatistics = () => {
       return result.data;
     },
     staleTime: 10 * 60 * 1000, // 10 minutes
+  });
+};
+
+/**
+ * Hook to fetch next available student number
+ */
+export const useNextStudentNumber = (department) => {
+  return useQuery({
+    queryKey: ['nextStudentNumber', department],
+    queryFn: async () => {
+      const result = await studentService.getNextStudentNumber(department);
+      if (!result.success) {
+        throw new Error(result.message);
+      }
+      return result.data;
+    },
+    enabled: !!department, // Only fetch when department is provided
+    staleTime: 0, // Always fetch fresh data
   });
 };
 

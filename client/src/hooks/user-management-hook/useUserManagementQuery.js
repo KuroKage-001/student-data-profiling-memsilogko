@@ -17,7 +17,9 @@ export const useUsers = (params = {}) => {
   return useQuery({
     queryKey: userKeys.list(params),
     queryFn: async () => {
-      const result = await userManagementService.getUsers(params);
+      // Add per_page parameter to get all users (or a large number)
+      const queryParams = { ...params, per_page: 1000 };
+      const result = await userManagementService.getUsers(queryParams);
       if (!result.success) {
         throw new Error(result.message);
       }

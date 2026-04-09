@@ -59,6 +59,27 @@ export const validateUserForm = (formData, isEdit = false) => {
     errors.role = 'Role is required';
   }
 
+  // Department validation - required for student, dept_chair, faculty, and admin
+  if (formData.role === 'student' || formData.role === 'dept_chair' || formData.role === 'faculty' || formData.role === 'admin') {
+    if (!formData.department || formData.department.trim() === '') {
+      errors.department = 'Department is required';
+    }
+  }
+
+  // Position validation - required for faculty, admin, and dept_chair
+  if (formData.role === 'faculty' || formData.role === 'admin' || formData.role === 'dept_chair') {
+    if (!formData.position || formData.position.trim() === '') {
+      errors.position = 'Position is required';
+    }
+  }
+
+  // Student number validation - required for student role
+  if (formData.role === 'student') {
+    if (!formData.student_number || formData.student_number.trim() === '') {
+      errors.student_number = 'Student number is required';
+    }
+  }
+
   // Status validation
   if (!formData.status) {
     errors.status = 'Status is required';

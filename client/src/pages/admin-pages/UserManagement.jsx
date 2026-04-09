@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import AdminLayout from '../../layouts/AdminLayout';
@@ -9,7 +9,7 @@ import { useUsers, useCreateUser, useUpdateUser, useDeleteUser } from '../../hoo
 import { UserManagementSkeleton } from '../../layouts/skeleton-loading';
 import useToast from '../../hooks/useToast';
 import usePageTitle from '../../hooks/usePageTitle';
-import { FaUsers, FaSearch, FaPlus } from 'react-icons/fa';
+import { FaUsers, FaSearch, FaPlus, FaFilter, FaChevronDown, FaChevronUp } from 'react-icons/fa';
 
 const UserManagement = () => {
   usePageTitle('User Management');
@@ -19,9 +19,23 @@ const UserManagement = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [userToEdit, setUserToEdit] = useState(null);
   const [userToDelete, setUserToDelete] = useState(null);
+  const [showFilters, setShowFilters] = useState(false);
+  const [filters, setFilters] = useState({
+    role: 'all',
+    status: 'all'
+  });
+
+  // Build query params
+  const queryParams = useMemo(() => {
+    const params = {};
+    if (searchTerm) params.search = searchTerm;
+    if (filters.role !== 'all') params.role = filters.role;
+    if (filters.status !== 'all') params.status = filters.status;
+    return params;
+  }, [searchTerm, filters]);
 
   // React Query hooks
-  const { data: users = [], isLoading, error } = useUsers();
+  const { data: users = [], isLoading, error } = useUsers(queryParams);
   const createUserMutation = useCreateUser();
   const updateUserMutation = useUpdateUser();
   const deleteUserMutation = useDeleteUser();
@@ -90,6 +104,13 @@ const UserManagement = () => {
     setUserToDelete(null);
   };
 
+  const handleFilterChange = (filterName, value) => {
+    setFilters(prev => ({
+      ...prev,
+      [filterName]: value
+    }));
+  };
+
   // Show skeleton loading while data is being fetched
   if (isLoading) {
     return (
@@ -147,6 +168,62 @@ const UserManagement = () => {
                 <FaPlus className="text-xs" />
                 <span>Add User</span>
               </button>
+            </div>
+          </div>
+
+          {/* Filters Toggle Button (Mobile Only) */}
+          <div className="mt-3 lg:hidden">
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="w-full flex items-center justify-between px-3 py-2.5 bg-gray-50 hover:bg-gray-100 active:bg-gray-200 border border-gray-200 rounded-lg transition-all text-gray-700 font-medium text-sm"
+            >
+              <div className="flex items-center gap-2">
+                <FaFilter className="text-xs text-orange-600" />
+                <span>Filters</span>
+                {(filters.role !== 'all' || filters.status !== 'all') && (
+                  <span className="inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-orange-600 rounded-full">
+                    {[filters.role !== 'all', filters.status !== 'all'].filter(Boolean).length}
+                  </span>
+                )}
+              </div>
+              {showFilters ? <FaChevronUp className="text-xs" /> : <FaChevronDown className="text-xs" />}
+            </button>
+          </div>
+
+          {/* Filters Section */}
+          <div className={`mt-3 pt-3 border-t border-gray-200 ${showFilters ? 'block' : 'hidden'} lg:block`}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  Role
+                </label>
+                <select
+                  value={filters.role}
+                  onChange={(e) => handleFilterChange('role', e.target.value)}
+                  className="w-full px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                >
+                  <option value="all">All Roles</option>
+                  <option value="admin">Administrator</option>
+                  <option value="dept_chair">Department Chairman</option>
+                  <option value="faculty">Faculty</option>
+                  <option value="student">Student</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  Status
+                </label>
+                <select
+                  value={filters.status}
+                  onChange={(e) => handleFilterChange('status', e.target.value)}
+                  className="w-full px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                >
+                  <option value="all">All Statuses</option>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                  <option value="suspended">Suspended</option>
+                </select>
+              </div>
             </div>
           </div>
         </div>

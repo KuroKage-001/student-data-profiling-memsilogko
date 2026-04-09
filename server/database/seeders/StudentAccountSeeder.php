@@ -24,8 +24,8 @@ class StudentAccountSeeder extends Seeder
         }
 
         $programs = [
-            'Information Technology' => 50,
-            'Computer Science' => 50,
+            'IT' => 50,  // Information Technology
+            'CS' => 50,  // Computer Science
         ];
 
         $firstNames = [
@@ -74,8 +74,9 @@ class StudentAccountSeeder extends Seeder
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n";
 
         // Generate students based on program distribution
-        foreach ($programs as $program => $count) {
-            echo "   Creating $count students for $program...\n";
+        foreach ($programs as $department => $count) {
+            $programName = $department === 'IT' ? 'Information Technology' : 'Computer Science';
+            echo "   Creating $count students for $programName ($department)...\n";
             
             for ($i = 0; $i < $count; $i++) {
                 // Generate unique name and email combination
@@ -100,6 +101,14 @@ class StudentAccountSeeder extends Seeder
                 // Determine status based on distribution
                 $status = $this->getWeightedStatus($statuses);
                 
+                // Generate student number: YYYY-DDDDD (Year-Department-Sequential)
+                $studentNumber = sprintf('%s-%s%05d', $year, $department, $counter);
+                
+                // Map department to program
+                $program = $department === 'IT' 
+                    ? 'Bachelor of Science in Information Technology' 
+                    : 'Bachelor of Science in Computer Science';
+                
                 // Default password for all student accounts
                 $password = Hash::make('Student@2024');
                 
@@ -110,11 +119,12 @@ class StudentAccountSeeder extends Seeder
                     'password' => $password,
                     'role' => 'student',
                     'status' => $status,
-                    'department' => null, // Will be set when student profile is added
+                    'department' => $department,
+                    'student_number' => $studentNumber,
                     'student_id' => null, // Will be set when student profile is added
                     'phone' => null,
                     'address' => null,
-                    'program' => null, // Will be set when student profile is added
+                    'program' => $program, // Set program based on department
                     'year_level' => null,
                     'gpa' => null,
                     'enrollment_date' => null,
@@ -145,8 +155,8 @@ class StudentAccountSeeder extends Seeder
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n";
         
         echo "📊 Distribution by Program:\n";
-        echo "   • Information Technology: 50 accounts\n";
-        echo "   • Computer Science: 50 accounts\n\n";
+        echo "   • Information Technology (IT): 50 accounts\n";
+        echo "   • Computer Science (CS): 50 accounts\n\n";
         
         echo "📊 Distribution by Status:\n";
         echo "   • Active: ~90 accounts\n";
@@ -155,7 +165,9 @@ class StudentAccountSeeder extends Seeder
         
         echo "🔐 Default Credentials:\n";
         echo "   • Email: [firstname].[lastname]@student.ccs.edu\n";
-        echo "   • Password: Student@2024\n\n";
+        echo "   • Password: Student@2024\n";
+        echo "   • Student Number: $year-[DEPT][00001-00100]\n";
+        echo "     (e.g., $year-IT00001, $year-CS00050)\n\n";
         
         echo "📝 Next Steps:\n";
         echo "   1. Login to Admin Portal\n";
@@ -165,8 +177,8 @@ class StudentAccountSeeder extends Seeder
         echo "   5. Fill in student profile information\n";
         echo "   6. Submit to complete the profile\n\n";
         
-        echo "💡 Note: These accounts have 'student' role but no profile data yet.\n";
-        echo "   Use the new User Integration feature to add student profiles.\n\n";
+        echo "💡 Note: These accounts have 'student' role with department, student number, and program.\n";
+        echo "   Use the User Integration feature in Student Profiles to complete their profiles.\n\n";
     }
 
     /**

@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { FaTimes, FaUserGraduate, FaEnvelope, FaPhone, FaMapMarkerAlt, FaGraduationCap, FaCalendarAlt, FaUserFriends, FaStickyNote, FaIdCard, FaTrophy, FaRunning } from 'react-icons/fa';
 import UserSearchDropdown from './UserSearchDropdown';
 import { useUsers } from '../../../hooks/user-management-hook';
+import { useNextStudentNumber } from '../../../hooks/student-profile-hook';
 
 const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors }) => {
   const [formData, setFormData] = useState({
@@ -26,9 +27,13 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
   const [errors, setErrors] = useState({});
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [userDepartment, setUserDepartment] = useState(null);
 
   // Fetch users with student role
   const { data: allUsers = [], isLoading: usersLoading, error: usersError } = useUsers({ role: 'student' });
+
+  // Fetch next student number based on selected user's department
+  const { data: nextStudentNumber, isLoading: loadingNextNumber } = useNextStudentNumber(userDepartment);
 
   // Update errors when serverErrors prop changes
   useEffect(() => {
@@ -39,16 +44,8 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
 
   // Available options
   const programs = [
-    'Computer Science',
-    'Information Technology',
-    'Computer Engineering',
-    'Data Science',
-    'Software Engineering',
-    'Information Systems',
-    'Cybersecurity',
-    'Artificial Intelligence',
-    'Computer Networks',
-    'Web Development'
+    'Bachelor of Science in Information Technology',
+    'Bachelor of Science in Computer Science'
   ];
 
   const yearLevels = ['1st Year', '2nd Year', '3rd Year', '4th Year', '5th Year'];
@@ -61,7 +58,7 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
         user_id: student.id || '',
         name: student.name || '',
         email: student.email || '',
-        student_id: student.student_id || '',
+        student_id: student.student_number || student.student_id || '', // Use student_number first
         phone: student.phone || '',
         address: student.address || '',
         program: student.program || '',
@@ -79,51 +76,96 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
       setSelectedUser({
         id: student.id,
         name: student.name,
-        email: student.email
+        email: student.email,
+        student_number: student.student_number || '',
+        department: student.department || ''
       });
     } else {
       setIsEditMode(false);
       setSelectedUser(null);
-      const generateStudentId = () => {
-        const prefix = 'STU';
-        const randomNum = Math.floor(1000 + Math.random() * 9000);
-        const year = new Date().getFullYear().toString().slice(-2);
-        return `${prefix}${year}${randomNum}`;
-      };
+      setUserDepartment(null);
       
-      setFormData(prev => ({
-        ...prev,
+      setFormData({
         user_id: '',
-        student_id: generateStudentId(),
-        enrollment_date: new Date().toISOString().split('T')[0]
-      }));
+        name: '',
+        email: '',
+        student_id: '', // Will be set when user is selected or next number is fetched
+        phone: '',
+        address: '',
+        program: '',
+        year_level: '',
+        gpa: '',
+        enrollment_date: new Date().toISOString().split('T')[0],
+        graduation_date: '',
+        guardian_name: '',
+        guardian_phone: '',
+        skills: '',
+        extracurricular_activities: '',
+        notes: ''
+      });
     }
     setErrors({});
   }, [student]);
+
+  // Auto-fill next student number when it's fetched
+  useEffect(() => {
+    if (!isEditMode && nextStudentNumber && userDepartment) {
+      setFormData(prev => ({
+        ...prev,
+        student_id: nextStudentNumber
+      }));
+      // Clear student_id error since it's auto-filled
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors.student_id;
+        return newErrors;
+      });
+    }
+  }, [nextStudentNumber, userDepartment, isEditMode]);
 
   // Handle user selection from dropdown
   const handleUserSelect = (user) => {
     setSelectedUser(user);
     if (user) {
+      // Set department to trigger next student number fetch
+      setUserDepartment(user.department);
+      
+      // Determine program based on department
+      let program = '';
+      if (user.department === 'IT') {
+        program = 'Bachelor of Science in Information Technology';
+      } else if (user.department === 'CS') {
+        program = 'Bachelor of Science in Computer Science';
+      }
+
       setFormData(prev => ({
         ...prev,
         user_id: user.id,
         name: user.name || '',
-        email: user.email || ''
+        email: user.email || '',
+        program: program,
+        student_id: user.student_number || prev.student_id // Use student_number if available, otherwise keep current (will be set by next number)
       }));
-      // Clear name and email errors since they're auto-filled
+      // Clear name, email, program errors since they're auto-filled
       setErrors(prev => {
         const newErrors = { ...prev };
         delete newErrors.name;
         delete newErrors.email;
+        delete newErrors.program;
+        if (user.student_number) {
+          delete newErrors.student_id;
+        }
         return newErrors;
       });
     } else {
+      setUserDepartment(null);
       setFormData(prev => ({
         ...prev,
         user_id: '',
         name: '',
-        email: ''
+        email: '',
+        program: '',
+        student_id: ''
       }));
     }
   };
@@ -168,7 +210,12 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
         return null;
       
       case 'student_id':
-        if (!value.trim()) return 'Student ID is required';
+        if (!value || typeof value !== 'string' || !value.trim()) return 'Student Number is required';
+        // Validate format: YYYY-DDDDD (e.g., 2026-IT00001, 2026-CS00050)
+        const studentIdRegex = /^\d{4}-(IT|CS)\d{5}$/;
+        if (!studentIdRegex.test(value)) {
+          return 'Invalid format. Use: YYYY-DDDDD (e.g., 2026-IT00001)';
+        }
         return null;
       
       case 'program':
@@ -193,10 +240,15 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
     // For new students, user must be selected
     if (!isEditMode && !formData.user_id) return false;
     
-    // Check required fields
-    if (!formData.name.trim()) return false;
-    if (!formData.email.trim()) return false;
-    if (!formData.student_id.trim()) return false;
+    // Check required fields with safe string checks
+    if (!formData.name || typeof formData.name !== 'string' || !formData.name.trim()) return false;
+    if (!formData.email || typeof formData.email !== 'string' || !formData.email.trim()) return false;
+    if (!formData.student_id || typeof formData.student_id !== 'string' || !formData.student_id.trim()) return false;
+    
+    // Validate student_id format
+    const studentIdRegex = /^\d{4}-(IT|CS)\d{5}$/;
+    if (!studentIdRegex.test(formData.student_id)) return false;
+    
     if (!formData.program) return false;
     if (!formData.year_level) return false;
     if (!formData.enrollment_date) return false;
@@ -401,9 +453,12 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
               )}
             </div>
 
-            {/* Student ID Field */}
+            {/* Student Number Field */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Student ID *</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Student Number * {isEditMode && <span className="text-gray-500 font-normal">(editable)</span>}
+                {!isEditMode && <span className="text-gray-500 font-normal">(auto-generated)</span>}
+              </label>
               <div className="relative">
                 <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><FaIdCard /></div>
                 <input
@@ -411,11 +466,23 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
                   name="student_id"
                   value={formData.student_id}
                   onChange={handleChange}
-                  className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all ${errors.student_id ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-orange-500'}`}
-                  placeholder="Enter student ID"
+                  disabled={!isEditMode && (!selectedUser || loadingNextNumber)}
+                  className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all ${
+                    (!isEditMode && (!selectedUser || loadingNextNumber)) ? 'bg-gray-50 cursor-not-allowed' : ''
+                  } ${errors.student_id ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-orange-500'}`}
+                  placeholder={loadingNextNumber ? "Generating..." : "e.g., 2026-IT00001"}
                 />
               </div>
               {errors.student_id && <p className="mt-1 text-sm text-red-600">{errors.student_id}</p>}
+              {!isEditMode && selectedUser && !loadingNextNumber && formData.student_id ? (
+                <p className="mt-1 text-xs text-gray-500">Auto-generated next available number for {selectedUser.department}</p>
+              ) : !isEditMode && loadingNextNumber ? (
+                <p className="mt-1 text-xs text-gray-500">Generating next student number...</p>
+              ) : isEditMode ? (
+                <p className="mt-1 text-xs text-gray-500">Format: YYYY-DDDDD (e.g., 2026-IT00001, 2026-CS00050)</p>
+              ) : (
+                <p className="mt-1 text-xs text-gray-500">Will be auto-generated when you select a user</p>
+              )}
             </div>
 
             {/* Phone Field */}
@@ -454,13 +521,19 @@ const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors })
                   name="program"
                   value={formData.program}
                   onChange={handleChange}
-                  className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all appearance-none ${errors.program ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-orange-500'}`}
+                  disabled={!isEditMode && selectedUser && selectedUser.department}
+                  className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all appearance-none ${
+                    (!isEditMode && selectedUser && selectedUser.department) ? 'bg-gray-50 cursor-not-allowed' : ''
+                  } ${errors.program ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-orange-500'}`}
                 >
                   <option value="">Select program</option>
                   {programs.map(program => (<option key={program} value={program}>{program}</option>))}
                 </select>
               </div>
               {errors.program && <p className="mt-1 text-sm text-red-600">{errors.program}</p>}
+              {!isEditMode && selectedUser && selectedUser.department && (
+                <p className="mt-1 text-xs text-gray-500">Auto-filled based on user's department ({selectedUser.department})</p>
+              )}
             </div>
 
             {/* Year Level Field */}

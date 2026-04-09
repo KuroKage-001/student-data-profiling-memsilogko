@@ -6,6 +6,7 @@ export {
   useUpdateStudent, 
   useDeleteStudent,
   useStudentStatistics,
+  useNextStudentNumber,
   studentKeys,
   getPrograms,
   getYearLevels,
