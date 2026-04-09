@@ -23,17 +23,20 @@ const PortalCards = () => {
         </div>
       </div>
 
-      <div className="bg-white border-2 border-gray-200 rounded-lg p-5 cursor-not-allowed group opacity-60 shadow-sm">
+      <div 
+        onClick={() => navigate('/login')}
+        className="bg-white border-2 border-gray-200 rounded-lg p-5 hover:border-orange-600 transition-all duration-300 cursor-pointer group shadow-sm hover:shadow-md"
+      >
         <div className="flex items-center mb-3">
-          <div className="text-gray-400 text-2xl mr-3"><FaUserGraduate /></div>
-          <h3 className="text-lg md:text-xl font-semibold text-gray-400">Student Portal</h3>
+          <div className="text-orange-600 text-2xl mr-3"><FaUserGraduate /></div>
+          <h3 className="text-lg md:text-xl font-semibold text-black group-hover:text-orange-600 transition-colors">Student Portal</h3>
         </div>
-        <p className="text-gray-400 text-xs md:text-sm mb-3">
-          Coming Soon - Student access to profiles, academic records, and personal information management.
+        <p className="text-gray-600 text-xs md:text-sm mb-3">
+          Student access to profiles, academic records, and personal information management.
         </p>
-        <div className="flex items-center text-gray-400 text-xs font-medium">
-          <span>Coming Soon</span>
-          <span className="ml-2">⏳</span>
+        <div className="flex items-center text-orange-600 text-xs font-medium">
+          <span>Access Portal</span>
+          <span className="ml-2 group-hover:translate-x-1 transition-transform">→</span>
         </div>
       </div>
     </div>
