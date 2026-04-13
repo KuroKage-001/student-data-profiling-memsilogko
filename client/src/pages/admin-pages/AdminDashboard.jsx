@@ -16,6 +16,7 @@ const AdminDashboard = () => {
   const { user } = useAuth();
   
   const isDeptChair = user?.role === 'dept_chair';
+  const isFaculty = user?.role === 'faculty';
 
   const handleNavigateToStudents = () => {
     navigate('/admin/students');
@@ -46,11 +47,19 @@ const AdminDashboard = () => {
           <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
             <div className="w-1 sm:w-1.5 h-6 sm:h-8 bg-linear-to-b from-orange-600 to-orange-400 rounded-full"></div>
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-linear-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-              {isDeptChair && user?.department ? `${user.department} Department Dashboard` : 'Admin Dashboard'}
+              {isDeptChair && user?.department 
+                ? `${user.department} Department Dashboard` 
+                : isFaculty 
+                  ? 'Faculty Dashboard' 
+                  : 'Admin Dashboard'}
             </h1>
           </div>
           <p className="text-sm sm:text-base lg:text-lg text-gray-600 ml-4 sm:ml-6 font-medium">
-            {isDeptChair ? 'Department Management and Oversight' : 'Comprehensive Profiling System Management'}
+            {isDeptChair 
+              ? 'Department Management and Oversight' 
+              : isFaculty 
+                ? 'Teaching and Academic Management' 
+                : 'Comprehensive Profiling System Management'}
           </p>
         </div>
 
@@ -60,9 +69,9 @@ const AdminDashboard = () => {
         </div>
 
         {/* Main Navigation Cards - Enhanced Design */}
-        <div className={`grid grid-cols-1 ${isDeptChair ? 'lg:grid-cols-2' : 'lg:grid-cols-2'} gap-4 sm:gap-5 lg:gap-6 mb-6 sm:mb-8 lg:mb-10`}>
-          {/* Student Profiles Card - Hidden for Dept Chair */}
-          {!isDeptChair && (
+        <div className={`grid grid-cols-1 ${isDeptChair || isFaculty ? 'lg:grid-cols-2' : 'lg:grid-cols-2'} gap-4 sm:gap-5 lg:gap-6 mb-6 sm:mb-8 lg:mb-10`}>
+          {/* Student Profiles Card - Hidden for Dept Chair and Faculty */}
+          {!isDeptChair && !isFaculty && (
             <div 
               onClick={handleNavigateToStudents}
               className="group relative bg-white rounded-xl sm:rounded-2xl p-5 sm:p-6 lg:p-8 cursor-pointer overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 hover:border-orange-300 hover:-translate-y-1 active:scale-[0.98]"
@@ -130,8 +139,8 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-          {/* Scheduling Card - For Dept Chair */}
-          {isDeptChair && (
+          {/* Scheduling Card - For Dept Chair and Faculty */}
+          {(isDeptChair || isFaculty) && (
             <div 
               onClick={handleNavigateToScheduling}
               className="group relative bg-white rounded-xl sm:rounded-2xl p-5 sm:p-6 lg:p-8 cursor-pointer overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 hover:border-orange-300 hover:-translate-y-1 active:scale-[0.98]"

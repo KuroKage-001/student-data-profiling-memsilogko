@@ -53,7 +53,7 @@ class RouteController extends Controller
                 'component' => 'UserProfileSettings',
                 'isPublic' => false,
                 'title' => 'Profile Settings',
-                'roles' => ['admin', 'faculty', 'student'],
+                'roles' => ['admin', 'dept_chair', 'faculty', 'student'],
                 'requiresAuth' => true,
             ],
             [
@@ -62,7 +62,7 @@ class RouteController extends Controller
                 'component' => 'AdminDashboard',
                 'isPublic' => false,
                 'title' => 'Dashboard',
-                'roles' => ['admin'],
+                'roles' => ['admin', 'dept_chair', 'faculty'],
                 'requiresAuth' => true,
             ],
             [
@@ -89,7 +89,7 @@ class RouteController extends Controller
                 'component' => 'FacultyProfiles',
                 'isPublic' => false,
                 'title' => 'Faculty Profiles',
-                'roles' => ['admin'],
+                'roles' => ['admin', 'dept_chair'],
                 'requiresAuth' => true,
             ],
             [
@@ -107,7 +107,7 @@ class RouteController extends Controller
                 'component' => 'Scheduling',
                 'isPublic' => false,
                 'title' => 'Scheduling',
-                'roles' => ['admin', 'faculty'],
+                'roles' => ['admin', 'dept_chair', 'faculty'],
                 'requiresAuth' => true,
             ],
             [

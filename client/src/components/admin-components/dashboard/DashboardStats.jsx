@@ -7,6 +7,7 @@ const DashboardStats = () => {
   const { user } = useAuth();
   
   const isDeptChair = user?.role === 'dept_chair';
+  const isFaculty = user?.role === 'faculty';
 
   // Format number with commas
   const formatNumber = (num) => {
@@ -50,7 +51,7 @@ const DashboardStats = () => {
   ];
 
   // Filter stats based on user role
-  const stats = isDeptChair 
+  const stats = (isDeptChair || isFaculty)
     ? allStats.filter(stat => !stat.hideForDeptChair)
     : allStats;
 
@@ -63,7 +64,7 @@ const DashboardStats = () => {
   }
 
   return (
-    <div className={`grid grid-cols-1 ${isDeptChair ? 'md:grid-cols-3' : 'md:grid-cols-2 lg:grid-cols-4'} gap-4 sm:gap-5`}>
+    <div className={`grid grid-cols-1 ${(isDeptChair || isFaculty) ? 'md:grid-cols-3' : 'md:grid-cols-2 lg:grid-cols-4'} gap-4 sm:gap-5`}>
       {stats.map((stat, index) => (
         <div key={index} className="bg-white rounded-2xl p-5 sm:p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300">
           <div className="flex items-start justify-between">
