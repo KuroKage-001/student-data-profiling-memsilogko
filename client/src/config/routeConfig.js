@@ -59,7 +59,7 @@ export const routeConfig = [
     component: AdminDashboard,
     isPublic: false,
     title: 'Dashboard',
-    roles: ['admin', 'dept_chair'],
+    roles: ['admin', 'dept_chair', 'faculty'],
     requiresAuth: true,
   },
   {
