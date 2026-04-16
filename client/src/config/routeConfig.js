@@ -37,6 +37,14 @@ export const routeConfig = [
     roles: ['*'],
   },
   {
+    id: 'faculty-login',
+    path: '/faculty/login',
+    component: LoginPage,
+    isPublic: true,
+    title: 'Faculty Login',
+    roles: ['*'],
+  },
+  {
     id: 'student-login',
     path: '/login',
     component: LoginPage,
@@ -141,6 +149,10 @@ export const specialRoutes = {
   adminRedirect: {
     from: '/admin',
     to: '/admin/login',
+  },
+  facultyRedirect: {
+    from: '/faculty',
+    to: '/faculty/login',
   },
   notFound: {
     from: '*',

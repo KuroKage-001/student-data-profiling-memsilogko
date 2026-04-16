@@ -59,7 +59,7 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'email' => 'required|email',
             'password' => 'required|string',
-            'portal_type' => 'nullable|string|in:admin,student', // Optional portal type
+            'portal_type' => 'nullable|string|in:admin,faculty,student', // Added faculty portal type
         ]);
 
         if ($validator->fails()) {
@@ -104,12 +104,22 @@ class AuthController extends Controller
 
         // Portal-based role validation
         if ($portalType === 'admin') {
-            // Admin portal: only admin, dept_chair, and faculty allowed
-            if (!in_array($user->role, ['admin', 'dept_chair', 'faculty'])) {
+            // Admin portal: only admin allowed
+            if ($user->role !== 'admin') {
                 auth('api')->logout();
                 return response()->json([
                     'success' => false,
-                    'message' => 'Access denied. This portal is for administrators and faculty only.',
+                    'message' => 'Access denied. This portal is for administrators only.',
+                    'portal_mismatch' => true
+                ], 403);
+            }
+        } elseif ($portalType === 'faculty') {
+            // Faculty portal: only dept_chair and faculty allowed
+            if (!in_array($user->role, ['dept_chair', 'faculty'])) {
+                auth('api')->logout();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Access denied. This portal is for faculty and department chairs only.',
                     'portal_mismatch' => true
                 ], 403);
             }
@@ -119,7 +129,7 @@ class AuthController extends Controller
                 auth('api')->logout();
                 return response()->json([
                     'success' => false,
-                    'message' => 'Access denied. This portal is for students only. Please use the Admin Portal.',
+                    'message' => 'Access denied. This portal is for students only. Please use the appropriate portal for your role.',
                     'portal_mismatch' => true
                 ], 403);
             }

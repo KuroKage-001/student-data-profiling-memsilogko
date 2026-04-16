@@ -19,7 +19,13 @@ export const useLoginForm = () => {
   const { showSuccess, showError } = useToast();
 
   // Determine portal type based on current route
-  const portalType = location.pathname === '/admin/login' ? 'admin' : 'student';
+  const getPortalType = () => {
+    if (location.pathname === '/admin/login') return 'admin';
+    if (location.pathname === '/faculty/login') return 'faculty';
+    return 'student';
+  };
+  
+  const portalType = getPortalType();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -56,12 +62,12 @@ export const useLoginForm = () => {
         // Role-based navigation
         const userRole = result.user?.role;
         
-        if (userRole === 'admin' || userRole === 'dept_chair') {
+        if (userRole === 'admin') {
           navigate('/admin/dashboard');
-        } else if (userRole === 'faculty') {
-          navigate('/admin/dashboard'); // Faculty can access dashboard
+        } else if (userRole === 'dept_chair' || userRole === 'faculty') {
+          navigate('/admin/dashboard'); // Faculty and dept chairs access admin dashboard
         } else if (userRole === 'student') {
-          navigate('/profile/settings'); // Students go to their profile
+          navigate('/student/dashboard'); // Students go to their dashboard
         } else {
           // Default fallback
           navigate('/');

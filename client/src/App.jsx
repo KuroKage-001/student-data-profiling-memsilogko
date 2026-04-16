@@ -48,6 +48,10 @@ const DynamicRoutes = () => {
         path={specialRoutes.adminRedirect.from} 
         element={<Navigate to={specialRoutes.adminRedirect.to} replace />} 
       />
+      <Route 
+        path={specialRoutes.facultyRedirect.from} 
+        element={<Navigate to={specialRoutes.facultyRedirect.to} replace />} 
+      />
       
       {/* Catch all route */}
       <Route 
