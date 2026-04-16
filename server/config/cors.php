@@ -19,15 +19,16 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['*'],
+    'allowed_origins' => env('CORS_ALLOWED_ORIGINS') ? explode(',', env('CORS_ALLOWED_ORIGINS')) : ['*'],
 
     'allowed_origins_patterns' => [
         '/^https:\/\/.*\.vercel\.app$/',
+        '/^http:\/\/localhost(:\d+)?$/',
     ],
 
     'allowed_headers' => ['*'],
 
-    'exposed_headers' => [],
+    'exposed_headers' => ['Authorization'],
 
     'max_age' => 86400, // Cache preflight requests for 24 hours
 
