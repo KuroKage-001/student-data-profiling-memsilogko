@@ -96,9 +96,6 @@ return [
             'prefix_indexes' => true,
             'search_path' => 'public',
             'sslmode' => env('DB_SSLMODE', 'prefer'),
-            'options' => extension_loaded('pdo_pgsql') ? (env('DB_SSLMODE') === 'require' ? [
-                PDO::PGSQL_ATTR_SSL_MODE => PDO::PGSQL_SSL_MODE_REQUIRE,
-            ] : []) : [],
         ],
 
         'sqlsrv' => [
