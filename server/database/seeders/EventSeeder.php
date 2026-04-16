@@ -9,6 +9,12 @@ class EventSeeder extends Seeder
 {
     public function run(): void
     {
+        // Skip if events already exist
+        if (\App\Models\Event::count() > 0) {
+            echo "\n⚠️  Events already exist, skipping Event seeding.\n";
+            return;
+        }
+
         $events = [
             [
                 'title' => 'CCS Research Symposium 2024',

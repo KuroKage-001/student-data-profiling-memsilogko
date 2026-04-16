@@ -13,6 +13,12 @@ class CSFacultySeeder extends Seeder
      */
     public function run(): void
     {
+        // Skip if faculty already exist
+        if (Faculty::where('department', 'CS')->count() > 0) {
+            echo "\n⚠️  CS Faculty already exist, skipping CS Faculty seeding.\n";
+            return;
+        }
+
         $positions = [
             'Professor' => 15,
             'Associate Professor' => 25,

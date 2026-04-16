@@ -13,6 +13,12 @@ class ITFacultySeeder extends Seeder
      */
     public function run(): void
     {
+        // Skip if faculty already exist
+        if (Faculty::where('department', 'IT')->count() > 0) {
+            echo "\n⚠️  IT Faculty already exist, skipping IT Faculty seeding.\n";
+            return;
+        }
+
         $positions = [
             'Professor' => 15,
             'Associate Professor' => 25,
