@@ -106,6 +106,15 @@ Route::middleware(['auth:api', 'check.status'])->group(function () {
     Route::get('student/upcoming-events', [App\Http\Controllers\StudentDashboardController::class, 'getUpcomingEvents']);
 });
 
+// Student Schedule API Routes (Protected)
+Route::middleware(['auth:api', 'check.status'])->group(function () {
+    Route::get('student/schedules', [App\Http\Controllers\StudentScheduleController::class, 'getMySchedules']);
+    Route::get('student/available-classes', [App\Http\Controllers\StudentScheduleController::class, 'getAvailableClasses']);
+    Route::get('student/schedule-statistics', [App\Http\Controllers\StudentScheduleController::class, 'getStatistics']);
+    Route::post('student/enroll', [App\Http\Controllers\StudentScheduleController::class, 'enroll']);
+    Route::delete('student/enrollments/{enrollmentId}', [App\Http\Controllers\StudentScheduleController::class, 'drop']);
+});
+
 // Dynamic Routes API (Optional - for database-driven routing)
 Route::middleware(['auth:api', 'check.status'])->group(function () {
     Route::get('routes', [App\Http\Controllers\RouteController::class, 'index']);

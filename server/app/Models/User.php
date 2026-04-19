@@ -189,4 +189,20 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(StudentAcademicRecord::class);
     }
+
+    /**
+     * Get the enrollments for the student
+     */
+    public function enrollments()
+    {
+        return $this->hasMany(StudentEnrollment::class);
+    }
+
+    /**
+     * Get active enrollments for the student
+     */
+    public function activeEnrollments()
+    {
+        return $this->enrollments()->where('enrollment_status', 'enrolled');
+    }
 }

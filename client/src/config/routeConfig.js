@@ -10,6 +10,7 @@ const LoginPage = lazy(() => import('../pages/system-page/LoginPage'));
 const UserProfileSettings = lazy(() => import('../pages/system-page/UserProfileSettings'));
 const AdminDashboard = lazy(() => import('../pages/admin-pages/AdminDashboard'));
 const StudentDashboard = lazy(() => import('../pages/student-pages/StudentDashboard'));
+const MySchedule = lazy(() => import('../pages/student-pages/MySchedule'));
 const StudentProfiles = lazy(() => import('../pages/admin-pages/StudentProfiles'));
 const FacultyProfiles = lazy(() => import('../pages/admin-pages/FacultyProfiles'));
 const Events = lazy(() => import('../pages/admin-pages/Events'));
@@ -76,6 +77,15 @@ export const routeConfig = [
     component: StudentDashboard,
     isPublic: false,
     title: 'Student Dashboard',
+    roles: ['student'],
+    requiresAuth: true,
+  },
+  {
+    id: 'my-schedule',
+    path: '/student/my-schedule',
+    component: MySchedule,
+    isPublic: false,
+    title: 'My Schedule',
     roles: ['student'],
     requiresAuth: true,
   },

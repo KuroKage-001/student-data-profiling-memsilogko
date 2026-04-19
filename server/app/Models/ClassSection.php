@@ -38,6 +38,22 @@ class ClassSection extends Model
     }
 
     /**
+     * Get the student enrollments for this class section
+     */
+    public function enrollments()
+    {
+        return $this->hasMany(StudentEnrollment::class);
+    }
+
+    /**
+     * Get enrolled students for this class section
+     */
+    public function enrolledStudents()
+    {
+        return $this->enrollments()->where('enrollment_status', 'enrolled')->with('student');
+    }
+
+    /**
      * Get the primary faculty member assigned to this class
      */
     public function primaryFaculty()
