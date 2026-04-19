@@ -29,10 +29,16 @@ class StudentAcademicRecordSeeder extends Seeder
         $this->command->info("Found {$students->count()} students");
 
         // Clear existing records with foreign key checks disabled
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-        StudentSubject::truncate();
-        StudentAcademicRecord::truncate();
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+            StudentSubject::truncate();
+            StudentAcademicRecord::truncate();
+            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        } else {
+            // PostgreSQL
+            StudentSubject::query()->delete();
+            StudentAcademicRecord::query()->delete();
+        }
 
         $recordCount = 0;
         $subjectCount = 0;
@@ -79,7 +85,7 @@ class StudentAcademicRecordSeeder extends Seeder
                     // Check if record already exists for this student, year, and semester
                     $existingRecord = StudentAcademicRecord::where('user_id', $student->id)
                         ->where('academic_year', $academicYear)
-                        ->where('semester', $semester)
+                        ->where('semester', (string)$semester)
                         ->first();
 
                     if ($existingRecord) {
@@ -89,7 +95,7 @@ class StudentAcademicRecordSeeder extends Seeder
                     // Create academic record
                     $record = StudentAcademicRecord::create([
                         'user_id' => $student->id,
-                        'semester' => $semester,
+                        'semester' => (string)$semester,
                         'academic_year' => $academicYear,
                         'semester_gpa' => 0, // Will be calculated
                         'remarks' => null,

@@ -27,9 +27,14 @@ class StudentAffiliationSeeder extends Seeder
         $this->command->info('Starting student affiliations seeding...');
 
         // Clear existing affiliations with foreign key checks disabled
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-        StudentAffiliation::truncate();
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+            StudentAffiliation::truncate();
+            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        } else {
+            // PostgreSQL
+            StudentAffiliation::query()->delete();
+        }
 
         $affiliations = [
             ['name' => 'Computer Science Society', 'type' => 'academic_org'],
@@ -67,14 +72,18 @@ class StudentAffiliationSeeder extends Seeder
                     foreach ($selectedAffiliations as $affiliationIndex) {
                         $affiliation = $affiliations[$affiliationIndex];
                         
+                        // Generate random values
+                        $randomEndDate = rand(0, 1);
+                        $randomActive = rand(0, 1);
+                        
                         StudentAffiliation::create([
                             'user_id' => $student->id,
                             'organization_name' => $affiliation['name'],
                             'affiliation_type' => $affiliation['type'],
                             'role' => $this->getRandomRole($affiliation['type']),
                             'start_date' => now()->subMonths(rand(1, 24)),
-                            'end_date' => rand(0, 1) ? now()->addMonths(rand(1, 12)) : null,
-                            'is_active' => rand(0, 1) ? true : false,
+                            'end_date' => $randomEndDate === 1 ? now()->addMonths(rand(1, 12)) : null,
+                            'is_active' => $randomActive === 1 ? true : false,
                             'description' => $this->getDescription($affiliation['name'], $affiliation['type']),
                         ]);
 
