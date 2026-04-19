@@ -49,10 +49,11 @@ php artisan migrate --force --no-interaction
 echo "Migration status:"
 php artisan migrate:status
 
-# Run database seeders only if SEED_DATABASE environment variable is set
+# Run database seeders only if SEED_DATABASE environment variable is set to true
 if [ "$SEED_DATABASE" = "true" ]; then
     echo "Running database seeders..."
-    php artisan db:seed --force
+    php artisan db:seed --force --no-interaction
+    echo "Database seeding completed!"
 else
     echo "Skipping database seeders (set SEED_DATABASE=true to enable)"
 fi

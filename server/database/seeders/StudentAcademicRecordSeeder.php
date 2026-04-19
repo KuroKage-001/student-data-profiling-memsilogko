@@ -15,6 +15,13 @@ class StudentAcademicRecordSeeder extends Seeder
      */
     public function run(): void
     {
+        // Check if records already exist
+        $existingRecords = StudentAcademicRecord::count();
+        if ($existingRecords > 50) {
+            $this->command->warn("⚠️  {$existingRecords} academic records already exist. Skipping seeding.");
+            return;
+        }
+
         // Get all active students
         $students = User::where('role', 'student')
             ->where('status', 'active')
@@ -27,18 +34,6 @@ class StudentAcademicRecordSeeder extends Seeder
 
         $this->command->info('Starting student academic records seeding...');
         $this->command->info("Found {$students->count()} students");
-
-        // Clear existing records with foreign key checks disabled
-        if (DB::getDriverName() === 'mysql') {
-            DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-            StudentSubject::truncate();
-            StudentAcademicRecord::truncate();
-            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
-        } else {
-            // PostgreSQL
-            StudentSubject::query()->delete();
-            StudentAcademicRecord::query()->delete();
-        }
 
         $recordCount = 0;
         $subjectCount = 0;
@@ -71,7 +66,15 @@ class StudentAcademicRecordSeeder extends Seeder
         $academicYears = ['2023-2024', '2024-2025', '2025-2026'];
 
         try {
+            // Use batch processing for better performance
+            DB::beginTransaction();
+            
             foreach ($students as $student) {
+                // Skip if student already has records
+                if (StudentAcademicRecord::where('user_id', $student->id)->exists()) {
+                    continue;
+                }
+
                 // Determine subjects based on department
                 $subjects = $student->department === 'IT' ? $itSubjects : $csSubjects;
 
@@ -81,16 +84,6 @@ class StudentAcademicRecordSeeder extends Seeder
                 for ($i = 0; $i < $numRecords; $i++) {
                     $academicYear = $academicYears[array_rand($academicYears)];
                     $semester = $semesters[array_rand($semesters)];
-
-                    // Check if record already exists for this student, year, and semester
-                    $existingRecord = StudentAcademicRecord::where('user_id', $student->id)
-                        ->where('academic_year', $academicYear)
-                        ->where('semester', (string)$semester)
-                        ->first();
-
-                    if ($existingRecord) {
-                        continue;
-                    }
 
                     // Create academic record
                     $record = StudentAcademicRecord::create([
@@ -145,11 +138,15 @@ class StudentAcademicRecordSeeder extends Seeder
                 $student->update(['gpa' => round($overallGpa, 2)]);
             }
 
+            DB::commit();
+            
             $this->command->info("Successfully created {$recordCount} academic records!");
             $this->command->info("Successfully created {$subjectCount} subject entries!");
 
         } catch (\Exception $e) {
+            DB::rollBack();
             $this->command->error('Error seeding academic records: ' . $e->getMessage());
+            throw $e;
         }
     }
 

@@ -14,6 +14,13 @@ class StudentAffiliationSeeder extends Seeder
      */
     public function run(): void
     {
+        // Check if affiliations already exist
+        $existingAffiliations = StudentAffiliation::count();
+        if ($existingAffiliations > 50) {
+            $this->command->warn("⚠️  {$existingAffiliations} affiliations already exist. Skipping seeding.");
+            return;
+        }
+
         // Get all active students
         $students = User::where('role', 'student')
             ->where('status', 'active')
@@ -25,16 +32,6 @@ class StudentAffiliationSeeder extends Seeder
         }
 
         $this->command->info('Starting student affiliations seeding...');
-
-        // Clear existing affiliations with foreign key checks disabled
-        if (DB::getDriverName() === 'mysql') {
-            DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-            StudentAffiliation::truncate();
-            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
-        } else {
-            // PostgreSQL
-            StudentAffiliation::query()->delete();
-        }
 
         $affiliations = [
             ['name' => 'Computer Science Society', 'type' => 'academic_org'],
@@ -58,7 +55,14 @@ class StudentAffiliationSeeder extends Seeder
         $affiliationCount = 0;
 
         try {
+            DB::beginTransaction();
+            
             foreach ($students as $student) {
+                // Skip if student already has affiliations
+                if (StudentAffiliation::where('user_id', $student->id)->exists()) {
+                    continue;
+                }
+
                 // Each student gets 0-4 random affiliations
                 $numAffiliations = rand(0, 4);
                 
@@ -92,10 +96,13 @@ class StudentAffiliationSeeder extends Seeder
                 }
             }
 
+            DB::commit();
             $this->command->info("Successfully created {$affiliationCount} student affiliations!");
 
         } catch (\Exception $e) {
+            DB::rollBack();
             $this->command->error('Error seeding affiliations: ' . $e->getMessage());
+            throw $e;
         }
     }
 
