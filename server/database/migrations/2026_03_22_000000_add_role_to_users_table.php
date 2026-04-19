@@ -16,16 +16,18 @@ return new class extends Migration
             if (DB::getDriverName() === 'pgsql') {
                 $table->string('role', 20)->default('student')->after('email');
                 $table->string('status', 20)->default('active')->after('role');
-                
-                // Add check constraints for PostgreSQL
-                DB::statement("ALTER TABLE users ADD CONSTRAINT users_role_check CHECK (role IN ('admin', 'faculty', 'student'))");
-                DB::statement("ALTER TABLE users ADD CONSTRAINT users_status_check CHECK (status IN ('active', 'inactive', 'suspended'))");
             } else {
                 // MySQL enum
                 $table->enum('role', ['admin', 'faculty', 'student'])->default('student')->after('email');
                 $table->enum('status', ['active', 'inactive', 'suspended'])->default('active')->after('role');
             }
         });
+        
+        // Add check constraints for PostgreSQL after columns are created
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement("ALTER TABLE users ADD CONSTRAINT users_role_check CHECK (role IN ('admin', 'faculty', 'student'))");
+            DB::statement("ALTER TABLE users ADD CONSTRAINT users_status_check CHECK (status IN ('active', 'inactive', 'suspended'))");
+        }
     }
 
     /**

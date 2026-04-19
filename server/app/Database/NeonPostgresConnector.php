@@ -25,8 +25,8 @@ class NeonPostgresConnector extends PostgresConnector
             preg_match('/^(ep-[^.]+)/', $host, $matches);
             if (!empty($matches[1])) {
                 $endpoint = $matches[1];
-                // Add endpoint to DSN options - use proper PostgreSQL options format
-                $dsn .= ";options='-c endpoint={$endpoint}'";
+                // Add endpoint to DSN options - use proper format without -c
+                $dsn .= ";options='endpoint={$endpoint}'";
             }
         }
 
