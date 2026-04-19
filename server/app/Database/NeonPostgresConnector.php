@@ -20,11 +20,13 @@ class NeonPostgresConnector extends PostgresConnector
         // Extract endpoint from host if it contains 'neon.tech'
         if (isset($config['host']) && str_contains($config['host'], 'neon.tech')) {
             // Extract endpoint ID from host (e.g., ep-wispy-truth-a1nim5i2)
-            preg_match('/^(ep-[^-.]+)/', $config['host'], $matches);
+            // Remove -pooler suffix if present
+            $host = str_replace('-pooler', '', $config['host']);
+            preg_match('/^(ep-[^.]+)/', $host, $matches);
             if (!empty($matches[1])) {
                 $endpoint = $matches[1];
-                // Add endpoint to DSN options
-                $dsn .= ";options='endpoint={$endpoint}'";
+                // Add endpoint to DSN options - use proper PostgreSQL options format
+                $dsn .= ";options='-c endpoint={$endpoint}'";
             }
         }
 
