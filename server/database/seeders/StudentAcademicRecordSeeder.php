@@ -95,6 +95,16 @@ class StudentAcademicRecordSeeder extends Seeder
                     $academicYear = $academicYears[array_rand($academicYears)];
                     $semester = $semesters[array_rand($semesters)];
 
+                    // Check if this combination already exists for this student
+                    $existingRecord = StudentAcademicRecord::where('user_id', $student->id)
+                        ->where('academic_year', $academicYear)
+                        ->where('semester', (string)$semester)
+                        ->first();
+
+                    if ($existingRecord) {
+                        continue; // Skip if this semester/year combo already exists
+                    }
+
                     // Create academic record
                     $record = StudentAcademicRecord::create([
                         'user_id' => $student->id,
@@ -121,6 +131,15 @@ class StudentAcademicRecordSeeder extends Seeder
                         $subject = $subjects[$subjectIndex];
                         $grade = $grades[array_rand($grades)];
                         
+                        // Check if this subject already exists for this record
+                        $existingSubject = StudentSubject::where('academic_record_id', $record->id)
+                            ->where('subject_code', $subject['code'])
+                            ->first();
+
+                        if ($existingSubject) {
+                            continue; // Skip if subject already exists
+                        }
+
                         StudentSubject::create([
                             'academic_record_id' => $record->id,
                             'subject_code' => $subject['code'],
@@ -144,8 +163,10 @@ class StudentAcademicRecordSeeder extends Seeder
 
                 // Update student's overall GPA
                 $allRecords = StudentAcademicRecord::where('user_id', $student->id)->get();
-                $overallGpa = $allRecords->avg('semester_gpa');
-                $student->update(['gpa' => round($overallGpa, 2)]);
+                if ($allRecords->isNotEmpty()) {
+                    $overallGpa = $allRecords->avg('semester_gpa');
+                    $student->update(['gpa' => round($overallGpa, 2)]);
+                }
             }
 
             DB::commit();
