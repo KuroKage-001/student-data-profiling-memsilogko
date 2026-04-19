@@ -135,19 +135,45 @@ class AuthController extends Controller
             }
         }
         
+        $userData = [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'role' => $user->role,
+            'status' => $user->status,
+            'created_at' => $user->created_at,
+        ];
+
+        // Add student-specific fields if user is a student
+        if ($user->role === 'student') {
+            $userData['student_id'] = $user->student_id;
+            $userData['student_number'] = $user->student_number;
+            $userData['program'] = $user->program;
+            $userData['year_level'] = $user->year_level;
+            $userData['department'] = $user->department;
+            $userData['phone'] = $user->phone;
+            $userData['address'] = $user->address;
+            $userData['gpa'] = $user->gpa;
+        }
+
+        // Add faculty-specific fields if user is faculty or dept_chair
+        if (in_array($user->role, ['faculty', 'dept_chair'])) {
+            $userData['department'] = $user->department;
+            $userData['position'] = $user->position;
+        }
+
+        // Add admin-specific fields if user is admin
+        if ($user->role === 'admin') {
+            $userData['department'] = $user->department;
+            $userData['position'] = $user->position;
+        }
+        
         return response()->json([
             'success' => true,
             'access_token' => $token,
             'token_type' => 'bearer',
             'expires_in' => auth('api')->factory()->getTTL() * 60,
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'role' => $user->role,
-                'status' => $user->status,
-                'created_at' => $user->created_at,
-            ]
+            'user' => $userData
         ])->header('Cache-Control', 'no-store, no-cache, must-revalidate');
     }
 
@@ -160,16 +186,42 @@ class AuthController extends Controller
     {
         $user = auth('api')->user();
         
+        $userData = [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'role' => $user->role,
+            'status' => $user->status,
+            'created_at' => $user->created_at,
+        ];
+
+        // Add student-specific fields if user is a student
+        if ($user->role === 'student') {
+            $userData['student_id'] = $user->student_id;
+            $userData['student_number'] = $user->student_number;
+            $userData['program'] = $user->program;
+            $userData['year_level'] = $user->year_level;
+            $userData['department'] = $user->department;
+            $userData['phone'] = $user->phone;
+            $userData['address'] = $user->address;
+            $userData['gpa'] = $user->gpa;
+        }
+
+        // Add faculty-specific fields if user is faculty or dept_chair
+        if (in_array($user->role, ['faculty', 'dept_chair'])) {
+            $userData['department'] = $user->department;
+            $userData['position'] = $user->position;
+        }
+
+        // Add admin-specific fields if user is admin
+        if ($user->role === 'admin') {
+            $userData['department'] = $user->department;
+            $userData['position'] = $user->position;
+        }
+        
         return response()->json([
             'success' => true,
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'role' => $user->role,
-                'status' => $user->status,
-                'created_at' => $user->created_at,
-            ]
+            'user' => $userData
         ])->header('Cache-Control', 'private, max-age=300'); // Cache for 5 minutes
     }
 
@@ -224,19 +276,45 @@ class AuthController extends Controller
     {
         $user = auth('api')->user();
         
+        $userData = [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'role' => $user->role,
+            'status' => $user->status,
+            'created_at' => $user->created_at,
+        ];
+
+        // Add student-specific fields if user is a student
+        if ($user->role === 'student') {
+            $userData['student_id'] = $user->student_id;
+            $userData['student_number'] = $user->student_number;
+            $userData['program'] = $user->program;
+            $userData['year_level'] = $user->year_level;
+            $userData['department'] = $user->department;
+            $userData['phone'] = $user->phone;
+            $userData['address'] = $user->address;
+            $userData['gpa'] = $user->gpa;
+        }
+
+        // Add faculty-specific fields if user is faculty or dept_chair
+        if (in_array($user->role, ['faculty', 'dept_chair'])) {
+            $userData['department'] = $user->department;
+            $userData['position'] = $user->position;
+        }
+
+        // Add admin-specific fields if user is admin
+        if ($user->role === 'admin') {
+            $userData['department'] = $user->department;
+            $userData['position'] = $user->position;
+        }
+        
         return response()->json([
             'success' => true,
             'access_token' => $token,
             'token_type' => 'bearer',
             'expires_in' => auth('api')->factory()->getTTL() * 60,
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'role' => $user->role,
-                'status' => $user->status,
-                'created_at' => $user->created_at,
-            ]
+            'user' => $userData
         ])->header('Cache-Control', 'no-store, no-cache, must-revalidate');
     }
 }

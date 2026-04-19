@@ -7,7 +7,7 @@ const StudentProfileCard = () => {
   return (
     <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-lg border border-gray-100">
       <div className="flex items-center gap-4 mb-6">
-        <div className="w-16 h-16 sm:w-20 sm:h-20 bg-linear-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center shadow-lg">
+        <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center shadow-lg">
           <FaUser className="text-white text-2xl sm:text-3xl" />
         </div>
         <div>
@@ -21,9 +21,9 @@ const StudentProfileCard = () => {
           <div className="w-10 h-10 bg-orange-50 rounded-lg flex items-center justify-center">
             <FaEnvelope className="text-orange-600" />
           </div>
-          <div>
+          <div className="flex-1 min-w-0">
             <p className="text-xs text-gray-500">Email</p>
-            <p className="text-sm font-medium">{user?.email || 'N/A'}</p>
+            <p className="text-sm font-medium truncate">{user?.email || 'N/A'}</p>
           </div>
         </div>
 
@@ -31,9 +31,9 @@ const StudentProfileCard = () => {
           <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
             <FaIdCard className="text-blue-600" />
           </div>
-          <div>
-            <p className="text-xs text-gray-500">Student ID</p>
-            <p className="text-sm font-medium">{user?.student_id || 'N/A'}</p>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs text-gray-500">Student Number</p>
+            <p className="text-sm font-medium">{user?.student_number || user?.student_id || 'N/A'}</p>
           </div>
         </div>
 
@@ -41,7 +41,7 @@ const StudentProfileCard = () => {
           <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center">
             <FaGraduationCap className="text-green-600" />
           </div>
-          <div>
+          <div className="flex-1 min-w-0">
             <p className="text-xs text-gray-500">Program</p>
             <p className="text-sm font-medium">{user?.program || 'N/A'}</p>
           </div>

@@ -1,4 +1,4 @@
-import { FaBook, FaTrophy, FaCalendarAlt, FaChartLine } from 'react-icons/fa';
+import { FaBook, FaCalendarAlt, FaChartLine, FaGraduationCap } from 'react-icons/fa';
 import { useStudentDashboard } from '../../../hooks/student-dashboard-hook';
 import { formatNumber, formatGPA } from '../../../utils/student-utilities/student-dashboard-utils';
 
@@ -21,9 +21,9 @@ const StudentDashboardStats = () => {
       iconColor: 'text-blue-600',
     },
     {
-      title: 'Achievements',
-      value: isLoading ? '...' : formatNumber(statsData?.achievements || 0),
-      icon: FaTrophy,
+      title: 'Enrolled Classes',
+      value: isLoading ? '...' : formatNumber(statsData?.enrolled_classes || 0),
+      icon: FaGraduationCap,
       iconBg: 'bg-green-100',
       iconColor: 'text-green-600',
     },
@@ -31,8 +31,8 @@ const StudentDashboardStats = () => {
       title: 'Upcoming Events',
       value: isLoading ? '...' : formatNumber(statsData?.upcoming_events || 0),
       icon: FaCalendarAlt,
-      iconBg: 'bg-yellow-100',
-      iconColor: 'text-yellow-600',
+      iconBg: 'bg-purple-100',
+      iconColor: 'text-purple-600',
     }
   ];
 

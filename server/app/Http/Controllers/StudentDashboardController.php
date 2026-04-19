@@ -46,8 +46,10 @@ class StudentDashboardController extends Controller
             
             $gpa = $totalUnits > 0 ? round($totalGradePoints / $totalUnits, 2) : ($user->gpa ?? 0);
 
-            // Count achievements (affiliations)
-            $achievements = StudentAffiliation::where('user_id', $user->id)->count();
+            // Count enrolled classes
+            $enrolledClasses = \App\Models\StudentEnrollment::where('user_id', $user->id)
+                ->where('enrollment_status', 'enrolled')
+                ->count();
 
             // Count upcoming events
             $upcomingEvents = Event::where('date', '>=', Carbon::now())
@@ -59,7 +61,7 @@ class StudentDashboardController extends Controller
                 'data' => [
                     'gpa' => $gpa,
                     'units_completed' => $totalUnits,
-                    'achievements' => $achievements,
+                    'enrolled_classes' => $enrolledClasses,
                     'upcoming_events' => $upcomingEvents
                 ]
             ]);

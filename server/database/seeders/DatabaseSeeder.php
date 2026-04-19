@@ -225,6 +225,8 @@ class DatabaseSeeder extends Seeder
             ITFacultySeeder::class,
             CSFacultySeeder::class,
             StudentAccountSeeder::class,
+            StudentAcademicRecordSeeder::class,
+            StudentAffiliationSeeder::class,
         ]);
     }
 }
