@@ -1,6 +1,6 @@
 FROM php:8.2-apache
 
-# Install system dependencies and PHP extensions
+# Install system dependencies and PHP extensions in one layer
 RUN apt-get update && apt-get install -y \
     git \
     curl \
@@ -20,11 +20,17 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /var/www/html
 
+# Copy composer files first for better caching
+COPY composer.json composer.lock ./
+
+# Install dependencies (this layer will be cached if composer files don't change)
+RUN composer install --no-dev --no-scripts --optimize-autoloader --no-interaction
+
 # Copy application code
 COPY . .
 
-# Install dependencies without running scripts
-RUN composer install --no-dev --no-scripts --optimize-autoloader
+# Run composer scripts now that code is in place
+RUN composer dump-autoload --optimize
 
 # Copy Apache configuration
 COPY apache-config.conf /etc/apache2/sites-available/000-default.conf

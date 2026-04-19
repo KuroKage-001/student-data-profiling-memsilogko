@@ -16,18 +16,9 @@ php artisan key:generate --force
 echo "Running database migrations..."
 php artisan migrate --force
 
-# Clear all caches first
-echo "Clearing all caches..."
-php artisan cache:clear
-php artisan config:clear
-php artisan route:clear
-php artisan view:clear
-
-# Then cache for production
-echo "Caching configuration..."
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
+# Optimize for production (combines clear + cache in one command)
+echo "Optimizing for production..."
+php artisan optimize
 
 # Generate JWT secret if not set
 echo "Generating JWT secret..."
