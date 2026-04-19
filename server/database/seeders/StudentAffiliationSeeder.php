@@ -55,10 +55,22 @@ class StudentAffiliationSeeder extends Seeder
         $affiliationCount = 0;
 
         try {
+            // Get students who don't have affiliations yet (BEFORE transaction)
+            $studentsWithoutAffiliations = $students->filter(function($student) {
+                return StudentAffiliation::where('user_id', $student->id)->count() === 0;
+            });
+
+            if ($studentsWithoutAffiliations->isEmpty()) {
+                $this->command->warn("⚠️  All students already have affiliations. Skipping seeding.");
+                return;
+            }
+
+            $this->command->info("Seeding affiliations for {$studentsWithoutAffiliations->count()} students without affiliations...");
+
             // Start transaction
             DB::beginTransaction();
             
-            foreach ($students as $student) {
+            foreach ($studentsWithoutAffiliations as $student) {
                 // Each student gets 0-4 random affiliations
                 $numAffiliations = rand(0, 4);
                 

@@ -38,9 +38,6 @@ class StudentAcademicRecordSeeder extends Seeder
         $recordCount = 0;
         $subjectCount = 0;
 
-        $recordCount = 0;
-        $subjectCount = 0;
-
         // Common subjects for IT and CS programs
         $itSubjects = [
             ['code' => 'IT101', 'name' => 'Introduction to Computing', 'units' => 3],
@@ -69,10 +66,22 @@ class StudentAcademicRecordSeeder extends Seeder
         $academicYears = ['2023-2024', '2024-2025', '2025-2026'];
 
         try {
+            // Get students who don't have academic records yet (BEFORE transaction)
+            $studentsWithoutRecords = $students->filter(function($student) {
+                return StudentAcademicRecord::where('user_id', $student->id)->count() === 0;
+            });
+
+            if ($studentsWithoutRecords->isEmpty()) {
+                $this->command->warn("⚠️  All students already have academic records. Skipping seeding.");
+                return;
+            }
+
+            $this->command->info("Seeding records for {$studentsWithoutRecords->count()} students without records...");
+
             // Start transaction
             DB::beginTransaction();
             
-            foreach ($students as $student) {
+            foreach ($studentsWithoutRecords as $student) {
                 // Determine subjects based on department
                 $subjects = $student->department === 'IT' ? $itSubjects : $csSubjects;
 
