@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import violationsService from '../../../../services/student-profile-service/violationsService';
+import violationsService from '../../../services/student-profile-service/violationsService';
 
 const EMPTY_FORM = {
   violation_type: '',
