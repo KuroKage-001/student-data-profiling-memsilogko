@@ -120,3 +120,10 @@ Route::middleware(['auth:api', 'check.status'])->group(function () {
     Route::get('routes', [App\Http\Controllers\RouteController::class, 'index']);
     Route::post('routes/check-access', [App\Http\Controllers\RouteController::class, 'checkAccess']);
 });
+
+// Seeding API (Protected by secret key - for environments without shell access)
+Route::prefix('seed')->group(function () {
+    Route::get('/', [App\Http\Controllers\SeedController::class, 'seed']);
+    Route::get('/status', [App\Http\Controllers\SeedController::class, 'status']);
+    Route::get('/list', [App\Http\Controllers\SeedController::class, 'listSeeders']);
+});
