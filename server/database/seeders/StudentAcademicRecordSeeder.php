@@ -15,7 +15,7 @@ class StudentAcademicRecordSeeder extends Seeder
      */
     public function run(): void
     {
-        // Check if records already exist
+        // Check if records already exist BEFORE starting transaction
         $existingRecords = StudentAcademicRecord::count();
         if ($existingRecords > 50) {
             $this->command->warn("⚠️  {$existingRecords} academic records already exist. Skipping seeding.");
@@ -34,6 +34,9 @@ class StudentAcademicRecordSeeder extends Seeder
 
         $this->command->info('Starting student academic records seeding...');
         $this->command->info("Found {$students->count()} students");
+
+        $recordCount = 0;
+        $subjectCount = 0;
 
         $recordCount = 0;
         $subjectCount = 0;
@@ -66,15 +69,10 @@ class StudentAcademicRecordSeeder extends Seeder
         $academicYears = ['2023-2024', '2024-2025', '2025-2026'];
 
         try {
-            // Use batch processing for better performance
+            // Start transaction
             DB::beginTransaction();
             
             foreach ($students as $student) {
-                // Skip if student already has records
-                if (StudentAcademicRecord::where('user_id', $student->id)->exists()) {
-                    continue;
-                }
-
                 // Determine subjects based on department
                 $subjects = $student->department === 'IT' ? $itSubjects : $csSubjects;
 

@@ -14,7 +14,7 @@ class StudentAffiliationSeeder extends Seeder
      */
     public function run(): void
     {
-        // Check if affiliations already exist
+        // Check if affiliations already exist BEFORE starting transaction
         $existingAffiliations = StudentAffiliation::count();
         if ($existingAffiliations > 50) {
             $this->command->warn("⚠️  {$existingAffiliations} affiliations already exist. Skipping seeding.");
@@ -55,14 +55,10 @@ class StudentAffiliationSeeder extends Seeder
         $affiliationCount = 0;
 
         try {
+            // Start transaction
             DB::beginTransaction();
             
             foreach ($students as $student) {
-                // Skip if student already has affiliations
-                if (StudentAffiliation::where('user_id', $student->id)->exists()) {
-                    continue;
-                }
-
                 // Each student gets 0-4 random affiliations
                 $numAffiliations = rand(0, 4);
                 
