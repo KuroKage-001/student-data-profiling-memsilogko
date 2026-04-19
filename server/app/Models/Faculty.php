@@ -33,4 +33,37 @@ class Faculty extends Model
         'courses' => 'array',
         'qualifications' => 'array'
     ];
+
+    /**
+     * Get the class assignments for this faculty member
+     */
+    public function classAssignments()
+    {
+        return $this->hasMany(FacultyClassAssignment::class);
+    }
+
+    /**
+     * Get active class assignments
+     */
+    public function activeClassAssignments()
+    {
+        return $this->hasMany(FacultyClassAssignment::class)
+            ->where('status', 'active')
+            ->with('classSection');
+    }
+
+    /**
+     * Get classes assigned to this faculty member
+     */
+    public function assignedClasses()
+    {
+        return $this->hasManyThrough(
+            ClassSection::class,
+            FacultyClassAssignment::class,
+            'faculty_id',
+            'id',
+            'id',
+            'class_section_id'
+        )->where('faculty_class_assignments.status', 'active');
+    }
 }

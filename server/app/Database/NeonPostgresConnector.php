@@ -8,28 +8,27 @@ use PDO;
 class NeonPostgresConnector extends PostgresConnector
 {
     /**
-     * Create a new PDO connection.
+     * Get the DSN string for a host / port configuration.
      *
-     * @param  string  $dsn
      * @param  array  $config
-     * @param  array  $options
-     * @return \PDO
+     * @return string
      */
-    public function createConnection($dsn, array $config, array $options)
+    protected function getDsn(array $config)
     {
-        // Extract endpoint from host if it contains 'neon.tech'
-        if (isset($config['host']) && str_contains($config['host'], 'neon.tech')) {
-            // Extract endpoint ID from host (e.g., ep-wispy-truth-a1nim5i2)
-            // Remove -pooler suffix if present
-            $host = str_replace('-pooler', '', $config['host']);
-            preg_match('/^(ep-[^.]+)/', $host, $matches);
-            if (!empty($matches[1])) {
-                $endpoint = $matches[1];
-                // Add endpoint to DSN options - use proper format without -c
-                $dsn .= ";options='endpoint={$endpoint}'";
-            }
+        $host = $config['host'] ?? null;
+        $port = $config['port'] ?? 5432;
+
+        $dsn = "pgsql:host={$host};port={$port};dbname={$config['database']}";
+
+        // Add endpoint as options parameter for Neon
+        if (isset($config['endpoint'])) {
+            $dsn .= ";options='endpoint={$config['endpoint']}'";
         }
 
-        return parent::createConnection($dsn, $config, $options);
+        if (isset($config['sslmode'])) {
+            $dsn .= ";sslmode={$config['sslmode']}";
+        }
+
+        return $this->addSslOptions($dsn, $config);
     }
 }

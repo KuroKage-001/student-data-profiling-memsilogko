@@ -76,6 +76,22 @@ Route::middleware(['auth:api', 'check.status'])->group(function () {
     Route::get('faculty-statistics', [App\Http\Controllers\FacultyController::class, 'statistics']);
 });
 
+// Class Sections API Routes (Protected)
+Route::middleware(['auth:api', 'check.status'])->group(function () {
+    Route::apiResource('class-sections', App\Http\Controllers\ClassSectionController::class);
+    Route::get('class-sections-statistics', [App\Http\Controllers\ClassSectionController::class, 'statistics']);
+});
+
+// Faculty Class Assignments API Routes (Protected)
+Route::middleware(['auth:api', 'check.status'])->group(function () {
+    Route::post('faculty-assignments', [App\Http\Controllers\FacultyAssignmentController::class, 'assign']);
+    Route::put('faculty-assignments/{id}', [App\Http\Controllers\FacultyAssignmentController::class, 'update']);
+    Route::delete('faculty-assignments/{id}', [App\Http\Controllers\FacultyAssignmentController::class, 'unassign']);
+    Route::get('faculty/{facultyId}/classes', [App\Http\Controllers\FacultyAssignmentController::class, 'getFacultyClasses']);
+    Route::get('class-sections/{classSectionId}/faculty', [App\Http\Controllers\FacultyAssignmentController::class, 'getClassFaculty']);
+    Route::post('faculty-assignments/available', [App\Http\Controllers\FacultyAssignmentController::class, 'getAvailableFaculty']);
+});
+
 // Events API Routes (Protected)
 Route::middleware(['auth:api', 'check.status'])->group(function () {
     Route::apiResource('events', EventController::class);
