@@ -25,8 +25,6 @@ class ClassSection extends Model
     ];
 
     protected $casts = [
-        'start_time' => 'datetime:H:i',
-        'end_time' => 'datetime:H:i',
         'max_capacity' => 'integer',
         'current_enrollment' => 'integer',
     ];

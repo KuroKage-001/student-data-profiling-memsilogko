@@ -3,9 +3,9 @@ import AdminLayout from '../../layouts/AdminLayout';
 import usePageTitle from '../../hooks/usePageTitle';
 import { FaClock, FaSearch, FaPlus, FaChartBar, FaUsers, FaDoorOpen, FaEdit, FaTrash, FaEye } from 'react-icons/fa';
 import classSectionService from '../../services/classSectionService';
-import facultyService from '../../services/faculty-profile-service/facultyService';
 import ClassSectionModal from '../../components/admin-components/scheduling/ClassSectionModal';
 import DeleteConfirmModal from '../../components/admin-components/scheduling/DeleteConfirmModal';
+import { SchedulingSkeleton } from '../../layouts/skeleton-loading';
 import { toast } from 'react-toastify';
 
 const Scheduling = () => {
@@ -15,7 +15,7 @@ const Scheduling = () => {
   const [statistics, setStatistics] = useState({
     total_classes: 0,
     total_students: 0,
-    rooms_used: 0,
+    unique_rooms: 0,
     avg_capacity_percentage: 0,
   });
   const [loading, setLoading] = useState(true);
@@ -24,7 +24,9 @@ const Scheduling = () => {
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedSection, setSelectedSection] = useState(null);
-  const [modalMode, setModalMode] = useState('create'); // 'create', 'edit', 'view'
+  const [modalMode, setModalMode] = useState('create');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
 
   const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -38,10 +40,12 @@ const Scheduling = () => {
       setLoading(true);
       const response = await classSectionService.getAllSections({
         status: 'active',
-        semester: 'Fall 2024',
       });
       
-      if (response.success) {
+      // Handle both response formats
+      if (Array.isArray(response)) {
+        setSchedules(response);
+      } else if (response?.success && response?.data) {
         setSchedules(response.data);
       }
     } catch (error) {
@@ -54,12 +58,13 @@ const Scheduling = () => {
 
   const fetchStatistics = async () => {
     try {
-      const response = await classSectionService.getStatistics({
-        semester: 'Fall 2024',
-      });
+      const response = await classSectionService.getStatistics();
       
-      if (response.success) {
+      // Handle both response formats
+      if (response?.success && response?.data) {
         setStatistics(response.data);
+      } else if (response && !response.success) {
+        setStatistics(response);
       }
     } catch (error) {
       console.error('Error fetching statistics:', error);
@@ -138,6 +143,22 @@ const Scheduling = () => {
     return matchesSearch && matchesDay;
   });
 
+  // Pagination
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentSchedules = filteredSchedules.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredSchedules.length / itemsPerPage);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterDay]);
+
   const getCapacityColor = (students, capacity) => {
     const percentage = (students / capacity) * 100;
     if (percentage >= 90) return 'text-red-600';
@@ -162,14 +183,7 @@ const Scheduling = () => {
   if (loading) {
     return (
       <AdminLayout>
-        <div className="min-h-screen bg-linear-to-br from-gray-50 via-orange-50/30 to-gray-50 p-4 sm:p-6 lg:p-8">
-          <div className="flex items-center justify-center h-64">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto"></div>
-              <p className="mt-4 text-gray-600">Loading schedules...</p>
-            </div>
-          </div>
-        </div>
+        <SchedulingSkeleton />
       </AdminLayout>
     );
   }
@@ -216,7 +230,7 @@ const Scheduling = () => {
           </div>
           <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300">
             <div className="flex items-center justify-between mb-2">
-              <div className="text-2xl sm:text-3xl font-bold text-green-600">{statistics.rooms_used}</div>
+              <div className="text-2xl sm:text-3xl font-bold text-green-600">{statistics.unique_rooms || 0}</div>
               <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
                 <FaDoorOpen className="text-green-600 text-lg" />
               </div>
@@ -303,7 +317,7 @@ const Scheduling = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredSchedules.map((schedule) => (
+                {currentSchedules.map((schedule) => (
                   <tr key={schedule.id} className="hover:bg-gray-50">
                     <td className="px-4 xl:px-6 py-4">
                       <div>
@@ -362,7 +376,7 @@ const Scheduling = () => {
 
           {/* Mobile Card View */}
           <div className="lg:hidden">
-            {filteredSchedules.map((schedule) => (
+            {currentSchedules.map((schedule) => (
               <div key={schedule.id} className="border-b border-gray-200 last:border-b-0 p-4 hover:bg-gray-50">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
@@ -428,8 +442,69 @@ const Scheduling = () => {
           )}
         </div>
 
+        {/* Pagination */}
+        {filteredSchedules.length > itemsPerPage && (
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 px-6 py-4 mt-6">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="text-sm text-gray-600">
+                Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredSchedules.length)} of {filteredSchedules.length} schedules
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="px-3 py-2 rounded-lg border-2 border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                >
+                  Previous
+                </button>
+                
+                <div className="flex gap-1">
+                  {[...Array(totalPages)].map((_, index) => {
+                    const pageNumber = index + 1;
+                    // Show first page, last page, current page, and pages around current
+                    if (
+                      pageNumber === 1 ||
+                      pageNumber === totalPages ||
+                      (pageNumber >= currentPage - 1 && pageNumber <= currentPage + 1)
+                    ) {
+                      return (
+                        <button
+                          key={pageNumber}
+                          onClick={() => handlePageChange(pageNumber)}
+                          className={`px-3 py-2 rounded-lg border-2 transition-all ${
+                            currentPage === pageNumber
+                              ? 'bg-orange-600 text-white border-orange-600'
+                              : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                          }`}
+                        >
+                          {pageNumber}
+                        </button>
+                      );
+                    } else if (
+                      pageNumber === currentPage - 2 ||
+                      pageNumber === currentPage + 2
+                    ) {
+                      return <span key={pageNumber} className="px-2 py-2 text-gray-400">...</span>;
+                    }
+                    return null;
+                  })}
+                </div>
+                
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-2 rounded-lg border-2 border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Weekly Schedule Grid */}
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 sm:p-8">
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 sm:p-8 mt-8">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 bg-linear-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
               <FaClock className="text-white text-lg" />

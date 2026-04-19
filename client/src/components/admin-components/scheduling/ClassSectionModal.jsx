@@ -51,11 +51,13 @@ const ClassSectionModal = ({ mode, section, onClose, onSubmit }) => {
   const fetchFaculty = async () => {
     try {
       const response = await facultyService.getFaculty();
-      if (response.success) {
-        setFacultyList(response.data);
+      if (response.success && response.data) {
+        setFacultyList(Array.isArray(response.data) ? response.data : []);
       }
     } catch (error) {
       console.error('Error fetching faculty:', error);
+      // Silently fail - faculty dropdown will just be empty
+      setFacultyList([]);
     }
   };
 

@@ -111,8 +111,3 @@ Route::middleware(['auth:api', 'check.status'])->group(function () {
     Route::get('routes', [App\Http\Controllers\RouteController::class, 'index']);
     Route::post('routes/check-access', [App\Http\Controllers\RouteController::class, 'checkAccess']);
 });
-
-// Faculty portal redirect route
-Route::get('faculty', function () {
-    return redirect('/faculty/login');
-});

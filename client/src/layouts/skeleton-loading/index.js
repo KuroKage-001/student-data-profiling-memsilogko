@@ -12,3 +12,4 @@ export { default as UserProfileSettingsSkeleton } from './UserProfileSettingsSke
 export { default as ProfileTabSkeleton } from './ProfileTabSkeleton';
 export { default as PasswordTabSkeleton } from './PasswordTabSkeleton';
 export { default as EventsSkeleton } from './EventsSkeleton';
+export { default as SchedulingSkeleton } from './SchedulingSkeleton';

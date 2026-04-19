@@ -5,7 +5,7 @@ const classSectionService = {
   getAllSections: async (params = {}) => {
     try {
       const response = await api.get('/class-sections', { params });
-      return response.data;
+      return response.data; // This already contains { success: true, data: [...] }
     } catch (error) {
       throw error.response?.data || error;
     }
