@@ -81,101 +81,91 @@ class StudentAcademicRecordSeeder extends Seeder
 
             $this->command->info("Seeding records for {$studentsWithoutRecords->count()} students without records...");
 
-            // Start transaction
-            DB::beginTransaction();
-            
+            // Process each student individually with its own transaction
             foreach ($studentsWithoutRecords as $student) {
-                // Determine subjects based on department
-                $subjects = $student->department === 'IT' ? $itSubjects : $csSubjects;
-
-                // Create 2-3 academic records per student (different semesters)
-                $numRecords = rand(2, 3);
-                
-                for ($i = 0; $i < $numRecords; $i++) {
-                    $academicYear = $academicYears[array_rand($academicYears)];
-                    $semester = $semesters[array_rand($semesters)];
-
-                    // Check if this combination already exists for this student
-                    $existingRecord = StudentAcademicRecord::where('user_id', $student->id)
-                        ->where('academic_year', $academicYear)
-                        ->where('semester', (string)$semester)
-                        ->first();
-
-                    if ($existingRecord) {
-                        continue; // Skip if this semester/year combo already exists
-                    }
-
-                    // Create academic record
-                    $record = StudentAcademicRecord::create([
-                        'user_id' => $student->id,
-                        'semester' => (string)$semester,
-                        'academic_year' => $academicYear,
-                        'semester_gpa' => 0, // Will be calculated
-                        'remarks' => null,
-                    ]);
-
-                    $recordCount++;
-
-                    // Add 4-6 subjects per semester
-                    $numSubjects = rand(4, 6);
-                    $selectedSubjects = array_rand($subjects, min($numSubjects, count($subjects)));
+                try {
+                    // Start individual transaction for each student
+                    DB::beginTransaction();
                     
-                    if (!is_array($selectedSubjects)) {
-                        $selectedSubjects = [$selectedSubjects];
-                    }
+                    // Determine subjects based on department
+                    $subjects = $student->department === 'IT' ? $itSubjects : $csSubjects;
 
-                    $totalGradePoints = 0;
-                    $totalUnits = 0;
+                    // Create 2-3 academic records per student (different semesters)
+                    $numRecords = rand(2, 3);
+                    
+                    for ($i = 0; $i < $numRecords; $i++) {
+                        $academicYear = $academicYears[array_rand($academicYears)];
+                        $semester = $semesters[array_rand($semesters)];
 
-                    foreach ($selectedSubjects as $subjectIndex) {
-                        $subject = $subjects[$subjectIndex];
-                        $grade = $grades[array_rand($grades)];
-                        
-                        // Check if this subject already exists for this record
-                        $existingSubject = StudentSubject::where('academic_record_id', $record->id)
-                            ->where('subject_code', $subject['code'])
-                            ->first();
-
-                        if ($existingSubject) {
-                            continue; // Skip if subject already exists
-                        }
-
-                        StudentSubject::create([
-                            'academic_record_id' => $record->id,
-                            'subject_code' => $subject['code'],
-                            'subject_name' => $subject['name'],
-                            'units' => $subject['units'],
-                            'grade' => $grade,
+                        // Create academic record
+                        $record = StudentAcademicRecord::create([
+                            'user_id' => $student->id,
+                            'semester' => (string)$semester,
+                            'academic_year' => $academicYear,
+                            'semester_gpa' => 0, // Will be calculated
+                            'remarks' => null,
                         ]);
 
-                        $subjectCount++;
+                        $recordCount++;
 
-                        // Calculate GPA
-                        $gradePoint = $this->convertGradeToPoint($grade);
-                        $totalGradePoints += $gradePoint * $subject['units'];
-                        $totalUnits += $subject['units'];
+                        // Add 4-6 subjects per semester
+                        $numSubjects = rand(4, 6);
+                        $selectedSubjects = array_rand($subjects, min($numSubjects, count($subjects)));
+                        
+                        if (!is_array($selectedSubjects)) {
+                            $selectedSubjects = [$selectedSubjects];
+                        }
+
+                        $totalGradePoints = 0;
+                        $totalUnits = 0;
+
+                        foreach ($selectedSubjects as $subjectIndex) {
+                            $subject = $subjects[$subjectIndex];
+                            $grade = $grades[array_rand($grades)];
+                            
+                            StudentSubject::create([
+                                'academic_record_id' => $record->id,
+                                'subject_code' => $subject['code'],
+                                'subject_name' => $subject['name'],
+                                'units' => $subject['units'],
+                                'grade' => $grade,
+                            ]);
+
+                            $subjectCount++;
+
+                            // Calculate GPA
+                            $gradePoint = $this->convertGradeToPoint($grade);
+                            $totalGradePoints += $gradePoint * $subject['units'];
+                            $totalUnits += $subject['units'];
+                        }
+
+                        // Update semester GPA
+                        $semesterGpa = $totalUnits > 0 ? round($totalGradePoints / $totalUnits, 2) : 0;
+                        $record->update(['semester_gpa' => $semesterGpa]);
                     }
 
-                    // Update semester GPA
-                    $semesterGpa = $totalUnits > 0 ? round($totalGradePoints / $totalUnits, 2) : 0;
-                    $record->update(['semester_gpa' => $semesterGpa]);
-                }
+                    // Update student's overall GPA
+                    $allRecords = StudentAcademicRecord::where('user_id', $student->id)->get();
+                    if ($allRecords->isNotEmpty()) {
+                        $overallGpa = $allRecords->avg('semester_gpa');
+                        $student->update(['gpa' => round($overallGpa, 2)]);
+                    }
 
-                // Update student's overall GPA
-                $allRecords = StudentAcademicRecord::where('user_id', $student->id)->get();
-                if ($allRecords->isNotEmpty()) {
-                    $overallGpa = $allRecords->avg('semester_gpa');
-                    $student->update(['gpa' => round($overallGpa, 2)]);
+                    // Commit this student's transaction
+                    DB::commit();
+                    
+                } catch (\Exception $e) {
+                    // Rollback this student's transaction and continue with next student
+                    DB::rollBack();
+                    $this->command->warn("⚠️  Skipped student {$student->id} ({$student->name}): " . $e->getMessage());
+                    continue;
                 }
             }
-
-            DB::commit();
             
             $this->command->info("Successfully created {$recordCount} academic records!");
             $this->command->info("Successfully created {$subjectCount} subject entries!");
 
         } catch (\Exception $e) {
-            DB::rollBack();
             $this->command->error('Error seeding academic records: ' . $e->getMessage());
             throw $e;
         }
