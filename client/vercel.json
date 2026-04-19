@@ -1,7 +1,7 @@
 {
   "build": {
     "env": {
-      "VITE_API_URL": "https://student-profiling-api.vercel.app/api"
+      "VITE_API_URL": "https://student-data-profiling-memsilogko.onrender.com/api"
     }
   },
   "rewrites": [
