@@ -66,9 +66,12 @@ class StudentAcademicRecordSeeder extends Seeder
         $academicYears = ['2023-2024', '2024-2025', '2025-2026'];
 
         try {
-            // Get students who don't have academic records yet (BEFORE transaction)
-            $studentsWithoutRecords = $students->filter(function($student) {
-                return StudentAcademicRecord::where('user_id', $student->id)->count() === 0;
+            // Get student IDs who already have records (single query - FAST)
+            $studentIdsWithRecords = StudentAcademicRecord::pluck('user_id')->unique()->toArray();
+            
+            // Filter out students who already have records
+            $studentsWithoutRecords = $students->filter(function($student) use ($studentIdsWithRecords) {
+                return !in_array($student->id, $studentIdsWithRecords);
             });
 
             if ($studentsWithoutRecords->isEmpty()) {

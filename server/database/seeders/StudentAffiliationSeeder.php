@@ -55,9 +55,12 @@ class StudentAffiliationSeeder extends Seeder
         $affiliationCount = 0;
 
         try {
-            // Get students who don't have affiliations yet (BEFORE transaction)
-            $studentsWithoutAffiliations = $students->filter(function($student) {
-                return StudentAffiliation::where('user_id', $student->id)->count() === 0;
+            // Get student IDs who already have affiliations (single query - FAST)
+            $studentIdsWithAffiliations = StudentAffiliation::pluck('user_id')->unique()->toArray();
+            
+            // Filter out students who already have affiliations
+            $studentsWithoutAffiliations = $students->filter(function($student) use ($studentIdsWithAffiliations) {
+                return !in_array($student->id, $studentIdsWithAffiliations);
             });
 
             if ($studentsWithoutAffiliations->isEmpty()) {
