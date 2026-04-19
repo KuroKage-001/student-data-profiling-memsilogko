@@ -81,12 +81,9 @@ class StudentAcademicRecordSeeder extends Seeder
 
             $this->command->info("Seeding records for {$studentsWithoutRecords->count()} students without records...");
 
-            // Process each student individually with its own transaction
+            // Process each student individually WITHOUT transaction to isolate errors
             foreach ($studentsWithoutRecords as $student) {
                 try {
-                    // Start individual transaction for each student
-                    DB::beginTransaction();
-                    
                     // Determine subjects based on department
                     $subjects = $student->department === 'IT' ? $itSubjects : $csSubjects;
 
@@ -96,6 +93,16 @@ class StudentAcademicRecordSeeder extends Seeder
                     for ($i = 0; $i < $numRecords; $i++) {
                         $academicYear = $academicYears[array_rand($academicYears)];
                         $semester = $semesters[array_rand($semesters)];
+
+                        // Check for duplicate before creating
+                        $existingRecord = StudentAcademicRecord::where('user_id', $student->id)
+                            ->where('semester', (string)$semester)
+                            ->where('academic_year', $academicYear)
+                            ->first();
+                        
+                        if ($existingRecord) {
+                            continue; // Skip duplicate
+                        }
 
                         // Create academic record
                         $record = StudentAcademicRecord::create([
@@ -123,12 +130,22 @@ class StudentAcademicRecordSeeder extends Seeder
                             $subject = $subjects[$subjectIndex];
                             $grade = $grades[array_rand($grades)];
                             
+                            // Check for duplicate subject before creating
+                            $existingSubject = StudentSubject::where('academic_record_id', $record->id)
+                                ->where('subject_code', $subject['code'])
+                                ->first();
+                            
+                            if ($existingSubject) {
+                                continue; // Skip duplicate
+                            }
+                            
+                            // Explicitly cast all values to ensure proper SQL quoting
                             StudentSubject::create([
-                                'academic_record_id' => $record->id,
-                                'subject_code' => $subject['code'],
-                                'subject_name' => $subject['name'],
-                                'units' => $subject['units'],
-                                'grade' => $grade,
+                                'academic_record_id' => (int)$record->id,
+                                'subject_code' => (string)$subject['code'],
+                                'subject_name' => (string)$subject['name'],
+                                'units' => (int)$subject['units'],
+                                'grade' => (float)$grade,
                             ]);
 
                             $subjectCount++;
@@ -150,13 +167,9 @@ class StudentAcademicRecordSeeder extends Seeder
                         $overallGpa = $allRecords->avg('semester_gpa');
                         $student->update(['gpa' => round($overallGpa, 2)]);
                     }
-
-                    // Commit this student's transaction
-                    DB::commit();
                     
                 } catch (\Exception $e) {
-                    // Rollback this student's transaction and continue with next student
-                    DB::rollBack();
+                    // Log error and continue with next student
                     $this->command->warn("⚠️  Skipped student {$student->id} ({$student->name}): " . $e->getMessage());
                     continue;
                 }
