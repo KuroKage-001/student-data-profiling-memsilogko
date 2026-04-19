@@ -12,10 +12,12 @@ class NeonDatabaseServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // Bind the custom Neon PostgreSQL connector
-        $this->app->bind('db.connector.pgsql', function () {
-            return new NeonPostgresConnector();
-        });
+        // Only use custom connector if explicitly enabled
+        if (env('USE_NEON_CONNECTOR', false)) {
+            $this->app->bind('db.connector.pgsql', function () {
+                return new NeonPostgresConnector();
+            });
+        }
     }
 
     /**
