@@ -12,7 +12,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Handle CORS for API routes
+        // Handle CORS for API routes - MUST be first
         $middleware->api(prepend: [
             \Illuminate\Http\Middleware\HandleCors::class,
         ]);
@@ -25,6 +25,11 @@ return Application::configure(basePath: dirname(__DIR__))
         // Register middleware aliases
         $middleware->alias([
             'check.status' => \App\Http\Middleware\CheckUserStatus::class,
+        ]);
+        
+        // Ensure CORS is handled globally for all routes
+        $middleware->use([
+            \Illuminate\Http\Middleware\HandleCors::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
