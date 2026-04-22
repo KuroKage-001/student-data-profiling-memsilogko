@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import StudentLayout from '../../layouts/StudentLayout';
+import AdminLayout from '../../layouts/AdminLayout';
 import usePageTitle from '../../hooks/usePageTitle';
 import { FaCalendarAlt, FaMapMarkerAlt, FaClock, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import { studentEventAPI } from '../../services/studentEventService';
@@ -58,19 +58,19 @@ const MyEvents = () => {
 
   if (loading) {
     return (
-      <StudentLayout>
+      <AdminLayout>
         <div className="min-h-screen bg-gradient-to-br from-gray-50 via-orange-50/30 to-gray-50 p-4 sm:p-6 lg:p-8">
           <div className="text-center py-12">
             <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
             <p className="mt-4 text-gray-600">Loading your events...</p>
           </div>
         </div>
-      </StudentLayout>
+      </AdminLayout>
     );
   }
 
   return (
-    <StudentLayout>
+    <AdminLayout>
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-orange-50/30 to-gray-50 p-4 sm:p-6 lg:p-8">
         {/* Header */}
         <div className="mb-6 sm:mb-8">
@@ -168,7 +168,7 @@ const MyEvents = () => {
           </div>
         )}
       </div>
-    </StudentLayout>
+    </AdminLayout>
   );
 };
 
