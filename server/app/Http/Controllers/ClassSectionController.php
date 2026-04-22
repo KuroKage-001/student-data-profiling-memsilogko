@@ -16,7 +16,17 @@ class ClassSectionController extends Controller
     public function index(Request $request)
     {
         try {
+            $user = auth()->user();
             $query = ClassSection::query()->with(['facultyAssignments.faculty']);
+
+            // If user is faculty (not admin or dept_chair), only show their assigned classes
+            if ($user && in_array($user->role, ['faculty']) && $user->facultyProfile) {
+                $facultyId = $user->facultyProfile->id;
+                $query->whereHas('facultyAssignments', function($q) use ($facultyId) {
+                    $q->where('faculty_id', $facultyId)
+                      ->where('status', 'active');
+                });
+            }
 
             // Filter by semester
             if ($request->has('semester')) {
@@ -83,6 +93,15 @@ class ClassSectionController extends Controller
      */
     public function store(Request $request)
     {
+        // Only admin and dept_chair can create class sections
+        $user = auth()->user();
+        if ($user && $user->role === 'faculty') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized. Only administrators and department chairs can create class sections.'
+            ], 403);
+        }
+
         $validator = Validator::make($request->all(), [
             'section_code' => 'required|string|max:20',
             'course_code' => 'required|string|max:20',
@@ -204,6 +223,15 @@ class ClassSectionController extends Controller
      */
     public function update(Request $request, $id)
     {
+        // Only admin and dept_chair can update class sections
+        $user = auth()->user();
+        if ($user && $user->role === 'faculty') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized. Only administrators and department chairs can update class sections.'
+            ], 403);
+        }
+
         $validator = Validator::make($request->all(), [
             'section_code' => 'sometimes|required|string|max:20',
             'course_code' => 'sometimes|required|string|max:20',
@@ -275,6 +303,15 @@ class ClassSectionController extends Controller
      */
     public function destroy($id)
     {
+        // Only admin and dept_chair can delete class sections
+        $user = auth()->user();
+        if ($user && $user->role === 'faculty') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized. Only administrators and department chairs can delete class sections.'
+            ], 403);
+        }
+
         try {
             $classSection = ClassSection::findOrFail($id);
             
@@ -307,10 +344,20 @@ class ClassSectionController extends Controller
     public function statistics(Request $request)
     {
         try {
+            $user = auth()->user();
             $semester = $request->get('semester');
             $academicYear = $request->get('academic_year');
 
             $query = ClassSection::query();
+
+            // If user is faculty (not admin or dept_chair), only show their assigned classes
+            if ($user && in_array($user->role, ['faculty']) && $user->facultyProfile) {
+                $facultyId = $user->facultyProfile->id;
+                $query->whereHas('facultyAssignments', function($q) use ($facultyId) {
+                    $q->where('faculty_id', $facultyId)
+                      ->where('status', 'active');
+                });
+            }
 
             if ($semester) {
                 $query->where('semester', $semester);

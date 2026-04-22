@@ -12,6 +12,7 @@ class Faculty extends Model
     protected $table = 'faculty';
 
     protected $fillable = [
+        'user_id',
         'faculty_id',
         'name',
         'email',
@@ -33,6 +34,14 @@ class Faculty extends Model
         'courses' => 'array',
         'qualifications' => 'array'
     ];
+
+    /**
+     * Get the user associated with this faculty member
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
     /**
      * Get the class assignments for this faculty member

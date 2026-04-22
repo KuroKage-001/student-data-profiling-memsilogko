@@ -205,4 +205,20 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->enrollments()->where('enrollment_status', 'enrolled');
     }
+
+    /**
+     * Get the faculty profile for this user (if user is faculty)
+     */
+    public function facultyProfile()
+    {
+        return $this->hasOne(Faculty::class);
+    }
+
+    /**
+     * Check if user has a faculty profile
+     */
+    public function isFaculty()
+    {
+        return in_array($this->role, ['faculty', 'dept_chair']) && $this->facultyProfile()->exists();
+    }
 }

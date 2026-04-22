@@ -7,9 +7,11 @@ import ClassSectionModal from '../../components/admin-components/scheduling/Clas
 import DeleteConfirmModal from '../../components/admin-components/scheduling/DeleteConfirmModal';
 import { SchedulingSkeleton } from '../../layouts/skeleton-loading';
 import { toast } from 'react-toastify';
+import { useAuth } from '../../context/AuthContext';
 
 const Scheduling = () => {
   usePageTitle('Scheduling');
+  const { user } = useAuth();
   
   const [schedules, setSchedules] = useState([]);
   const [statistics, setStatistics] = useState({
@@ -27,6 +29,9 @@ const Scheduling = () => {
   const [modalMode, setModalMode] = useState('create');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
+
+  // Check if user can manage schedules (admin or dept_chair)
+  const canManageSchedules = user && ['admin', 'dept_chair'].includes(user.role);
 
   const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -124,13 +129,24 @@ const Scheduling = () => {
 
       if (response.success) {
         toast.success(`Class section ${modalMode === 'create' ? 'created' : 'updated'} successfully`);
+        setShowModal(false);
         fetchSchedules();
         fetchStatistics();
-        setShowModal(false);
       }
     } catch (error) {
       console.error('Error saving section:', error);
-      toast.error(error.message || `Failed to ${modalMode} class section`);
+      
+      // Handle schedule conflict error with detailed information
+      if (error.conflict) {
+        const conflict = error.conflict;
+        toast.error(
+          `Schedule conflict: ${conflict.course_code} (${conflict.course_name}) is already scheduled in ${conflict.room || 'this room'} on ${conflict.day_of_week} from ${conflict.start_time} to ${conflict.end_time}`,
+          { autoClose: 8000 }
+        );
+      } else {
+        toast.error(error.message || `Failed to ${modalMode} class section`);
+      }
+      // Re-throw so modal knows there was an error
       throw error;
     }
   };
@@ -199,12 +215,15 @@ const Scheduling = () => {
             </div>
             <div>
               <h1 className="text-3xl sm:text-4xl font-bold bg-linear-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-                Scheduling Management
+                {canManageSchedules ? 'Scheduling Management' : 'My Schedule'}
               </h1>
             </div>
           </div>
           <p className="text-base sm:text-lg text-gray-600 ml-16 font-medium">
-            Manage class schedules, room assignments, and faculty assignments
+            {canManageSchedules 
+              ? 'Manage class schedules, room assignments, and faculty assignments'
+              : 'View your assigned class schedules and teaching assignments'
+            }
           </p>
         </div>
 
@@ -278,14 +297,16 @@ const Scheduling = () => {
               </select>
             </div>
             
-            <button
-              onClick={handleCreate}
-              className="group relative bg-linear-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white px-6 py-3.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 font-semibold shadow-md hover:shadow-xl hover:-translate-y-0.5 overflow-hidden w-full lg:w-auto"
-            >
-              <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
-              <FaPlus className="text-sm relative z-10" />
-              <span className="relative z-10">Add Schedule</span>
-            </button>
+            {canManageSchedules && (
+              <button
+                onClick={handleCreate}
+                className="group relative bg-linear-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white px-6 py-3.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 font-semibold shadow-md hover:shadow-xl hover:-translate-y-0.5 overflow-hidden w-full lg:w-auto"
+              >
+                <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+                <FaPlus className="text-sm relative z-10" />
+                <span className="relative z-10">Add Schedule</span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -352,20 +373,24 @@ const Scheduling = () => {
                         >
                           <FaEye />
                         </button>
-                        <button 
-                          onClick={() => handleEdit(schedule)}
-                          className="text-orange-600 hover:text-orange-700 transition-colors"
-                          title="Edit"
-                        >
-                          <FaEdit />
-                        </button>
-                        <button 
-                          onClick={() => handleDelete(schedule)}
-                          className="text-red-600 hover:text-red-700 transition-colors"
-                          title="Delete"
-                        >
-                          <FaTrash />
-                        </button>
+                        {canManageSchedules && (
+                          <>
+                            <button 
+                              onClick={() => handleEdit(schedule)}
+                              className="text-orange-600 hover:text-orange-700 transition-colors"
+                              title="Edit"
+                            >
+                              <FaEdit />
+                            </button>
+                            <button 
+                              onClick={() => handleDelete(schedule)}
+                              className="text-red-600 hover:text-red-700 transition-colors"
+                              title="Delete"
+                            >
+                              <FaTrash />
+                            </button>
+                          </>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -418,18 +443,22 @@ const Scheduling = () => {
                   >
                     <FaEye /> View
                   </button>
-                  <button 
-                    onClick={() => handleEdit(schedule)}
-                    className="text-orange-600 hover:text-orange-700 transition-colors font-medium flex items-center gap-1"
-                  >
-                    <FaEdit /> Edit
-                  </button>
-                  <button 
-                    onClick={() => handleDelete(schedule)}
-                    className="text-red-600 hover:text-red-700 transition-colors font-medium flex items-center gap-1"
-                  >
-                    <FaTrash /> Delete
-                  </button>
+                  {canManageSchedules && (
+                    <>
+                      <button 
+                        onClick={() => handleEdit(schedule)}
+                        className="text-orange-600 hover:text-orange-700 transition-colors font-medium flex items-center gap-1"
+                      >
+                        <FaEdit /> Edit
+                      </button>
+                      <button 
+                        onClick={() => handleDelete(schedule)}
+                        className="text-red-600 hover:text-red-700 transition-colors font-medium flex items-center gap-1"
+                      >
+                        <FaTrash /> Delete
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             ))}

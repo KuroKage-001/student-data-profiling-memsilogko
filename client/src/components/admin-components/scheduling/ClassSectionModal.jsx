@@ -24,6 +24,7 @@ const ClassSectionModal = ({ mode, section, onClose, onSubmit }) => {
   const [facultyList, setFacultyList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const [conflictError, setConflictError] = useState(null);
 
   const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
@@ -74,6 +75,10 @@ const ClassSectionModal = ({ mode, section, onClose, onSubmit }) => {
         [name]: ''
       }));
     }
+    // Clear conflict error when user makes changes
+    if (conflictError) {
+      setConflictError(null);
+    }
   };
 
   const validate = () => {
@@ -116,10 +121,21 @@ const ClassSectionModal = ({ mode, section, onClose, onSubmit }) => {
     }
 
     setLoading(true);
+    setConflictError(null);
     try {
       await onSubmit(formData);
+      // If successful, the parent will close the modal and show success toast
     } catch (error) {
       console.error('Error submitting form:', error);
+      
+      // Display conflict error in the modal
+      if (error.conflict) {
+        const conflict = error.conflict;
+        setConflictError(
+          `Schedule conflict detected: ${conflict.course_code} (${conflict.course_name}) is already scheduled in ${conflict.room || 'this room'} on ${conflict.day_of_week} from ${conflict.start_time} to ${conflict.end_time}. Please choose a different time slot or room.`
+        );
+      }
+      // Don't re-throw - error is handled here
     } finally {
       setLoading(false);
     }
@@ -159,6 +175,23 @@ const ClassSectionModal = ({ mode, section, onClose, onSubmit }) => {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="px-6 py-6">
+            {/* Conflict Error Alert */}
+            {conflictError && (
+              <div className="mb-6 p-4 bg-red-50 border-2 border-red-200 rounded-xl">
+                <div className="flex items-start gap-3">
+                  <div className="shrink-0 mt-0.5">
+                    <svg className="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="text-sm font-bold text-red-800 mb-1">Schedule Conflict</h4>
+                    <p className="text-sm text-red-700">{conflictError}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="space-y-6">
               {/* Course Information Section */}
               <div>
