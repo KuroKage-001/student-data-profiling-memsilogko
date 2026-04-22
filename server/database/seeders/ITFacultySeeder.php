@@ -9,7 +9,7 @@ use Carbon\Carbon;
 class ITFacultySeeder extends Seeder
 {
     /**
-     * Seed 100 IT Faculty members with professional data.
+     * Seed 15 IT Faculty members with professional data.
      */
     public function run(): void
     {
@@ -20,11 +20,10 @@ class ITFacultySeeder extends Seeder
         }
 
         $positions = [
-            'Professor' => 15,
-            'Associate Professor' => 25,
-            'Assistant Professor' => 35,
-            'Instructor' => 20,
-            'Lecturer' => 5
+            'Professor' => 3,
+            'Associate Professor' => 4,
+            'Assistant Professor' => 5,
+            'Instructor' => 3
         ];
 
         $specializations = [
@@ -186,19 +185,15 @@ class ITFacultySeeder extends Seeder
             }
         }
 
-        // Insert in batches for better performance
-        $chunks = array_chunk($facultyData, 50);
-        foreach ($chunks as $chunk) {
-            Faculty::insert($chunk);
-        }
+        // Insert all faculty data
+        Faculty::insert($facultyData);
 
-        echo "\n✅ Successfully seeded 100 IT Faculty members\n";
-        echo "   - Professors: 15\n";
-        echo "   - Associate Professors: 25\n";
-        echo "   - Assistant Professors: 35\n";
-        echo "   - Instructors: 20\n";
-        echo "   - Lecturers: 5\n";
-        echo "   - Active: ~85, On Leave: ~10, Inactive: ~5\n\n";
+        echo "\n✅ Successfully seeded 15 IT Faculty members\n";
+        echo "   - Professors: 3\n";
+        echo "   - Associate Professors: 4\n";
+        echo "   - Assistant Professors: 5\n";
+        echo "   - Instructors: 3\n";
+        echo "   - Active: ~13, On Leave: ~1-2, Inactive: ~0-1\n\n";
     }
 
     private function getWeightedStatus($statuses)

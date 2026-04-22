@@ -77,7 +77,16 @@ const UserManagement = () => {
       setIsFormModalOpen(false);
       setUserToEdit(null);
     } catch (error) {
-      showError(error.message || 'Operation failed');
+      console.error('User form submission error:', error);
+      
+      // Handle validation errors specifically
+      if (error.response?.status === 422 && error.response?.data?.errors) {
+        const validationErrors = error.response.data.errors;
+        const errorMessages = Object.values(validationErrors).flat();
+        showError(`Validation failed: ${errorMessages.join(', ')}`);
+      } else {
+        showError(error.message || 'Operation failed');
+      }
     }
   };
 

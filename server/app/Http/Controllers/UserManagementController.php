@@ -62,6 +62,9 @@ class UserManagementController extends Controller
      */
     public function store(Request $request)
     {
+        // Log the incoming request for debugging
+        \Log::info('User creation request:', $request->all());
+
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
@@ -74,8 +77,14 @@ class UserManagementController extends Controller
         ]);
 
         if ($validator->fails()) {
+            \Log::error('User creation validation failed:', [
+                'errors' => $validator->errors()->toArray(),
+                'request_data' => $request->all()
+            ]);
+            
             return response()->json([
                 'success' => false,
+                'message' => 'Validation failed',
                 'errors' => $validator->errors()
             ], 422);
         }
@@ -255,6 +264,28 @@ class UserManagementController extends Controller
                 'message' => 'Failed to delete user: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Debug endpoint to test user creation validation
+     */
+    public function debug(Request $request)
+    {
+        return response()->json([
+            'success' => true,
+            'message' => 'Debug endpoint working',
+            'received_data' => $request->all(),
+            'validation_rules' => [
+                'name' => 'required|string|max:255',
+                'email' => 'required|string|email|max:255|unique:users',
+                'password' => 'required|string|min:8',
+                'role' => 'required|in:admin,faculty,student,dept_chair',
+                'department' => 'required_if:role,dept_chair,student,faculty,admin|nullable|in:IT,CS',
+                'position' => 'required_if:role,faculty,admin,dept_chair|nullable|string|max:100',
+                'student_number' => 'required_if:role,student|nullable|string|max:50|unique:users',
+                'status' => 'sometimes|in:active,inactive,suspended'
+            ]
+        ]);
     }
 
     /**

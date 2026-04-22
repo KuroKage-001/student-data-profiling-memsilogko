@@ -36,6 +36,7 @@ Route::apiResource('instructions', InstructionController::class);
 Route::middleware(['auth:api', 'check.status'])->group(function () {
     Route::apiResource('users', App\Http\Controllers\UserManagementController::class);
     Route::get('users-statistics', [App\Http\Controllers\UserManagementController::class, 'statistics']);
+    Route::post('users-debug', [App\Http\Controllers\UserManagementController::class, 'debug']);
 });
 
 // User Profile API Routes (Protected)

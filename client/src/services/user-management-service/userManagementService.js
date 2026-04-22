@@ -44,6 +44,7 @@ class UserManagementService {
    */
   async createUser(userData) {
     try {
+      console.log('Creating user with data:', userData);
       const response = await axiosInstance.post('/users', userData);
       return {
         success: true,
@@ -52,11 +53,23 @@ class UserManagementService {
       };
     } catch (error) {
       console.error('Create user error:', error);
-      return {
-        success: false,
-        message: error.response?.data?.message || 'Failed to create user',
-        errors: error.response?.data?.errors
-      };
+      
+      // Handle validation errors specifically
+      if (error.response?.status === 422) {
+        const errorMessage = error.response.data?.message || 'Validation failed';
+        const validationErrors = error.response.data?.errors || {};
+        
+        console.error('Validation errors:', validationErrors);
+        
+        // Create a detailed error message
+        const errorDetails = Object.entries(validationErrors)
+          .map(([field, messages]) => `${field}: ${messages.join(', ')}`)
+          .join('; ');
+        
+        throw new Error(`${errorMessage}${errorDetails ? ` - ${errorDetails}` : ''}`);
+      }
+      
+      throw new Error(error.response?.data?.message || 'Failed to create user');
     }
   }
 

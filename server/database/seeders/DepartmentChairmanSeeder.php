@@ -10,9 +10,13 @@ class DepartmentChairmanSeeder extends Seeder
 {
     /**
      * Seed the Department Chairmen for IT and CS departments.
+     * Creates 1 Department Chair for IT and 1 for CS.
      */
     public function run(): void
     {
+        echo "\n🎓 Seeding Department Chairmen...\n";
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n";
+
         $departmentChairmen = [
             [
                 'name' => 'Dr. Michael Anderson',
@@ -20,6 +24,7 @@ class DepartmentChairmanSeeder extends Seeder
                 'password' => Hash::make('ITChair2026!'),
                 'role' => 'dept_chair',
                 'department' => 'IT',
+                'position' => 'Department Chairman',
                 'status' => 'active',
                 'email_verified_at' => now(),
                 'created_at' => now(),
@@ -31,6 +36,7 @@ class DepartmentChairmanSeeder extends Seeder
                 'password' => Hash::make('CSChair2026!'),
                 'role' => 'dept_chair',
                 'department' => 'CS',
+                'position' => 'Department Chairman',
                 'status' => 'active',
                 'email_verified_at' => now(),
                 'created_at' => now(),
@@ -38,33 +44,50 @@ class DepartmentChairmanSeeder extends Seeder
             ],
         ];
 
+        $created = 0;
+        $skipped = 0;
+
         foreach ($departmentChairmen as $chairman) {
             // Check if user already exists
             $existingUser = User::where('email', $chairman['email'])->first();
             
             if (!$existingUser) {
                 User::create($chairman);
-                echo "Created Department Chairman: {$chairman['name']} ({$chairman['department']})\n";
+                echo "   ✓ Created: {$chairman['name']} ({$chairman['department']} Department)\n";
+                $created++;
             } else {
-                echo "Department Chairman already exists: {$chairman['name']} ({$chairman['department']})\n";
+                echo "   ⚠️  Already exists: {$chairman['name']} ({$chairman['department']} Department)\n";
+                $skipped++;
             }
         }
 
-        echo "\n=== Department Chairmen Credentials ===\n";
+        echo "\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
+        echo "✅ Department Chairmen Seeding Complete!\n";
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n";
+        
+        echo "📊 Summary:\n";
+        echo "   • Created: $created\n";
+        echo "   • Skipped (already exists): $skipped\n";
+        echo "   • Total: 2 Department Chairmen (1 IT + 1 CS)\n\n";
+
+        echo "🔐 Department Chairmen Credentials:\n";
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
         echo "IT Department Chairman:\n";
         echo "  Name: Dr. Michael Anderson\n";
         echo "  Email: michael.anderson@ccs.edu.ph\n";
         echo "  Password: ITChair2026!\n";
-        echo "  Department: Information Technology\n\n";
+        echo "  Department: Information Technology\n";
+        echo "  Role: dept_chair\n\n";
         
         echo "CS Department Chairman:\n";
         echo "  Name: Dr. Sarah Chen\n";
         echo "  Email: sarah.chen@ccs.edu.ph\n";
         echo "  Password: CSChair2026!\n";
-        echo "  Department: Computer Science\n\n";
+        echo "  Department: Computer Science\n";
+        echo "  Role: dept_chair\n\n";
         
-        echo "Note: Please change these passwords after first login.\n";
-        echo "======================================\n";
+        echo "⚠️  Security Note: Please change these passwords after first login.\n";
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n";
     }
 }
 
