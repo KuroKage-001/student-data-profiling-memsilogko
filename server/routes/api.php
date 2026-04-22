@@ -26,11 +26,33 @@ Route::group(['prefix' => 'auth'], function () {
     });
 });
 
-// Research Materials API Routes
-Route::apiResource('research-materials', ResearchMaterialController::class);
+// Research Materials API Routes (Protected)
+Route::middleware(['auth:api', 'check.status'])->group(function () {
+    // View: All authenticated users
+    Route::get('research-materials', [ResearchMaterialController::class, 'index']);
+    Route::get('research-materials/{id}', [ResearchMaterialController::class, 'show']);
+    
+    // Create/Update/Delete: Admin and Faculty only
+    Route::middleware('role:admin,faculty')->group(function () {
+        Route::post('research-materials', [ResearchMaterialController::class, 'store']);
+        Route::put('research-materials/{id}', [ResearchMaterialController::class, 'update']);
+        Route::delete('research-materials/{id}', [ResearchMaterialController::class, 'destroy']);
+    });
+});
 
-// Instructions API Routes
-Route::apiResource('instructions', InstructionController::class);
+// Instructions API Routes (Protected)
+Route::middleware(['auth:api', 'check.status'])->group(function () {
+    // View: All authenticated users
+    Route::get('instructions', [InstructionController::class, 'index']);
+    Route::get('instructions/{id}', [InstructionController::class, 'show']);
+    
+    // Create/Update/Delete: Admin only
+    Route::middleware('role:admin')->group(function () {
+        Route::post('instructions', [InstructionController::class, 'store']);
+        Route::put('instructions/{id}', [InstructionController::class, 'update']);
+        Route::delete('instructions/{id}', [InstructionController::class, 'destroy']);
+    });
+});
 
 // User Management API Routes (Protected)
 Route::middleware(['auth:api', 'check.status'])->group(function () {
