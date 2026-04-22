@@ -19,7 +19,6 @@ export const fetchEvents = async (filterStatus, searchTerm, setEvents, setLoadin
       setEvents(response.data);
     }
   } catch (error) {
-    console.error('Error fetching events:', error);
     toast.error('Failed to load events');
   } finally {
     setLoading(false);
@@ -37,7 +36,7 @@ export const fetchStatistics = async (setStatistics) => {
       setStatistics(response.data);
     }
   } catch (error) {
-    console.error('Error fetching statistics:', error);
+    // Silently handle statistics fetch error
   }
 };
 
@@ -74,7 +73,6 @@ export const handleEventSubmit = async ({
     }
     return false;
   } catch (error) {
-    console.error('Error saving event:', error);
     toast.error(error.message || 'Failed to save event');
     return false;
   } finally {
@@ -102,7 +100,6 @@ export const handleEventDelete = async (eventId, onSuccess) => {
     }
     return false;
   } catch (error) {
-    console.error('Error deleting event:', error);
     toast.error('Failed to delete event');
     return false;
   }

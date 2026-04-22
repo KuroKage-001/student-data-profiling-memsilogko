@@ -85,6 +85,11 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, user, loading }) => {
     if (isEdit && !submitData.password) {
       delete submitData.password;
     }
+    
+    // Remove empty student_number to allow auto-generation
+    if (submitData.role === 'student' && (!submitData.student_number || submitData.student_number.trim() === '')) {
+      delete submitData.student_number;
+    }
 
     onSubmit(submitData);
   };
@@ -352,7 +357,7 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, user, loading }) => {
               {formData.role === 'student' && (
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Student Number *
+                    Student Number <span className="text-gray-500 font-normal">(optional - will be auto-generated if not provided)</span>
                   </label>
                   <div className="relative">
                     <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
@@ -370,13 +375,13 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, user, loading }) => {
                           ? 'border-red-500 focus:border-red-600' 
                           : 'border-gray-200 focus:border-orange-500'
                       }`}
-                      placeholder="e.g., 2026-IT00001"
+                      placeholder="e.g., 2026-IT00001 (leave blank for auto-generation)"
                     />
                   </div>
                   {errors.student_number && (
                     <p className="mt-1 text-sm text-red-600">{errors.student_number}</p>
                   )}
-                  <p className="mt-1 text-xs text-gray-500">Format: YYYY-DDDDD (e.g., 2026-IT00001)</p>
+                  <p className="mt-1 text-xs text-gray-500">Leave blank to auto-generate based on department and year</p>
                 </div>
               )}
 

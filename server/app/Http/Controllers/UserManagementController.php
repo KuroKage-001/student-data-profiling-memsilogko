@@ -6,9 +6,35 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 
 class UserManagementController extends Controller
 {
+    /**
+     * Generate next available student number for a department
+     */
+    private function generateStudentNumber($department)
+    {
+        $year = date('Y');
+        $prefix = $year . '-' . $department;
+        
+        // Get the highest existing student number for this department and year
+        $lastStudent = User::where('student_number', 'LIKE', $prefix . '%')
+            ->orderBy('student_number', 'desc')
+            ->first();
+        
+        if ($lastStudent) {
+            // Extract the number part and increment
+            $lastNumber = (int) substr($lastStudent->student_number, -5);
+            $nextNumber = $lastNumber + 1;
+        } else {
+            // Start from 1 if no existing students
+            $nextNumber = 1;
+        }
+        
+        // Format with leading zeros
+        return $prefix . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
+    }
     /**
      * Display a listing of users
      */
@@ -62,9 +88,6 @@ class UserManagementController extends Controller
      */
     public function store(Request $request)
     {
-        // Log the incoming request for debugging
-        \Log::info('User creation request:', $request->all());
-
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
@@ -72,16 +95,11 @@ class UserManagementController extends Controller
             'role' => 'required|in:admin,faculty,student,dept_chair',
             'department' => 'required_if:role,dept_chair,student,faculty,admin|nullable|in:IT,CS',
             'position' => 'required_if:role,faculty,admin,dept_chair|nullable|string|max:100',
-            'student_number' => 'required_if:role,student|nullable|string|max:50|unique:users',
+            'student_number' => 'nullable|string|max:50|unique:users',
             'status' => 'sometimes|in:active,inactive,suspended'
         ]);
 
         if ($validator->fails()) {
-            \Log::error('User creation validation failed:', [
-                'errors' => $validator->errors()->toArray(),
-                'request_data' => $request->all()
-            ]);
-            
             return response()->json([
                 'success' => false,
                 'message' => 'Validation failed',
@@ -109,8 +127,13 @@ class UserManagementController extends Controller
             }
 
             // Add student_number and program if role is student
-            if ($request->role === 'student' && $request->filled('student_number')) {
-                $userData['student_number'] = $request->student_number;
+            if ($request->role === 'student') {
+                // Auto-generate student number if not provided or if it already exists
+                if (!$request->filled('student_number') || User::where('student_number', $request->student_number)->exists()) {
+                    $userData['student_number'] = $this->generateStudentNumber($request->department);
+                } else {
+                    $userData['student_number'] = $request->student_number;
+                }
                 
                 // Auto-set program based on department
                 if ($request->department === 'IT') {
@@ -264,28 +287,6 @@ class UserManagementController extends Controller
                 'message' => 'Failed to delete user: ' . $e->getMessage()
             ], 500);
         }
-    }
-
-    /**
-     * Debug endpoint to test user creation validation
-     */
-    public function debug(Request $request)
-    {
-        return response()->json([
-            'success' => true,
-            'message' => 'Debug endpoint working',
-            'received_data' => $request->all(),
-            'validation_rules' => [
-                'name' => 'required|string|max:255',
-                'email' => 'required|string|email|max:255|unique:users',
-                'password' => 'required|string|min:8',
-                'role' => 'required|in:admin,faculty,student,dept_chair',
-                'department' => 'required_if:role,dept_chair,student,faculty,admin|nullable|in:IT,CS',
-                'position' => 'required_if:role,faculty,admin,dept_chair|nullable|string|max:100',
-                'student_number' => 'required_if:role,student|nullable|string|max:50|unique:users',
-                'status' => 'sometimes|in:active,inactive,suspended'
-            ]
-        ]);
     }
 
     /**

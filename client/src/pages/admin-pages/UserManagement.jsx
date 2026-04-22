@@ -77,8 +77,6 @@ const UserManagement = () => {
       setIsFormModalOpen(false);
       setUserToEdit(null);
     } catch (error) {
-      console.error('User form submission error:', error);
-      
       // Handle validation errors specifically
       if (error.response?.status === 422 && error.response?.data?.errors) {
         const validationErrors = error.response.data.errors;

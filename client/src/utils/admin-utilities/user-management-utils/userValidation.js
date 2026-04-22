@@ -83,11 +83,9 @@ export const validateUserForm = (formData, isEdit = false) => {
     }
   }
 
-  // Student number validation - required for student role
-  if (formData.role === 'student') {
-    if (!formData.student_number || formData.student_number.trim() === '') {
-      errors.student_number = 'Student number is required for students';
-    } else if (formData.student_number.length > 50) {
+  // Student number validation - optional for student role (will be auto-generated if not provided)
+  if (formData.role === 'student' && formData.student_number && formData.student_number.trim() !== '') {
+    if (formData.student_number.length > 50) {
       errors.student_number = 'Student number must not exceed 50 characters';
     }
   }

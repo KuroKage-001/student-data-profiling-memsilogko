@@ -46,7 +46,6 @@ export const exportFacultyToExcel = (faculty, filename = null) => {
 
     return exportFilename;
   } catch (error) {
-    console.error('Export error:', error);
     throw new Error('Failed to export faculty list');
   }
 };

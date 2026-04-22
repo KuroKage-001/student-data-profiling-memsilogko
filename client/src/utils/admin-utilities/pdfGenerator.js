@@ -775,7 +775,6 @@ export const generateBulkStudentPDF = async (students) => {
     
     return filename;
   } catch (error) {
-    console.error('Error generating bulk PDF:', error);
     throw new Error('Failed to generate bulk PDF report');
   }
 };

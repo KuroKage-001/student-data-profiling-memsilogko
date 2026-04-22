@@ -12,7 +12,6 @@ class UserManagementService {
         data: response.data.data
       };
     } catch (error) {
-      console.error('Get users error:', error);
       return {
         success: false,
         message: error.response?.data?.message || 'Failed to fetch users'
@@ -31,7 +30,6 @@ class UserManagementService {
         data: response.data.data
       };
     } catch (error) {
-      console.error('Get user error:', error);
       return {
         success: false,
         message: error.response?.data?.message || 'Failed to fetch user'
@@ -44,7 +42,6 @@ class UserManagementService {
    */
   async createUser(userData) {
     try {
-      console.log('Creating user with data:', userData);
       const response = await axiosInstance.post('/users', userData);
       return {
         success: true,
@@ -52,14 +49,10 @@ class UserManagementService {
         message: response.data.message
       };
     } catch (error) {
-      console.error('Create user error:', error);
-      
       // Handle validation errors specifically
       if (error.response?.status === 422) {
         const errorMessage = error.response.data?.message || 'Validation failed';
         const validationErrors = error.response.data?.errors || {};
-        
-        console.error('Validation errors:', validationErrors);
         
         // Create a detailed error message
         const errorDetails = Object.entries(validationErrors)
@@ -85,7 +78,6 @@ class UserManagementService {
         message: response.data.message
       };
     } catch (error) {
-      console.error('Update user error:', error);
       return {
         success: false,
         message: error.response?.data?.message || 'Failed to update user',
@@ -105,7 +97,6 @@ class UserManagementService {
         message: response.data.message
       };
     } catch (error) {
-      console.error('Delete user error:', error);
       return {
         success: false,
         message: error.response?.data?.message || 'Failed to delete user'
@@ -124,7 +115,6 @@ class UserManagementService {
         data: response.data.data
       };
     } catch (error) {
-      console.error('Get statistics error:', error);
       return {
         success: false,
         message: error.response?.data?.message || 'Failed to fetch statistics'

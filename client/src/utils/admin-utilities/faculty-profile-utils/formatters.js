@@ -31,7 +31,6 @@ export const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', DATE_FORMAT_OPTIONS);
   } catch (error) {
-    console.error('Date formatting error:', error);
     return 'Invalid Date';
   }
 };
