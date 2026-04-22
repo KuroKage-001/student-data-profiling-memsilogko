@@ -118,6 +118,19 @@ Route::middleware(['auth:api', 'check.status'])->group(function () {
 Route::middleware(['auth:api', 'check.status'])->group(function () {
     Route::apiResource('events', EventController::class);
     Route::get('events-statistics', [EventController::class, 'statistics']);
+    
+    // Student Event Routes
+    Route::get('student/my-events', [App\Http\Controllers\StudentEventController::class, 'getMyEvents']);
+    Route::get('student/all-events', [App\Http\Controllers\StudentEventController::class, 'getAllEvents']);
+    
+    // Admin/Faculty Event Management Routes
+    Route::middleware('role:admin,faculty')->group(function () {
+        Route::post('events/{event}/register-student', [App\Http\Controllers\StudentEventController::class, 'registerStudent']);
+        Route::delete('events/{event}/unregister-student/{student}', [App\Http\Controllers\StudentEventController::class, 'unregisterStudent']);
+        Route::post('events/{event}/mark-attendance', [App\Http\Controllers\StudentEventController::class, 'markAttendance']);
+        Route::get('events/{event}/attendees', [App\Http\Controllers\StudentEventController::class, 'getEventAttendees']);
+        Route::post('events/{event}/bulk-register', [App\Http\Controllers\StudentEventController::class, 'bulkRegister']);
+    });
 });
 
 // Student Dashboard API Routes (Protected)

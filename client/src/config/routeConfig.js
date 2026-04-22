@@ -81,6 +81,15 @@ export const routeConfig = [
     requiresAuth: true,
   },
   {
+    id: 'my-events',
+    path: '/student/my-events',
+    component: lazy(() => import('../pages/student-pages/MyEvents')),
+    isPublic: false,
+    title: 'My Events',
+    roles: ['student'],
+    requiresAuth: true,
+  },
+  {
     id: 'my-schedule',
     path: '/student/my-schedule',
     component: MySchedule,
