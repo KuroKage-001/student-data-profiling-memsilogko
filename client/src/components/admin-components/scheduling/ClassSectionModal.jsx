@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { FaTimes, FaUser, FaBook, FaClock, FaDoorOpen, FaCalendar } from 'react-icons/fa';
 import facultyService from '../../../services/faculty-profile-service/facultyService';
 
 const ClassSectionModal = ({ mode, section, onClose, onSubmit }) => {
   const isEdit = mode === 'edit';
   const isView = mode === 'view';
+  const facultyDropdownRef = useRef(null);
   
   const [formData, setFormData] = useState({
     section_code: '',
@@ -24,12 +25,15 @@ const ClassSectionModal = ({ mode, section, onClose, onSubmit }) => {
   const [facultyList, setFacultyList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  
+  // Search state for faculty dropdown
+  const [facultySearch, setFacultySearch] = useState('');
+  const [showFacultyDropdown, setShowFacultyDropdown] = useState(false);
+  const [selectedFacultyName, setSelectedFacultyName] = useState('');
 
   const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
   useEffect(() => {
-    fetchFaculty();
-    
     if (section && (isEdit || isView)) {
       setFormData({
         section_code: section.section_code || '',
@@ -45,21 +49,48 @@ const ClassSectionModal = ({ mode, section, onClose, onSubmit }) => {
         current_enrollment: section.current_enrollment || 0,
         faculty_id: section.instructor_id || '',
       });
+      
+      // Set selected faculty name if editing
+      if (section.instructor_id && facultyList.length > 0) {
+        const faculty = facultyList.find(f => f.id === section.instructor_id);
+        if (faculty) {
+          setSelectedFacultyName(`${faculty.name} - ${faculty.department}`);
+        }
+      }
     }
-  }, [section, mode]);
+  }, [section, mode, facultyList]);
+  
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (facultyDropdownRef.current && !facultyDropdownRef.current.contains(event.target)) {
+        setShowFacultyDropdown(false);
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const fetchFaculty = async () => {
     try {
       const response = await facultyService.getFaculty();
       if (response.success && response.data) {
-        setFacultyList(Array.isArray(response.data) ? response.data : []);
+        const facultyData = Array.isArray(response.data) ? response.data : [];
+        setFacultyList(facultyData);
       }
     } catch (error) {
       console.error('Error fetching faculty:', error);
-      // Silently fail - faculty dropdown will just be empty
       setFacultyList([]);
     }
   };
+  
+  // Refresh faculty list when modal opens
+  useEffect(() => {
+    if (mode === 'create' || mode === 'edit') {
+      fetchFaculty();
+    }
+  }, [mode]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -74,6 +105,34 @@ const ClassSectionModal = ({ mode, section, onClose, onSubmit }) => {
         [name]: ''
       }));
     }
+  };
+  
+  // Filter faculty based on search
+  const filteredFaculty = facultyList.filter(faculty => {
+    const searchLower = facultySearch.toLowerCase();
+    return (
+      faculty.name?.toLowerCase().includes(searchLower) ||
+      faculty.department?.toLowerCase().includes(searchLower) ||
+      faculty.email?.toLowerCase().includes(searchLower)
+    );
+  });
+  
+  const handleFacultySelect = (faculty) => {
+    setFormData(prev => ({ ...prev, faculty_id: faculty.id }));
+    setSelectedFacultyName(`${faculty.name} - ${faculty.department}`);
+    setFacultySearch('');
+    setShowFacultyDropdown(false);
+  };
+  
+  const handleFacultySearchChange = (e) => {
+    setFacultySearch(e.target.value);
+    setShowFacultyDropdown(true);
+  };
+  
+  const handleClearFaculty = () => {
+    setFormData(prev => ({ ...prev, faculty_id: '' }));
+    setSelectedFacultyName('');
+    setFacultySearch('');
   };
 
   const validate = () => {
@@ -457,31 +516,100 @@ const ClassSectionModal = ({ mode, section, onClose, onSubmit }) => {
                   </div>
 
                   {/* Assign Faculty */}
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Assign Faculty
-                    </label>
+                  <div ref={facultyDropdownRef}>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="block text-sm font-semibold text-gray-700">
+                        Assign Faculty (Optional)
+                      </label>
+                      {!isView && (
+                        <button
+                          type="button"
+                          onClick={fetchFaculty}
+                          className="text-xs text-orange-600 hover:text-orange-700 font-medium flex items-center gap-1"
+                        >
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                          </svg>
+                          Refresh List
+                        </button>
+                      )}
+                    </div>
                     <div className="relative">
-                      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 z-10">
                         <FaUser />
                       </div>
-                      <select
-                        name="faculty_id"
-                        value={formData.faculty_id}
-                        onChange={handleChange}
-                        disabled={isView}
-                        className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all appearance-none border-gray-200 focus:border-orange-500 ${
-                          isView ? 'bg-gray-100' : ''
-                        }`}
-                      >
-                        <option value="">-- Select Faculty (Optional) --</option>
-                        {facultyList.map(faculty => (
-                          <option key={faculty.id} value={faculty.id}>
-                            {faculty.name} - {faculty.department}
-                          </option>
-                        ))}
-                      </select>
+                      
+                      {/* Display selected faculty or search input */}
+                      {formData.faculty_id && selectedFacultyName && !showFacultyDropdown ? (
+                        <div className="w-full pl-10 pr-10 py-3 border-2 border-gray-200 rounded-xl bg-orange-50 flex items-center justify-between">
+                          <span className="text-gray-900 font-medium">{selectedFacultyName}</span>
+                          {!isView && (
+                            <button
+                              type="button"
+                              onClick={handleClearFaculty}
+                              className="text-gray-400 hover:text-red-600 transition-colors"
+                            >
+                              <FaTimes />
+                            </button>
+                          )}
+                        </div>
+                      ) : (
+                        <>
+                          <input
+                            type="text"
+                            value={facultySearch}
+                            onChange={handleFacultySearchChange}
+                            onFocus={() => setShowFacultyDropdown(true)}
+                            disabled={isView}
+                            className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all border-gray-200 focus:border-orange-500 ${
+                              isView ? 'bg-gray-100' : ''
+                            }`}
+                            placeholder="Search faculty by name, department, or email..."
+                          />
+                          
+                          {/* Dropdown list - positioned above */}
+                          {showFacultyDropdown && !isView && (
+                            <div className="absolute z-20 w-full bottom-full mb-1 bg-white border-2 border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                              {filteredFaculty.length > 0 ? (
+                                <>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      handleClearFaculty();
+                                      setShowFacultyDropdown(false);
+                                    }}
+                                    className="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors border-b border-gray-100 text-gray-500 italic"
+                                  >
+                                    -- No Faculty (Clear Selection) --
+                                  </button>
+                                  {filteredFaculty.map(faculty => (
+                                    <button
+                                      key={faculty.id}
+                                      type="button"
+                                      onClick={() => handleFacultySelect(faculty)}
+                                      className="w-full px-4 py-3 text-left hover:bg-orange-50 transition-colors border-b border-gray-100 last:border-b-0"
+                                    >
+                                      <div className="font-medium text-gray-900">{faculty.name}</div>
+                                      <div className="text-sm text-gray-600">{faculty.department}</div>
+                                      {faculty.email && (
+                                        <div className="text-xs text-gray-500">{faculty.email}</div>
+                                      )}
+                                    </button>
+                                  ))}
+                                </>
+                              ) : (
+                                <div className="px-4 py-3 text-gray-500 text-center">
+                                  {facultySearch ? 'No faculty found matching your search' : 'No faculty available'}
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </>
+                      )}
                     </div>
+                    <p className="mt-1 text-xs text-gray-500">
+                      Search by name, department, or email. Click "Refresh List" to see newly added faculty.
+                    </p>
                   </div>
                 </div>
               </div>

@@ -50,10 +50,29 @@ const InstructionsPage = () => {
     try {
       setLoading(true);
       const response = await instructionsAPI.getAll();
-      setInstructions(response.data || []);
+      
+      // Handle different response structures
+      let instructionsData = [];
+      
+      if (response && typeof response === 'object') {
+        // Laravel pagination: { data: [...], current_page, total, ... }
+        if (response.data && Array.isArray(response.data)) {
+          instructionsData = response.data;
+        }
+        // Direct array response
+        else if (Array.isArray(response)) {
+          instructionsData = response;
+        }
+        // Nested data.data structure
+        else if (response.data && response.data.data && Array.isArray(response.data.data)) {
+          instructionsData = response.data.data;
+        }
+      }
+      
+      setInstructions(instructionsData);
     } catch (error) {
       console.error('Failed to fetch instructions:', error);
-      toast.error('Failed to load instructions');
+      toast.error(error.message || 'Failed to load instructions');
     } finally {
       setLoading(false);
     }
@@ -119,7 +138,7 @@ const InstructionsPage = () => {
       fetchInstructions();
     } catch (error) {
       console.error('Failed to save instruction:', error);
-      toast.error(error.response?.data?.message || 'Failed to save instruction');
+      toast.error(error.message || 'Failed to save instruction');
     } finally {
       setSubmitting(false);
     }
@@ -137,7 +156,7 @@ const InstructionsPage = () => {
       fetchInstructions();
     } catch (error) {
       console.error('Failed to delete instruction:', error);
-      toast.error('Failed to delete instruction');
+      toast.error(error.message || 'Failed to delete instruction');
     } finally {
       setSubmitting(false);
     }

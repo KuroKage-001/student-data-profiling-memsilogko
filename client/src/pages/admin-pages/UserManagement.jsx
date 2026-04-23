@@ -25,14 +25,14 @@ const UserManagement = () => {
     status: 'all'
   });
 
-  // Build query params
+  // Build query params (exclude searchTerm - it's client-side only)
   const queryParams = useMemo(() => {
     const params = {};
-    if (searchTerm) params.search = searchTerm;
+    // searchTerm is handled client-side in UserList component
     if (filters.role !== 'all') params.role = filters.role;
     if (filters.status !== 'all') params.status = filters.status;
     return params;
-  }, [searchTerm, filters]);
+  }, [filters]); // Remove searchTerm from dependencies
 
   // React Query hooks
   const { data: users = [], isLoading, error } = useUsers(queryParams);

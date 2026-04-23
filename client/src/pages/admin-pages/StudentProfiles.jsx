@@ -37,17 +37,17 @@ const StudentProfiles = () => {
     status: 'all'
   });
 
-  // Build query params
+  // Build query params (exclude searchTerm - it's client-side only)
   const queryParams = useMemo(() => {
     const params = {};
-    if (searchTerm) params.search = searchTerm;
+    // searchTerm is handled client-side in StudentList component
     if (filters.program !== 'all') params.program = filters.program;
     if (filters.yearLevel !== 'all') params.year_level = filters.yearLevel;
     if (filters.skills) params.skills = filters.skills;
     if (filters.activities) params.activities = filters.activities;
     if (filters.status !== 'all') params.status = filters.status;
     return params;
-  }, [searchTerm, filters]);
+  }, [filters]); // Remove searchTerm from dependencies
 
   // React Query hooks
   const { data: students = [], isLoading, error } = useStudents(queryParams);

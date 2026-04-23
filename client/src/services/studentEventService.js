@@ -1,4 +1,4 @@
-import api from './api';
+import api from './system-service/apiService';
 
 /**
  * Student Event API Service

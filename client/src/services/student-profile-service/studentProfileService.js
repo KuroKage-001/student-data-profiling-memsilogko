@@ -34,18 +34,29 @@ const studentService = {
   getStudents: async (params = {}) => {
     try {
       const response = await axiosInstance.get('/students', { params });
-      // Normalize student data
-      if (response.data.success && response.data.data.data) {
-        response.data.data.data = response.data.data.data.map(normalizeStudentData);
-      }
+      
+      // Handle different response structures safely
+      const responseData = response.data?.data || response.data || {};
+      const studentsArray = responseData.data || responseData || [];
+      
+      // Normalize student data if it's an array
+      const normalizedStudents = Array.isArray(studentsArray) 
+        ? studentsArray.map(normalizeStudentData)
+        : [];
+      
       return {
         success: true,
-        data: response.data.data
+        data: {
+          ...responseData,
+          data: normalizedStudents
+        }
       };
     } catch (error) {
+      console.error('Get students error:', error);
       return {
         success: false,
-        message: error.response?.data?.message || 'Failed to fetch students'
+        message: error.response?.data?.message || 'Failed to fetch students',
+        data: { data: [] } // Return empty array to prevent crashes
       };
     }
   },

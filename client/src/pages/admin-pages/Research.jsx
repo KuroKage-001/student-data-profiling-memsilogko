@@ -46,10 +46,29 @@ const Research = () => {
     try {
       setLoading(true);
       const response = await researchAPI.getAll();
-      setMaterials(response.data || []);
+      
+      // Handle different response structures
+      let materialsData = [];
+      
+      if (response && typeof response === 'object') {
+        // Laravel pagination: { data: [...], current_page, total, ... }
+        if (response.data && Array.isArray(response.data)) {
+          materialsData = response.data;
+        }
+        // Direct array response
+        else if (Array.isArray(response)) {
+          materialsData = response;
+        }
+        // Nested data.data structure
+        else if (response.data && response.data.data && Array.isArray(response.data.data)) {
+          materialsData = response.data.data;
+        }
+      }
+      
+      setMaterials(materialsData);
     } catch (error) {
       console.error('Failed to fetch research materials:', error);
-      toast.error('Failed to load research materials');
+      toast.error(error.message || 'Failed to load research materials');
     } finally {
       setLoading(false);
     }
@@ -107,7 +126,7 @@ const Research = () => {
       fetchMaterials();
     } catch (error) {
       console.error('Failed to save research material:', error);
-      toast.error(error.response?.data?.message || 'Failed to save research material');
+      toast.error(error.message || 'Failed to save research material');
     } finally {
       setSubmitting(false);
     }
@@ -125,7 +144,7 @@ const Research = () => {
       fetchMaterials();
     } catch (error) {
       console.error('Failed to delete research material:', error);
-      toast.error('Failed to delete research material');
+      toast.error(error.message || 'Failed to delete research material');
     } finally {
       setSubmitting(false);
     }

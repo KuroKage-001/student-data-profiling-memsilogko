@@ -1,4 +1,4 @@
-import api from './api';
+import api from './system-service/apiService';
 
 /**
  * Instructions API Service
@@ -9,8 +9,10 @@ export const instructionsAPI = {
    * Get all instructions with optional filters
    */
   getAll: async (params = {}) => {
-    const response = await api.get('/instructions', { params });
-    return response.data;
+    const queryString = new URLSearchParams(params).toString();
+    const endpoint = `/instructions${queryString ? `?${queryString}` : ''}`;
+    const response = await api.get(endpoint);
+    return response;
   },
 
   /**

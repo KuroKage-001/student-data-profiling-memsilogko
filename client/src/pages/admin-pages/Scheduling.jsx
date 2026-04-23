@@ -6,7 +6,8 @@ import classSectionService from '../../services/classSectionService';
 import ClassSectionModal from '../../components/admin-components/scheduling/ClassSectionModal';
 import DeleteConfirmModal from '../../components/admin-components/scheduling/DeleteConfirmModal';
 import { SchedulingSkeleton } from '../../layouts/skeleton-loading';
-import { toast } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Scheduling = () => {
   usePageTitle('Scheduling');
@@ -98,14 +99,16 @@ const Scheduling = () => {
     try {
       const response = await classSectionService.deleteSection(selectedSection.id);
       
-      if (response.success) {
+      if (response?.success) {
         toast.success('Class section deleted successfully');
         fetchSchedules();
         fetchStatistics();
+      } else {
+        toast.error(response?.message || 'Failed to delete class section');
       }
     } catch (error) {
       console.error('Error deleting section:', error);
-      toast.error(error.message || 'Failed to delete class section');
+      toast.error(error?.message || 'Failed to delete class section');
     } finally {
       setShowDeleteModal(false);
       setSelectedSection(null);
@@ -175,8 +178,22 @@ const Scheduling = () => {
 
   const getScheduleForSlot = (day, timeSlot) => {
     return schedules.find(s => {
-      const scheduleTime = `${s.start_time} - ${s.end_time}`;
-      return s.day_of_week === day && scheduleTime === timeSlot;
+      // Convert 24-hour time to 12-hour format with AM/PM
+      const formatTime = (time) => {
+        if (!time) return '';
+        const [hours, minutes] = time.split(':');
+        const hour = parseInt(hours);
+        const ampm = hour >= 12 ? 'PM' : 'AM';
+        const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+        return `${displayHour.toString().padStart(2, '0')}:${minutes} ${ampm}`;
+      };
+      
+      // Parse slot start time
+      const [slotStart] = timeSlot.split(' - ');
+      const scheduleStartTime = formatTime(s.start_time);
+      
+      // Match if day matches and class starts within this time slot
+      return s.day_of_week === day && scheduleStartTime === slotStart;
     });
   };
 
@@ -610,6 +627,8 @@ const Scheduling = () => {
           onConfirm={confirmDelete}
         />
       )}
+      
+      <ToastContainer />
     </AdminLayout>
   );
 };

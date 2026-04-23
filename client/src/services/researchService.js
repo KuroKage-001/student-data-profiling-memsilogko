@@ -1,4 +1,4 @@
-import api from './api';
+import api from './system-service/apiService';
 
 /**
  * Research Materials API Service
@@ -9,8 +9,11 @@ export const researchAPI = {
    * Get all research materials with optional filters
    */
   getAll: async (params = {}) => {
-    const response = await api.get('/research-materials', { params });
-    return response.data;
+    const queryString = new URLSearchParams(params).toString();
+    const endpoint = `/research-materials${queryString ? `?${queryString}` : ''}`;
+    const response = await api.get(endpoint);
+    // apiRequest returns the parsed JSON directly
+    return response;
   },
 
   /**

@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Faculty;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 
 class UserManagementController extends Controller
 {
@@ -81,6 +83,8 @@ class UserManagementController extends Controller
         }
 
         try {
+            DB::beginTransaction();
+            
             $userData = [
                 'name' => $request->name,
                 'email' => $request->email,
@@ -113,17 +117,62 @@ class UserManagementController extends Controller
 
             $user = User::create($userData);
 
+            // Auto-create Faculty record if role is faculty
+            if ($request->role === 'faculty') {
+                $facultyId = $this->generateFacultyId();
+                
+                Faculty::create([
+                    'user_id' => $user->id,
+                    'faculty_id' => $facultyId,
+                    'name' => $request->name,
+                    'email' => $request->email,
+                    'department' => $request->department ?? 'IT',
+                    'position' => $request->position ?? 'Instructor',
+                    'specialization' => 'General',
+                    'hire_date' => now(),
+                    'status' => 'active'
+                ]);
+            }
+
+            DB::commit();
+
             return response()->json([
                 'success' => true,
-                'message' => 'User created successfully',
+                'message' => 'User created successfully' . ($request->role === 'faculty' ? ' with faculty profile' : ''),
                 'data' => $user
             ], 201);
         } catch (\Exception $e) {
+            DB::rollBack();
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to create user: ' . $e->getMessage()
             ], 500);
         }
+    }
+    
+    /**
+     * Generate a unique faculty ID
+     */
+    private function generateFacultyId()
+    {
+        $prefix = 'FAC';
+        $year = date('y');
+        
+        // Get the last faculty ID for this year
+        $lastFaculty = Faculty::where('faculty_id', 'like', "{$prefix}{$year}%")
+            ->orderBy('faculty_id', 'desc')
+            ->first();
+        
+        if ($lastFaculty) {
+            // Extract the number and increment
+            $lastNumber = intval(substr($lastFaculty->faculty_id, -4));
+            $newNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
+        } else {
+            // Start with 0001
+            $newNumber = '0001';
+        }
+        
+        return "{$prefix}{$year}{$newNumber}";
     }
 
     /**
@@ -152,7 +201,10 @@ class UserManagementController extends Controller
     public function update(Request $request, $id)
     {
         try {
+            DB::beginTransaction();
+            
             $user = User::findOrFail($id);
+            $oldRole = $user->role;
 
             $validator = Validator::make($request->all(), [
                 'name' => 'sometimes|required|string|max:255',
@@ -166,6 +218,7 @@ class UserManagementController extends Controller
             ]);
 
             if ($validator->fails()) {
+                DB::rollBack();
                 return response()->json([
                     'success' => false,
                     'errors' => $validator->errors()
@@ -214,12 +267,45 @@ class UserManagementController extends Controller
 
             $user->update($updateData);
 
+            // Handle Faculty record creation/update when role changes to faculty
+            if ($request->has('role') && $request->role === 'faculty' && $oldRole !== 'faculty') {
+                // Create faculty record if it doesn't exist
+                $existingFaculty = Faculty::where('user_id', $user->id)->first();
+                
+                if (!$existingFaculty) {
+                    $facultyId = $this->generateFacultyId();
+                    
+                    Faculty::create([
+                        'user_id' => $user->id,
+                        'faculty_id' => $facultyId,
+                        'name' => $user->name,
+                        'email' => $user->email,
+                        'department' => $request->department ?? 'IT',
+                        'position' => $request->position ?? 'Instructor',
+                        'specialization' => 'General',
+                        'hire_date' => now(),
+                        'status' => 'active'
+                    ]);
+                }
+            }
+            
+            // Update faculty record if user is faculty and name/email changed
+            if ($user->role === 'faculty' && ($request->has('name') || $request->has('email'))) {
+                Faculty::where('user_id', $user->id)->update([
+                    'name' => $user->name,
+                    'email' => $user->email,
+                ]);
+            }
+
+            DB::commit();
+
             return response()->json([
                 'success' => true,
                 'message' => 'User updated successfully',
                 'data' => $user
             ]);
         } catch (\Exception $e) {
+            DB::rollBack();
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to update user: ' . $e->getMessage()
