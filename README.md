@@ -2,7 +2,7 @@
 **React (Client) + Laravel (Server)**
 
 This repository contains a **full-stack web application** with:
-- **React + TypeScript (Vite)** for the frontend
+- **React + JavaScript (Vite)** for the frontend
 - **Laravel** for the backend API
 
 ---
@@ -28,13 +28,12 @@ client/
 │ ├─ layouts
 │ ├─ pages
 │ ├─ utils
-│ ├─ App.tsx
+│ ├─ App.jsx
 │ ├─ index.css
-│ └─ main.tsx
+│ └─ main.jsx
 │
 ├─ package.json
-├─ tsconfig.json
-└─ vite.config.ts
+└─ vite.config.js
 
 
 ---
@@ -67,20 +66,20 @@ Each context feature must contain **three files**:
 
 context/
 └─ feature-name/
-  ├─ FeatureContext.tsx
-  ├─ FeatureReducer.ts
-  └─ FeatureState.ts
+  ├─ FeatureContext.jsx
+  ├─ FeatureReducer.js
+  └─ FeatureState.js
 
 
 **Responsibilities:**
 
-- `FeatureContext.tsx`  
+- `FeatureContext.jsx`  
   Creates the context, provider, and connects reducer/state
 
-- `FeatureReducer.ts`  
+- `FeatureReducer.js`  
   Pure reducer payload and action handling
 
-- `FeatureState.ts`  
+- `FeatureState.js`  
   Initial state 
 
 **Rules:**
@@ -121,8 +120,8 @@ Pure helper functions and constants.
 
 ### Core Client Files
 
-- `App.tsx` – Routing, layout, providers
-- `main.tsx` – App entry point
+- `App.jsx` – Routing, layout, providers
+- `main.jsx` – App entry point
 - `index.css` – Global styles
 
 ---
