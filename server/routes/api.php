@@ -26,11 +26,33 @@ Route::group(['prefix' => 'auth'], function () {
     });
 });
 
-// Research Materials API Routes
-Route::apiResource('research-materials', ResearchMaterialController::class);
+// Research Materials API Routes (Protected)
+Route::middleware(['auth:api', 'check.status'])->group(function () {
+    // View: All authenticated users
+    Route::get('research-materials', [ResearchMaterialController::class, 'index']);
+    Route::get('research-materials/{id}', [ResearchMaterialController::class, 'show']);
+    
+    // Create/Update/Delete: Admin and Faculty only
+    Route::middleware('role:admin,faculty')->group(function () {
+        Route::post('research-materials', [ResearchMaterialController::class, 'store']);
+        Route::put('research-materials/{id}', [ResearchMaterialController::class, 'update']);
+        Route::delete('research-materials/{id}', [ResearchMaterialController::class, 'destroy']);
+    });
+});
 
-// Instructions API Routes
-Route::apiResource('instructions', InstructionController::class);
+// Instructions API Routes (Protected)
+Route::middleware(['auth:api', 'check.status'])->group(function () {
+    // View: All authenticated users
+    Route::get('instructions', [InstructionController::class, 'index']);
+    Route::get('instructions/{id}', [InstructionController::class, 'show']);
+    
+    // Create/Update/Delete: Admin only
+    Route::middleware('role:admin')->group(function () {
+        Route::post('instructions', [InstructionController::class, 'store']);
+        Route::put('instructions/{id}', [InstructionController::class, 'update']);
+        Route::delete('instructions/{id}', [InstructionController::class, 'destroy']);
+    });
+});
 
 // User Management API Routes (Protected)
 Route::middleware(['auth:api', 'check.status'])->group(function () {
@@ -96,6 +118,19 @@ Route::middleware(['auth:api', 'check.status'])->group(function () {
 Route::middleware(['auth:api', 'check.status'])->group(function () {
     Route::apiResource('events', EventController::class);
     Route::get('events-statistics', [EventController::class, 'statistics']);
+    
+    // Student Event Routes
+    Route::get('student/my-events', [App\Http\Controllers\StudentEventController::class, 'getMyEvents']);
+    Route::get('student/all-events', [App\Http\Controllers\StudentEventController::class, 'getAllEvents']);
+    
+    // Admin/Faculty Event Management Routes
+    Route::middleware('role:admin,faculty')->group(function () {
+        Route::post('events/{event}/register-student', [App\Http\Controllers\StudentEventController::class, 'registerStudent']);
+        Route::delete('events/{event}/unregister-student/{student}', [App\Http\Controllers\StudentEventController::class, 'unregisterStudent']);
+        Route::post('events/{event}/mark-attendance', [App\Http\Controllers\StudentEventController::class, 'markAttendance']);
+        Route::get('events/{event}/attendees', [App\Http\Controllers\StudentEventController::class, 'getEventAttendees']);
+        Route::post('events/{event}/bulk-register', [App\Http\Controllers\StudentEventController::class, 'bulkRegister']);
+    });
 });
 
 // Student Dashboard API Routes (Protected)

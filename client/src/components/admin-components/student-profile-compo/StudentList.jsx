@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { FaSearch } from 'react-icons/fa';
 
 const StudentList = ({ searchTerm, onViewStudent, onEditStudent, onDeleteStudent, loading, error, students }) => {
@@ -11,8 +11,8 @@ const StudentList = ({ searchTerm, onViewStudent, onEditStudent, onDeleteStudent
     const term = searchTerm.toLowerCase();
     return students.filter(student =>
       student.name?.toLowerCase().includes(term) ||
-      student.student_id?.toLowerCase().includes(term) ||
-      student.student_number?.toLowerCase().includes(term) ||
+      String(student.student_id || '').toLowerCase().includes(term) ||
+      String(student.student_number || '').toLowerCase().includes(term) ||
       student.program?.toLowerCase().includes(term) ||
       student.email?.toLowerCase().includes(term) ||
       student.skills?.toLowerCase().includes(term) ||
@@ -27,7 +27,7 @@ const StudentList = ({ searchTerm, onViewStudent, onEditStudent, onDeleteStudent
   const currentStudents = filteredStudents.slice(startIndex, endIndex);
 
   // Reset to page 1 when search changes
-  useMemo(() => {
+  useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm]);
 

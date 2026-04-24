@@ -42,4 +42,22 @@ class Event extends Model
     {
         return $this->date->format('Y-m-d');
     }
+
+    /**
+     * Get the registrations for the event
+     */
+    public function registrations()
+    {
+        return $this->hasMany(StudentEventRegistration::class);
+    }
+
+    /**
+     * Get the students registered for this event
+     */
+    public function students()
+    {
+        return $this->belongsToMany(User::class, 'student_event_registrations', 'event_id', 'student_id')
+            ->withPivot('attendance_status', 'registered_by', 'notes')
+            ->withTimestamps();
+    }
 }

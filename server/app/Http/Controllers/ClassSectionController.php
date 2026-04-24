@@ -113,7 +113,7 @@ class ClassSectionController extends Controller
             'semester' => 'required|string|max:50',
             'academic_year' => 'required|string|max:20',
             'max_capacity' => 'required|integer|min:1',
-            'faculty_id' => 'nullable|exists:faculty,id',
+            'faculty_id' => 'nullable|integer', // Changed from exists:faculty,id to just integer
         ]);
 
         if ($validator->fails()) {
