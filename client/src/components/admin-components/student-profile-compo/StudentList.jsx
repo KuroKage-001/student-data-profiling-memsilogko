@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { FaSearch } from 'react-icons/fa';
 
-const StudentList = ({ searchTerm, onViewStudent, onEditStudent, onDeleteStudent, loading, error, students }) => {
+const StudentList = ({ searchTerm, onViewStudent, onEditStudent, loading, error, students }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
@@ -110,12 +110,6 @@ const StudentList = ({ searchTerm, onViewStudent, onEditStudent, onDeleteStudent
                     >
                       Edit
                     </button>
-                    <button
-                      onClick={() => onDeleteStudent(student)}
-                      className="px-3 py-1.5 text-sm text-red-600 hover:text-white hover:bg-red-600 border border-red-600 rounded-lg transition-all duration-200 font-semibold"
-                    >
-                      Delete
-                    </button>
                   </div>
                 </td>
               </tr>
@@ -160,12 +154,6 @@ const StudentList = ({ searchTerm, onViewStudent, onEditStudent, onDeleteStudent
                   className="flex-1 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm text-orange-600 hover:text-white hover:bg-orange-600 active:bg-orange-700 border-2 border-orange-600 rounded-lg transition-all duration-200 font-semibold touch-manipulation"
                 >
                   Edit
-                </button>
-                <button
-                  onClick={() => onDeleteStudent(student)}
-                  className="flex-1 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm text-red-600 hover:text-white hover:bg-red-600 active:bg-red-700 border-2 border-red-600 rounded-lg transition-all duration-200 font-semibold touch-manipulation"
-                >
-                  Delete
                 </button>
               </div>
             </div>

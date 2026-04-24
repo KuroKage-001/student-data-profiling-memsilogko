@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import AdminLayout from '../../layouts/AdminLayout';
-import { FacultyList, FacultyProfileModal, FacultyFormModal, DeleteConfirmModal } from '../../components/admin-components/faculty-profile-compo';
+import { FacultyList, FacultyProfileModal, FacultyFormModal } from '../../components/admin-components/faculty-profile-compo';
 import { FacultyProfilesSkeleton } from '../../layouts/skeleton-loading';
 import usePageTitle from '../../hooks/usePageTitle';
 import useToast from '../../hooks/useToast';
@@ -21,7 +21,6 @@ const FacultyProfiles = () => {
   const [selectedFaculty, setSelectedFaculty] = useState(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [serverErrors, setServerErrors] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
@@ -39,7 +38,6 @@ const FacultyProfiles = () => {
     fetchFaculty,
     createFaculty,
     updateFaculty,
-    deleteFaculty,
     searchFaculty,
     getDepartments,
     getPositions,
@@ -88,12 +86,6 @@ const FacultyProfiles = () => {
     setIsFormModalOpen(true);
   };
 
-  const handleDeleteFaculty = (faculty) => {
-    setSelectedFaculty(faculty);
-    clearError(); // Clear any previous errors
-    setIsDeleteModalOpen(true);
-  };
-
   const handleAddFaculty = () => {
     setSelectedFaculty(null);
     setServerErrors(null);
@@ -111,12 +103,6 @@ const FacultyProfiles = () => {
     setIsFormModalOpen(false);
     setSelectedFaculty(null);
     setServerErrors(null);
-    clearError(); // Clear errors when closing
-  };
-
-  const handleCloseDeleteModal = () => {
-    setIsDeleteModalOpen(false);
-    setSelectedFaculty(null);
     clearError(); // Clear errors when closing
   };
 
@@ -158,22 +144,6 @@ const FacultyProfiles = () => {
       
     } catch (err) {
       showError(err.message || 'An unexpected error occurred while saving the faculty');
-    }
-  };
-
-  const handleConfirmDelete = async (facultyId) => {
-    try {
-      const result = await deleteFaculty(facultyId);
-      
-      if (result.success) {
-        showSuccess(result.message || 'Faculty deleted successfully');
-        handleCloseDeleteModal();
-      } else {
-        const errorMessage = result.message || 'Failed to delete faculty';
-        showError(errorMessage);
-      }
-    } catch (err) {
-      showError(err.message || 'An unexpected error occurred while deleting the faculty');
     }
   };
 
@@ -389,7 +359,6 @@ const FacultyProfiles = () => {
             searchTerm={searchTerm}
             onViewFaculty={handleViewFaculty}
             onEditFaculty={handleEditFaculty}
-            onDeleteFaculty={handleDeleteFaculty}
             faculty={faculty}
             loading={loading}
             error={error}
@@ -417,16 +386,6 @@ const FacultyProfiles = () => {
             onSubmit={handleSubmitFaculty}
             loading={loading}
             serverErrors={serverErrors}
-          />
-        )}
-
-        {/* Delete Confirmation Modal */}
-        {isDeleteModalOpen && selectedFaculty && (
-          <DeleteConfirmModal
-            faculty={selectedFaculty}
-            onClose={handleCloseDeleteModal}
-            onConfirm={handleConfirmDelete}
-            loading={loading}
           />
         )}
       </div>

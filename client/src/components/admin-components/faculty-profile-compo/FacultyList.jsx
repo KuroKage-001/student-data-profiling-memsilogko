@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { FaSearch } from 'react-icons/fa';
 
-const FacultyList = ({ searchTerm, onViewFaculty, onEditFaculty, onDeleteFaculty, faculty, loading, error }) => {
+const FacultyList = ({ searchTerm, onViewFaculty, onEditFaculty, faculty, loading, error }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
@@ -146,12 +146,6 @@ const FacultyList = ({ searchTerm, onViewFaculty, onEditFaculty, onDeleteFaculty
                     >
                       Edit
                     </button>
-                    <button 
-                      onClick={() => onDeleteFaculty(member)}
-                      className="px-3 py-1.5 text-sm text-red-600 hover:text-white hover:bg-red-600 border border-red-600 rounded-lg transition-all duration-200 font-semibold"
-                    >
-                      Delete
-                    </button>
                   </div>
                 </td>
               </tr>
@@ -202,12 +196,6 @@ const FacultyList = ({ searchTerm, onViewFaculty, onEditFaculty, onDeleteFaculty
                     className="flex-1 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm text-orange-600 hover:text-white hover:bg-orange-600 active:bg-orange-700 border-2 border-orange-600 rounded-lg transition-all duration-200 font-semibold touch-manipulation"
                   >
                     Edit
-                  </button>
-                  <button 
-                    onClick={() => onDeleteFaculty(member)}
-                    className="flex-1 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm text-red-600 hover:text-white hover:bg-red-600 active:bg-red-700 border-2 border-red-600 rounded-lg transition-all duration-200 font-semibold touch-manipulation"
-                  >
-                    Delete
                   </button>
                 </div>
               </div>

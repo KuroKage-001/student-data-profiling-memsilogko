@@ -2,14 +2,13 @@ import { useState, useEffect, useMemo } from 'react';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import AdminLayout from '../../layouts/AdminLayout';
-import { StudentList, StudentFormModal, DeleteConfirmModal, StudentProfileModal } from '../../components/admin-components/student-profile-compo';
+import { StudentList, StudentFormModal, StudentProfileModal } from '../../components/admin-components/student-profile-compo';
 import { StudentProfilesSkeleton } from '../../layouts/skeleton-loading';
 import usePageTitle from '../../hooks/usePageTitle';
 import { 
   useStudents, 
   useCreateStudent, 
-  useUpdateStudent, 
-  useDeleteStudent,
+  useUpdateStudent,
   getPrograms,
   getYearLevels,
   generateStudentId
@@ -25,7 +24,6 @@ const StudentProfiles = () => {
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [serverErrors, setServerErrors] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
@@ -53,7 +51,6 @@ const StudentProfiles = () => {
   const { data: students = [], isLoading, error } = useStudents(queryParams);
   const createStudentMutation = useCreateStudent();
   const updateStudentMutation = useUpdateStudent();
-  const deleteStudentMutation = useDeleteStudent();
 
   const { showSuccess, showError, showInfo } = useToast();
 
@@ -75,11 +72,6 @@ const StudentProfiles = () => {
     setIsFormModalOpen(true);
   };
 
-  const handleDeleteStudent = (student) => {
-    setSelectedStudent(student);
-    setIsDeleteModalOpen(true);
-  };
-
   const handleAddStudent = () => {
     setSelectedStudent(null);
     setServerErrors(null);
@@ -95,11 +87,6 @@ const StudentProfiles = () => {
     setIsFormModalOpen(false);
     setSelectedStudent(null);
     setServerErrors(null);
-  };
-
-  const handleCloseDeleteModal = () => {
-    setIsDeleteModalOpen(false);
-    setSelectedStudent(null);
   };
 
   const handleSubmitStudent = async (studentData, isEdit) => {
@@ -123,16 +110,6 @@ const StudentProfiles = () => {
         setServerErrors(err.errors);
       }
       showError(err.message || `Failed to ${isEdit ? 'update' : 'create'} student`);
-    }
-  };
-
-  const handleConfirmDelete = async (studentId) => {
-    try {
-      const result = await deleteStudentMutation.mutateAsync(studentId);
-      showSuccess(result.message || 'Student deleted successfully');
-      handleCloseDeleteModal();
-    } catch (err) {
-      showError(err.message || 'Failed to delete student');
     }
   };
 
@@ -337,7 +314,6 @@ const StudentProfiles = () => {
             searchTerm={searchTerm}
             onViewStudent={handleViewStudent}
             onEditStudent={handleEditStudent}
-            onDeleteStudent={handleDeleteStudent}
             loading={isLoading}
             error={error}
             students={students}
@@ -365,16 +341,6 @@ const StudentProfiles = () => {
             onSubmit={handleSubmitStudent}
             loading={createStudentMutation.isPending || updateStudentMutation.isPending}
             serverErrors={serverErrors}
-          />
-        )}
-
-        {/* Delete Confirmation Modal */}
-        {isDeleteModalOpen && selectedStudent && (
-          <DeleteConfirmModal
-            student={selectedStudent}
-            onClose={handleCloseDeleteModal}
-            onConfirm={handleConfirmDelete}
-            loading={deleteStudentMutation.isPending}
           />
         )}
       </div>
