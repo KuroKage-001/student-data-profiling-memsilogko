@@ -36,6 +36,32 @@ class UserManagementController extends Controller
         // Format with leading zeros
         return $prefix . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
     }
+
+    /**
+     * Generate unique student ID for student profile
+     */
+    private function generateStudentId($department)
+    {
+        $year = date('Y');
+        $prefix = 'STU' . $year . '-' . $department;
+        
+        // Get the highest existing student ID for this department and year
+        $lastStudent = User::where('student_id', 'LIKE', $prefix . '%')
+            ->orderBy('student_id', 'desc')
+            ->first();
+        
+        if ($lastStudent) {
+            // Extract the number part and increment
+            $lastNumber = (int) substr($lastStudent->student_id, -4);
+            $nextNumber = $lastNumber + 1;
+        } else {
+            // Start from 1 if no existing students
+            $nextNumber = 1;
+        }
+        
+        // Format with leading zeros (4 digits)
+        return $prefix . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+    }
     /**
      * Display a listing of users
      */
@@ -144,6 +170,15 @@ class UserManagementController extends Controller
                 } elseif ($request->department === 'CS') {
                     $userData['program'] = 'Bachelor of Science in Computer Science';
                 }
+                
+                // Auto-generate student_id for student profile
+                $userData['student_id'] = $this->generateStudentId($request->department);
+                
+                // Set default enrollment date to today
+                $userData['enrollment_date'] = now()->toDateString();
+                
+                // Set default year level to 1st Year if not provided
+                $userData['year_level'] = '1st Year';
             }
 
             $user = User::create($userData);
@@ -287,8 +322,33 @@ class UserManagementController extends Controller
                 // Handle student_number for student role
                 if ($request->role === 'student' && $request->has('student_number')) {
                     $updateData['student_number'] = $request->student_number;
+                    
+                    // Auto-generate student_id if not already set
+                    if (!$user->student_id) {
+                        $updateData['student_id'] = $this->generateStudentId($request->department);
+                    }
+                    
+                    // Set default enrollment date if not already set
+                    if (!$user->enrollment_date) {
+                        $updateData['enrollment_date'] = now()->toDateString();
+                    }
+                    
+                    // Set default year level if not already set
+                    if (!$user->year_level) {
+                        $updateData['year_level'] = '1st Year';
+                    }
                 } else {
                     $updateData['student_number'] = null;
+                    // Clear student profile fields when role changes from student
+                    if ($oldRole === 'student' && $request->role !== 'student') {
+                        $updateData['student_id'] = null;
+                        $updateData['year_level'] = null;
+                        $updateData['enrollment_date'] = null;
+                        $updateData['graduation_date'] = null;
+                        $updateData['gpa'] = null;
+                        $updateData['guardian_name'] = null;
+                        $updateData['guardian_phone'] = null;
+                    }
                 }
             }
             
