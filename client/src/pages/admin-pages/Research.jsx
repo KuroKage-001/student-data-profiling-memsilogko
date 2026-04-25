@@ -5,6 +5,7 @@ import { FaFlask, FaSearch, FaPlus, FaChartBar, FaCheckCircle, FaClock, FaFileAl
 import { usePermissions } from '../../hooks/usePermissions';
 import { researchAPI } from '../../services/researchService';
 import { ResearchFormModal, ResearchDeleteModal } from '../../components/admin-components/research-compo';
+import { ResearchSkeleton } from '../../layouts/skeleton-loading';
 import { toast } from 'react-toastify';
 
 const Research = () => {
@@ -184,12 +185,7 @@ const Research = () => {
   if (loading) {
     return (
       <AdminLayout>
-        <div className="min-h-screen bg-linear-to-br from-gray-50 via-orange-50/30 to-gray-50 p-4 sm:p-6 lg:p-8 flex items-center justify-center">
-          <div className="text-center">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
-            <p className="mt-4 text-gray-600">Loading research materials...</p>
-          </div>
-        </div>
+        <ResearchSkeleton />
       </AdminLayout>
     );
   }
