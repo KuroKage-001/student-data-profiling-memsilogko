@@ -1,18 +1,27 @@
-import { Suspense } from 'react';
+import { Suspense, memo } from 'react';
 import LoadingPage from './LoadingPage';
 
 /**
- * Route Loader Component
- * Handles lazy loading of route components with loading fallback
+ * Optimized Route Loader Component
+ * - Memoized to prevent unnecessary re-renders
+ * - Handles lazy loading with intelligent fallback
+ * - Supports custom loading states
  */
-const RouteLoader = ({ children, fallback }) => {
-  const defaultFallback = <LoadingPage message="Loading page..." subMessage="Please wait..." />;
+const RouteLoader = memo(({ children, fallback, message, subMessage }) => {
+  const defaultFallback = (
+    <LoadingPage 
+      message={message || "Loading page..."} 
+      subMessage={subMessage || "Please wait..."} 
+    />
+  );
 
   return (
     <Suspense fallback={fallback || defaultFallback}>
       {children}
     </Suspense>
   );
-};
+});
+
+RouteLoader.displayName = 'RouteLoader';
 
 export default RouteLoader;

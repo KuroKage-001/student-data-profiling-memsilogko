@@ -28,6 +28,7 @@ export const fetchEvents = async (filterStatus, searchTerm, setEvents, setLoadin
 /**
  * Fetch event statistics from API
  * @param {function} setStatistics - State setter for statistics
+ * @returns {Promise<void>}
  */
 export const fetchStatistics = async (setStatistics) => {
   try {
@@ -37,6 +38,7 @@ export const fetchStatistics = async (setStatistics) => {
     }
   } catch (error) {
     // Silently handle statistics fetch error
+    console.error('Failed to load statistics:', error);
   }
 };
 

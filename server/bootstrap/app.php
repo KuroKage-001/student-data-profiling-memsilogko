@@ -19,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
         
         // Add performance optimization middleware
         $middleware->api(append: [
+            \App\Http\Middleware\DatabaseOptimization::class,
             \App\Http\Middleware\OptimizeResponse::class,
         ]);
         
