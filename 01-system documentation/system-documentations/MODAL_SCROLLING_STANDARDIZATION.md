@@ -18,7 +18,12 @@ April 26, 2026
 **Parent:** `client/src/pages/admin-pages/Research.jsx`
 **Purpose:** Add/Edit research materials
 
-### 3. Faculty Form Modal (Reference Pattern)
+### 3. Instruction Form Modal
+**File:** `client/src/components/admin-components/instructions-compo/InstructionFormModal.jsx`
+**Parent:** `client/src/pages/admin-pages/InstructionsPage.jsx`
+**Purpose:** Add/Edit instructions (syllabus, curriculum, lesson plans)
+
+### 4. Faculty Form Modal (Reference Pattern)
 **File:** `client/src/components/admin-components/faculty-profile-compo/FacultyFormModal.jsx`
 **Parent:** `client/src/pages/admin-pages/FacultyProfiles.jsx`
 **Purpose:** Add/Edit faculty profiles (original pattern)
@@ -211,6 +216,7 @@ All modals use the same custom scrollbar styling:
 
 - **Event Modal:** `max-w-lg` (32rem / 512px)
 - **Research Modal:** `max-w-2xl` (42rem / 672px)
+- **Instruction Modal:** `max-w-2xl` (42rem / 672px)
 - **Faculty Modal:** `max-w-4xl` (56rem / 896px)
 
 All modals: `max-h-[92vh]` for consistent height handling
@@ -247,9 +253,10 @@ Consider applying this pattern to:
 
 ## Documentation References
 
-- [Event Modal Update](./events-documentations/EVENT_MODAL_SCROLLING_UPDATE.md)
-- [Research Modal Update](./research-documentations/RESEARCH_MODAL_SCROLLING_UPDATE.md)
-- [Faculty Modal Reference](./faculty-profile-documentations/)
+- [Event Modal Update](../events-documentations/EVENT_MODAL_SCROLLING_UPDATE.md)
+- [Research Modal Update](../research-documentations/RESEARCH_MODAL_SCROLLING_UPDATE.md)
+- [Instruction Modal Update](../instructions-documentations/INSTRUCTION_MODAL_SCROLLING_UPDATE.md)
+- [Faculty Modal Reference](../faculty-profile-documentations/)
 
 ## Testing Checklist
 
