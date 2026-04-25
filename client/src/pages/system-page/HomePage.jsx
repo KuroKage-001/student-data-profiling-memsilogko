@@ -1,33 +1,8 @@
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { BubbleWrap, PortalCards, FeaturesSection } from '../../components/system-components/home-compo';
-import LoadingPage from '../../components/system-components/LoadingPage';
 import usePageTitle from '../../hooks/usePageTitle';
-import { useAuth } from '../../context/AuthContext';
 
 const HomePage = () => {
   usePageTitle('Home');
-  const navigate = useNavigate();
-  const { isAuthenticated, user, loading } = useAuth();
-
-  // Redirect authenticated users to their appropriate dashboard
-  useEffect(() => {
-    if (!loading && isAuthenticated && user) {
-      const userRole = user.role;
-      
-      // Redirect based on role
-      if (userRole === 'admin' || userRole === 'dept_chair' || userRole === 'faculty') {
-        navigate('/admin/dashboard', { replace: true });
-      } else if (userRole === 'student') {
-        navigate('/student/dashboard', { replace: true });
-      }
-    }
-  }, [isAuthenticated, user, loading, navigate]);
-
-  // Show loading state while checking authentication
-  if (loading) {
-    return <LoadingPage message="Checking authentication..." subMessage="Please wait..." />;
-  }
   
   return (
     <div className="min-h-screen relative flex items-center justify-center px-4 py-8 overflow-x-hidden" style={{ backgroundColor: '#FFFFFF' }}>

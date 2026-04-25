@@ -6,6 +6,9 @@ import { lazy } from 'react';
 
 // Lazy load components for better performance
 const HomePage = lazy(() => import('../pages/system-page/HomePage'));
+const AdminPortalPage = lazy(() => import('../pages/system-page/AdminPortalPage'));
+const FacultyPortalPage = lazy(() => import('../pages/system-page/FacultyPortalPage'));
+const StudentPortalPage = lazy(() => import('../pages/system-page/StudentPortalPage'));
 const LoginPage = lazy(() => import('../pages/system-page/LoginPage'));
 const UserProfileSettings = lazy(() => import('../pages/system-page/UserProfileSettings'));
 const AdminDashboard = lazy(() => import('../pages/admin-pages/AdminDashboard'));
@@ -28,6 +31,30 @@ export const routeConfig = [
     isPublic: true,
     title: 'Home',
     roles: ['*'], // * means all roles including unauthenticated
+  },
+  {
+    id: 'admin-portal',
+    path: '/admin/portal',
+    component: AdminPortalPage,
+    isPublic: true,
+    title: 'Admin Portal',
+    roles: ['*'],
+  },
+  {
+    id: 'faculty-portal',
+    path: '/faculty/portal',
+    component: FacultyPortalPage,
+    isPublic: true,
+    title: 'Faculty Portal',
+    roles: ['*'],
+  },
+  {
+    id: 'student-portal',
+    path: '/student/portal',
+    component: StudentPortalPage,
+    isPublic: true,
+    title: 'Student Portal',
+    roles: ['*'],
   },
   {
     id: 'login',
@@ -167,11 +194,11 @@ export const routeConfig = [
 export const specialRoutes = {
   adminRedirect: {
     from: '/admin',
-    to: '/admin/login',
+    to: '/admin/portal',
   },
   facultyRedirect: {
     from: '/faculty',
-    to: '/faculty/login',
+    to: '/faculty/portal',
   },
   notFound: {
     from: '*',
