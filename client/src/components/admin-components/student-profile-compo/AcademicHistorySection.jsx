@@ -12,7 +12,7 @@ const EMPTY_FORM = {
   subjects: [{ ...EMPTY_SUBJECT }],
 };
 
-const AcademicHistorySection = ({ studentId }) => {
+const AcademicHistorySection = ({ studentId, canModify = true }) => {
   const queryClient = useQueryClient();
   const [showForm, setShowForm] = useState(false);
   const [editingRecord, setEditingRecord] = useState(null);
@@ -128,12 +128,14 @@ const AcademicHistorySection = ({ studentId }) => {
           <div className="w-1.5 h-1.5 bg-orange-600 rounded-full"></div>
           Academic History
         </h4>
-        <button
-          onClick={openAddForm}
-          className="text-xs px-3 py-1 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
-        >
-          Add Semester Record
-        </button>
+        {canModify && (
+          <button
+            onClick={openAddForm}
+            className="text-xs px-3 py-1 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+          >
+            Add Semester Record
+          </button>
+        )}
       </div>
 
       <div className="p-4">
@@ -322,27 +324,31 @@ const AcademicHistorySection = ({ studentId }) => {
                     )}
                   </div>
                   <div className="flex items-center gap-3">
-                    {confirmDeleteId === record.id ? (
-                      <span className="flex items-center gap-1 text-xs" onClick={(e) => e.stopPropagation()}>
-                        <span className="text-gray-600">Are you sure?</span>
-                        <button onClick={handleConfirmDelete} className="text-red-600 hover:underline font-medium">Confirm</button>
-                        <button onClick={() => setConfirmDeleteId(null)} className="text-gray-500 hover:underline">Cancel</button>
-                      </span>
-                    ) : (
-                      <span className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-                        <button
-                          onClick={() => openEditForm(record)}
-                          className="text-xs text-orange-600 hover:underline font-medium"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => setConfirmDeleteId(record.id)}
-                          className="text-xs text-red-600 hover:underline font-medium"
-                        >
-                          Delete
-                        </button>
-                      </span>
+                    {canModify && (
+                      <>
+                        {confirmDeleteId === record.id ? (
+                          <span className="flex items-center gap-1 text-xs" onClick={(e) => e.stopPropagation()}>
+                            <span className="text-gray-600">Are you sure?</span>
+                            <button onClick={handleConfirmDelete} className="text-red-600 hover:underline font-medium">Confirm</button>
+                            <button onClick={() => setConfirmDeleteId(null)} className="text-gray-500 hover:underline">Cancel</button>
+                          </span>
+                        ) : (
+                          <span className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                            <button
+                              onClick={() => openEditForm(record)}
+                              className="text-xs text-orange-600 hover:underline font-medium"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => setConfirmDeleteId(record.id)}
+                              className="text-xs text-red-600 hover:underline font-medium"
+                            >
+                              Delete
+                            </button>
+                          </span>
+                        )}
+                      </>
                     )}
                     <span className="text-gray-400 text-xs">{expandedId === record.id ? '▲' : '▼'}</span>
                   </div>

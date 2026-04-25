@@ -23,7 +23,7 @@ const SeverityBadge = ({ severity }) => {
   );
 };
 
-const ViolationsSection = ({ studentId }) => {
+const ViolationsSection = ({ studentId, canModify = true }) => {
   const queryClient = useQueryClient();
   const [showForm, setShowForm] = useState(false);
   const [editingViolation, setEditingViolation] = useState(null);
@@ -102,12 +102,14 @@ const ViolationsSection = ({ studentId }) => {
           <div className="w-1.5 h-1.5 bg-orange-600 rounded-full"></div>
           Violations
         </h4>
-        <button
-          onClick={openAddForm}
-          className="text-xs px-3 py-1 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
-        >
-          Add Violation
-        </button>
+        {canModify && (
+          <button
+            onClick={openAddForm}
+            className="text-xs px-3 py-1 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+          >
+            Add Violation
+          </button>
+        )}
       </div>
 
       <div className="p-4">
@@ -205,7 +207,9 @@ const ViolationsSection = ({ studentId }) => {
                   <th className="text-left py-2 px-2 text-xs font-medium text-gray-500">Severity</th>
                   <th className="text-left py-2 px-2 text-xs font-medium text-gray-500">Date</th>
                   <th className="text-left py-2 px-2 text-xs font-medium text-gray-500">Action Taken</th>
-                  <th className="text-left py-2 px-2 text-xs font-medium text-gray-500">Actions</th>
+                  {canModify && (
+                    <th className="text-left py-2 px-2 text-xs font-medium text-gray-500">Actions</th>
+                  )}
                 </tr>
               </thead>
               <tbody>
@@ -217,40 +221,42 @@ const ViolationsSection = ({ studentId }) => {
                       {v.violation_date ? new Date(v.violation_date).toLocaleDateString() : 'N/A'}
                     </td>
                     <td className="py-2 px-2 text-gray-600 max-w-xs truncate">{v.action_taken || 'N/A'}</td>
-                    <td className="py-2 px-2">
-                      {confirmDeleteId === v.id ? (
-                        <span className="flex items-center gap-1 text-xs">
-                          <span className="text-gray-600">Are you sure?</span>
-                          <button
-                            onClick={handleConfirmDelete}
-                            className="text-red-600 hover:underline font-medium"
-                          >
-                            Confirm
-                          </button>
-                          <button
-                            onClick={() => setConfirmDeleteId(null)}
-                            className="text-gray-500 hover:underline"
-                          >
-                            Cancel
-                          </button>
-                        </span>
-                      ) : (
-                        <span className="flex items-center gap-2">
-                          <button
-                            onClick={() => openEditForm(v)}
-                            className="text-xs text-orange-600 hover:underline font-medium"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => setConfirmDeleteId(v.id)}
-                            className="text-xs text-red-600 hover:underline font-medium"
-                          >
-                            Delete
-                          </button>
-                        </span>
-                      )}
-                    </td>
+                    {canModify && (
+                      <td className="py-2 px-2">
+                        {confirmDeleteId === v.id ? (
+                          <span className="flex items-center gap-1 text-xs">
+                            <span className="text-gray-600">Are you sure?</span>
+                            <button
+                              onClick={handleConfirmDelete}
+                              className="text-red-600 hover:underline font-medium"
+                            >
+                              Confirm
+                            </button>
+                            <button
+                              onClick={() => setConfirmDeleteId(null)}
+                              className="text-gray-500 hover:underline"
+                            >
+                              Cancel
+                            </button>
+                          </span>
+                        ) : (
+                          <span className="flex items-center gap-2">
+                            <button
+                              onClick={() => openEditForm(v)}
+                              className="text-xs text-orange-600 hover:underline font-medium"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => setConfirmDeleteId(v.id)}
+                              className="text-xs text-red-600 hover:underline font-medium"
+                            >
+                              Delete
+                            </button>
+                          </span>
+                        )}
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>

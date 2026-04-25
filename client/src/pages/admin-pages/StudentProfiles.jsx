@@ -387,6 +387,7 @@ const StudentProfiles = () => {
               handleEditStudent(selectedStudent);
             } : null}
             onGenerateReport={handleGenerateReport}
+            userRole={user?.role}
           />
         )}
 

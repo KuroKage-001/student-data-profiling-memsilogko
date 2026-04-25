@@ -27,7 +27,7 @@ const StatusBadge = ({ isActive }) => (
   </span>
 );
 
-const AffiliationsSection = ({ studentId }) => {
+const AffiliationsSection = ({ studentId, canModify = true }) => {
   const queryClient = useQueryClient();
   const [showForm, setShowForm] = useState(false);
   const [editingAffiliation, setEditingAffiliation] = useState(null);
@@ -108,12 +108,14 @@ const AffiliationsSection = ({ studentId }) => {
           <div className="w-1.5 h-1.5 bg-orange-600 rounded-full"></div>
           Affiliations
         </h4>
-        <button
-          onClick={openAddForm}
-          className="text-xs px-3 py-1 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
-        >
-          Add Affiliation
-        </button>
+        {canModify && (
+          <button
+            onClick={openAddForm}
+            className="text-xs px-3 py-1 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+          >
+            Add Affiliation
+          </button>
+        )}
       </div>
 
       <div className="p-4">
@@ -230,7 +232,9 @@ const AffiliationsSection = ({ studentId }) => {
                   <th className="text-left py-2 px-2 text-xs font-medium text-gray-500">Type</th>
                   <th className="text-left py-2 px-2 text-xs font-medium text-gray-500">Role</th>
                   <th className="text-left py-2 px-2 text-xs font-medium text-gray-500">Status</th>
-                  <th className="text-left py-2 px-2 text-xs font-medium text-gray-500">Actions</th>
+                  {canModify && (
+                    <th className="text-left py-2 px-2 text-xs font-medium text-gray-500">Actions</th>
+                  )}
                 </tr>
               </thead>
               <tbody>
@@ -240,40 +244,42 @@ const AffiliationsSection = ({ studentId }) => {
                     <td className="py-2 px-2 text-gray-600">{TYPE_LABELS[a.affiliation_type] || a.affiliation_type}</td>
                     <td className="py-2 px-2 text-gray-600">{a.role || 'N/A'}</td>
                     <td className="py-2 px-2"><StatusBadge isActive={a.is_active} /></td>
-                    <td className="py-2 px-2">
-                      {confirmDeleteId === a.id ? (
-                        <span className="flex items-center gap-1 text-xs">
-                          <span className="text-gray-600">Are you sure?</span>
-                          <button
-                            onClick={handleConfirmDelete}
-                            className="text-red-600 hover:underline font-medium"
-                          >
-                            Confirm
-                          </button>
-                          <button
-                            onClick={() => setConfirmDeleteId(null)}
-                            className="text-gray-500 hover:underline"
-                          >
-                            Cancel
-                          </button>
-                        </span>
-                      ) : (
-                        <span className="flex items-center gap-2">
-                          <button
-                            onClick={() => openEditForm(a)}
-                            className="text-xs text-orange-600 hover:underline font-medium"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => setConfirmDeleteId(a.id)}
-                            className="text-xs text-red-600 hover:underline font-medium"
-                          >
-                            Delete
-                          </button>
-                        </span>
-                      )}
-                    </td>
+                    {canModify && (
+                      <td className="py-2 px-2">
+                        {confirmDeleteId === a.id ? (
+                          <span className="flex items-center gap-1 text-xs">
+                            <span className="text-gray-600">Are you sure?</span>
+                            <button
+                              onClick={handleConfirmDelete}
+                              className="text-red-600 hover:underline font-medium"
+                            >
+                              Confirm
+                            </button>
+                            <button
+                              onClick={() => setConfirmDeleteId(null)}
+                              className="text-gray-500 hover:underline"
+                            >
+                              Cancel
+                            </button>
+                          </span>
+                        ) : (
+                          <span className="flex items-center gap-2">
+                            <button
+                              onClick={() => openEditForm(a)}
+                              className="text-xs text-orange-600 hover:underline font-medium"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => setConfirmDeleteId(a.id)}
+                              className="text-xs text-red-600 hover:underline font-medium"
+                            >
+                              Delete
+                            </button>
+                          </span>
+                        )}
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>

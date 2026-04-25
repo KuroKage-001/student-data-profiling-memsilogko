@@ -4,8 +4,11 @@ import ViolationsSection from './ViolationsSection';
 import AffiliationsSection from './AffiliationsSection';
 import AcademicHistorySection from './AcademicHistorySection';
 
-const StudentProfileModal = ({ student, onClose, onEdit, onGenerateReport }) => {
+const StudentProfileModal = ({ student, onClose, onEdit, onGenerateReport, userRole }) => {
   if (!student) return null;
+
+  // Only admin and dept_chair can modify violations, affiliations, and academic records
+  const canModifyRecords = userRole === 'admin' || userRole === 'dept_chair';
 
   // Helper functions
   const getStatusColor = (status) => {
@@ -264,13 +267,13 @@ const StudentProfileModal = ({ student, onClose, onEdit, onGenerateReport }) => 
               )}
 
               <div className="lg:col-span-3">
-                <ViolationsSection studentId={student.id} />
+                <ViolationsSection studentId={student.id} canModify={canModifyRecords} />
               </div>
               <div className="lg:col-span-3">
-                <AffiliationsSection studentId={student.id} />
+                <AffiliationsSection studentId={student.id} canModify={canModifyRecords} />
               </div>
               <div className="lg:col-span-3">
-                <AcademicHistorySection studentId={student.id} />
+                <AcademicHistorySection studentId={student.id} canModify={canModifyRecords} />
               </div>
             </div>
           </div>
