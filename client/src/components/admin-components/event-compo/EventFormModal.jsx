@@ -12,19 +12,35 @@ const EventFormModal = ({
   if (!show) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] flex flex-col overflow-hidden">
-        <div className="bg-linear-to-r from-orange-500 to-orange-600 px-6 py-4 rounded-t-2xl flex items-center justify-between shrink-0">
-          <h3 className="text-xl font-bold text-white">
-            {editingEvent ? 'Edit Event' : 'Add New Event'}
-          </h3>
-          <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-lg transition-colors">
-            <FaTimes className="text-white" />
-          </button>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+      {/* Background overlay with blur */}
+      <div 
+        className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
+        onClick={onClose}
+        aria-hidden="true"
+      ></div>
+
+      {/* Modal panel */}
+      <div className="relative z-10 bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[92vh] flex flex-col overflow-hidden">
+        {/* Header - Fixed */}
+        <div className="bg-linear-to-r from-orange-500 to-orange-600 px-6 py-4 shrink-0">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xl font-bold text-white">
+              {editingEvent ? 'Edit Event' : 'Add New Event'}
+            </h3>
+            <button
+              onClick={onClose}
+              className="text-white hover:text-gray-200 transition-colors p-1 hover:bg-white/10 rounded-lg"
+              disabled={submitting}
+            >
+              <FaTimes className="text-xl" />
+            </button>
+          </div>
         </div>
 
-        <form onSubmit={onSubmit} className="flex-1 overflow-y-auto">
-          <div className="p-6 space-y-4">
+        {/* Form - Scrollable with custom scrollbar */}
+        <form onSubmit={onSubmit} className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-orange-500 scrollbar-track-gray-100">
+          <div className="px-6 py-6 space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Event Title *</label>
               <input
@@ -134,23 +150,31 @@ const EventFormModal = ({
           </div>
         </form>
 
-        <div className="px-6 py-4 bg-white border-t border-gray-200 shrink-0">
+        {/* Action Buttons - Fixed at bottom */}
+        <div className="px-6 py-4 bg-linear-to-r from-gray-50 to-gray-100 border-t border-gray-200 shrink-0">
           <div className="flex gap-3">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2.5 border-2 border-gray-200 text-gray-700 rounded-xl font-medium hover:bg-gray-100 transition-colors"
+              className="flex-1 px-5 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-white hover:border-gray-400 transition-all font-semibold shadow-sm"
+              disabled={submitting}
             >
               Cancel
             </button>
             <button
               type="submit"
               onClick={onSubmit}
+              className="flex-1 px-5 py-3 bg-linear-to-r from-orange-600 to-orange-500 text-white rounded-xl hover:from-orange-700 hover:to-orange-600 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
               disabled={submitting}
-              className="flex-1 px-4 py-2.5 bg-linear-to-r from-orange-500 to-orange-600 text-white rounded-xl font-medium hover:from-orange-600 hover:to-orange-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
             >
-              {submitting && <FaSpinner className="animate-spin" />}
-              {editingEvent ? 'Update Event' : 'Create Event'}
+              {submitting ? (
+                <span className="flex items-center justify-center gap-2">
+                  <FaSpinner className="animate-spin" />
+                  Saving...
+                </span>
+              ) : (
+                editingEvent ? 'Update Event' : 'Create Event'
+              )}
             </button>
           </div>
         </div>

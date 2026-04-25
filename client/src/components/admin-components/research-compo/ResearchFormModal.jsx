@@ -1,4 +1,4 @@
-import { FaTimes } from 'react-icons/fa';
+import { FaTimes, FaSpinner } from 'react-icons/fa';
 
 const ResearchFormModal = ({ show, onClose, onSubmit, formData, onChange, isEditing, submitting }) => {
   if (!show) return null;
@@ -9,25 +9,37 @@ const ResearchFormModal = ({ show, onClose, onSubmit, formData, onChange, isEdit
   };
 
   return (
-    <div className="fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="sticky top-0 bg-gradient-to-r from-orange-600 to-orange-500 text-white px-6 py-4 rounded-t-2xl flex justify-between items-center">
-          <h2 className="text-xl font-bold">
-            {isEditing ? 'Edit Research Material' : 'Add New Research Material'}
-          </h2>
-          <button
-            onClick={onClose}
-            className="text-white hover:bg-white/20 rounded-lg p-2 transition-colors"
-          >
-            <FaTimes />
-          </button>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+      {/* Background overlay with blur */}
+      <div 
+        className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
+        onClick={onClose}
+        aria-hidden="true"
+      ></div>
+
+      {/* Modal panel */}
+      <div className="relative z-10 bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[92vh] flex flex-col overflow-hidden">
+        {/* Header - Fixed */}
+        <div className="bg-linear-to-r from-orange-500 to-orange-600 px-6 py-4 shrink-0">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xl font-bold text-white">
+              {isEditing ? 'Edit Research Material' : 'Add New Research Material'}
+            </h3>
+            <button
+              onClick={onClose}
+              className="text-white hover:text-gray-200 transition-colors p-1 hover:bg-white/10 rounded-lg"
+              disabled={submitting}
+            >
+              <FaTimes className="text-xl" />
+            </button>
+          </div>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          {/* Title */}
-          <div>
+        {/* Form - Scrollable with custom scrollbar */}
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-orange-500 scrollbar-track-gray-100">
+          <div className="px-6 py-6 space-y-4">
+            {/* Title */}
+            <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
               Title <span className="text-red-500">*</span>
             </label>
@@ -37,7 +49,7 @@ const ResearchFormModal = ({ show, onClose, onSubmit, formData, onChange, isEdit
               value={formData.title}
               onChange={onChange}
               required
-              className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:outline-none"
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:outline-none transition-all"
               placeholder="Enter research title"
             />
           </div>
@@ -53,7 +65,7 @@ const ResearchFormModal = ({ show, onClose, onSubmit, formData, onChange, isEdit
               value={formData.author}
               onChange={onChange}
               required
-              className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:outline-none"
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:outline-none transition-all"
               placeholder="Enter author name"
             />
           </div>
@@ -69,7 +81,7 @@ const ResearchFormModal = ({ show, onClose, onSubmit, formData, onChange, isEdit
                 value={formData.faculty_department}
                 onChange={onChange}
                 required
-                className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:outline-none"
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:outline-none transition-all appearance-none"
               >
                 <option value="">Select Department</option>
                 <option value="Computer Science">Computer Science</option>
@@ -88,7 +100,7 @@ const ResearchFormModal = ({ show, onClose, onSubmit, formData, onChange, isEdit
                 value={formData.research_type}
                 onChange={onChange}
                 required
-                className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:outline-none"
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:outline-none transition-all appearance-none"
               >
                 <option value="">Select Type</option>
                 <option value="Journal Article">Journal Article</option>
@@ -114,7 +126,7 @@ const ResearchFormModal = ({ show, onClose, onSubmit, formData, onChange, isEdit
                 required
                 min="1900"
                 max={new Date().getFullYear() + 1}
-                className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:outline-none"
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:outline-none transition-all"
               />
             </div>
 
@@ -126,7 +138,7 @@ const ResearchFormModal = ({ show, onClose, onSubmit, formData, onChange, isEdit
                 name="status"
                 value={formData.status}
                 onChange={onChange}
-                className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:outline-none"
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:outline-none transition-all appearance-none"
               >
                 <option value="published">Published</option>
                 <option value="draft">Draft</option>
@@ -145,7 +157,7 @@ const ResearchFormModal = ({ show, onClose, onSubmit, formData, onChange, isEdit
               value={formData.description}
               onChange={onChange}
               rows="3"
-              className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:outline-none resize-none"
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:outline-none transition-all resize-none"
               placeholder="Enter research description"
             />
           </div>
@@ -160,29 +172,41 @@ const ResearchFormModal = ({ show, onClose, onSubmit, formData, onChange, isEdit
               name="external_link"
               value={formData.external_link}
               onChange={onChange}
-              className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:outline-none"
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:outline-none transition-all"
               placeholder="https://example.com/research"
             />
           </div>
+          </div>
+        </form>
 
-          {/* Buttons */}
-          <div className="flex gap-3 pt-4">
+        {/* Action Buttons - Fixed at bottom */}
+        <div className="px-6 py-4 bg-linear-to-r from-gray-50 to-gray-100 border-t border-gray-200 shrink-0">
+          <div className="flex gap-3">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 font-semibold transition-colors"
+              className="flex-1 px-5 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-white hover:border-gray-400 transition-all font-semibold shadow-sm"
+              disabled={submitting}
             >
               Cancel
             </button>
             <button
               type="submit"
+              onClick={handleSubmit}
+              className="flex-1 px-5 py-3 bg-linear-to-r from-orange-600 to-orange-500 text-white rounded-xl hover:from-orange-700 hover:to-orange-600 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
               disabled={submitting}
-              className="flex-1 px-6 py-3 bg-gradient-to-r from-orange-600 to-orange-500 text-white rounded-xl hover:from-orange-700 hover:to-orange-600 font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {submitting ? 'Saving...' : isEditing ? 'Update' : 'Create'}
+              {submitting ? (
+                <span className="flex items-center justify-center gap-2">
+                  <FaSpinner className="animate-spin" />
+                  Saving...
+                </span>
+              ) : (
+                isEditing ? 'Update Research' : 'Create Research'
+              )}
             </button>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );
