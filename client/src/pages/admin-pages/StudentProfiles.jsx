@@ -24,7 +24,12 @@ const StudentProfiles = () => {
   
   const { user } = useAuth();
   const isDeptChair = user?.role === 'dept_chair';
+  const isFaculty = user?.role === 'faculty';
+  const isAdmin = user?.role === 'admin';
   const userDepartment = user?.department;
+  
+  // Only admin and dept_chair can create/edit students
+  const canModifyStudents = isAdmin || isDeptChair;
   
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
@@ -240,13 +245,15 @@ const StudentProfiles = () => {
             
             {/* Action Buttons */}
             <div className="flex flex-wrap gap-2 w-full lg:w-auto">
-              <button
-                onClick={handleAddStudent}
-                className="group relative bg-linear-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 active:scale-95 text-white px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all duration-300 flex items-center justify-center gap-2 font-semibold shadow-md hover:shadow-lg text-sm flex-1 sm:flex-none"
-              >
-                <FaPlus className="text-xs" />
-                <span>Add Student</span>
-              </button>
+              {canModifyStudents && (
+                <button
+                  onClick={handleAddStudent}
+                  className="group relative bg-linear-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 active:scale-95 text-white px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all duration-300 flex items-center justify-center gap-2 font-semibold shadow-md hover:shadow-lg text-sm flex-1 sm:flex-none"
+                >
+                  <FaPlus className="text-xs" />
+                  <span>Add Student</span>
+                </button>
+              )}
               <button
                 onClick={handleExportList}
                 className="group bg-white border-2 border-orange-600 text-orange-600 hover:bg-orange-600 hover:text-white active:bg-orange-700 active:text-white px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all duration-300 flex items-center justify-center gap-2 font-semibold shadow-md hover:shadow-lg text-sm flex-1 sm:flex-none"
@@ -363,7 +370,7 @@ const StudentProfiles = () => {
           <StudentList 
             searchTerm={searchTerm}
             onViewStudent={handleViewStudent}
-            onEditStudent={handleEditStudent}
+            onEditStudent={canModifyStudents ? handleEditStudent : null}
             loading={isLoading}
             error={error}
             students={students}
@@ -375,10 +382,10 @@ const StudentProfiles = () => {
           <StudentProfileModal
             student={selectedStudent}
             onClose={handleCloseViewModal}
-            onEdit={() => {
+            onEdit={canModifyStudents ? () => {
               handleCloseViewModal();
               handleEditStudent(selectedStudent);
-            }}
+            } : null}
             onGenerateReport={handleGenerateReport}
           />
         )}

@@ -104,12 +104,14 @@ const StudentList = ({ searchTerm, onViewStudent, onEditStudent, loading, error,
                     >
                       View
                     </button>
-                    <button
-                      onClick={() => onEditStudent(student)}
-                      className="px-3 py-1.5 text-sm text-orange-600 hover:text-white hover:bg-orange-600 border border-orange-600 rounded-lg transition-all duration-200 font-semibold"
-                    >
-                      Edit
-                    </button>
+                    {onEditStudent && (
+                      <button
+                        onClick={() => onEditStudent(student)}
+                        className="px-3 py-1.5 text-sm text-orange-600 hover:text-white hover:bg-orange-600 border border-orange-600 rounded-lg transition-all duration-200 font-semibold"
+                      >
+                        Edit
+                      </button>
+                    )}
                   </div>
                 </td>
               </tr>
@@ -145,16 +147,18 @@ const StudentList = ({ searchTerm, onViewStudent, onEditStudent, loading, error,
               <div className="flex gap-2 pt-3 border-t border-gray-200">
                 <button
                   onClick={() => onViewStudent(student)}
-                  className="flex-1 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm text-blue-600 hover:text-white hover:bg-blue-600 active:bg-blue-700 border-2 border-blue-600 rounded-lg transition-all duration-200 font-semibold touch-manipulation"
+                  className={`${onEditStudent ? 'flex-1' : 'w-full'} px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm text-blue-600 hover:text-white hover:bg-blue-600 active:bg-blue-700 border-2 border-blue-600 rounded-lg transition-all duration-200 font-semibold touch-manipulation`}
                 >
                   View
                 </button>
-                <button
-                  onClick={() => onEditStudent(student)}
-                  className="flex-1 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm text-orange-600 hover:text-white hover:bg-orange-600 active:bg-orange-700 border-2 border-orange-600 rounded-lg transition-all duration-200 font-semibold touch-manipulation"
-                >
-                  Edit
-                </button>
+                {onEditStudent && (
+                  <button
+                    onClick={() => onEditStudent(student)}
+                    className="flex-1 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm text-orange-600 hover:text-white hover:bg-orange-600 active:bg-orange-700 border-2 border-orange-600 rounded-lg transition-all duration-200 font-semibold touch-manipulation"
+                  >
+                    Edit
+                  </button>
+                )}
               </div>
             </div>
           </div>
