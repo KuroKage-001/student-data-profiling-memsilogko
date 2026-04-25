@@ -4,81 +4,108 @@ namespace App\Http\Controllers;
 
 use App\Models\ClassSection;
 use App\Models\FacultyClassAssignment;
+use App\Services\CacheService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 
 class ClassSectionController extends Controller
 {
     /**
      * Display a listing of class sections
+     * Implements caching with user-specific cache keys
      */
     public function index(Request $request)
     {
         try {
             $user = auth()->user();
-            $query = ClassSection::query()->with(['facultyAssignments.faculty']);
+            
+            // Generate cache parameters
+            $cacheParams = [
+                'user_id' => $user ? $user->id : 'guest',
+                'user_role' => $user ? $user->role : 'guest',
+                'faculty_id' => ($user && $user->facultyProfile) ? $user->facultyProfile->id : null,
+                'semester' => $request->get('semester', ''),
+                'academic_year' => $request->get('academic_year', ''),
+                'day' => $request->get('day', ''),
+                'status' => $request->get('status', 'active'),
+                'search' => $request->get('search', ''),
+                'sort_by' => $request->get('sort_by', 'day_of_week'),
+                'sort_order' => $request->get('sort_order', 'asc'),
+            ];
 
-            // If user is faculty (not admin or dept_chair), only show their assigned classes
-            if ($user && in_array($user->role, ['faculty']) && $user->facultyProfile) {
-                $facultyId = $user->facultyProfile->id;
-                $query->whereHas('facultyAssignments', function($q) use ($facultyId) {
-                    $q->where('faculty_id', $facultyId)
-                      ->where('status', 'active');
-                });
-            }
+            $classSections = CacheService::remember(
+                CacheService::PREFIX_CLASS_SECTIONS,
+                $cacheParams,
+                function () use ($request, $user) {
+                    $query = ClassSection::query()->with(['facultyAssignments.faculty']);
 
-            // Filter by semester
-            if ($request->has('semester')) {
-                $query->where('semester', $request->semester);
-            }
+                    // If user is faculty (not admin or dept_chair), only show their assigned classes
+                    if ($user && in_array($user->role, ['faculty']) && $user->facultyProfile) {
+                        $facultyId = $user->facultyProfile->id;
+                        $query->whereHas('facultyAssignments', function($q) use ($facultyId) {
+                            $q->where('faculty_id', $facultyId)
+                              ->where('status', 'active');
+                        });
+                    }
 
-            // Filter by academic year
-            if ($request->has('academic_year')) {
-                $query->where('academic_year', $request->academic_year);
-            }
+                    // Filter by semester
+                    if ($request->has('semester')) {
+                        $query->where('semester', $request->semester);
+                    }
 
-            // Filter by day
-            if ($request->has('day')) {
-                $query->where('day_of_week', $request->day);
-            }
+                    // Filter by academic year
+                    if ($request->has('academic_year')) {
+                        $query->where('academic_year', $request->academic_year);
+                    }
 
-            // Filter by status
-            if ($request->has('status')) {
-                $query->where('status', $request->status);
-            } else {
-                $query->where('status', 'active');
-            }
+                    // Filter by day
+                    if ($request->has('day')) {
+                        $query->where('day_of_week', $request->day);
+                    }
 
-            // Search
-            if ($request->has('search')) {
-                $search = $request->search;
-                $query->where(function($q) use ($search) {
-                    $q->where('course_code', 'like', "%{$search}%")
-                      ->orWhere('course_name', 'like', "%{$search}%")
-                      ->orWhere('section_code', 'like', "%{$search}%")
-                      ->orWhere('room', 'like', "%{$search}%");
-                });
-            }
+                    // Filter by status
+                    if ($request->has('status')) {
+                        $query->where('status', $request->status);
+                    } else {
+                        $query->where('status', 'active');
+                    }
 
-            // Sort
-            $sortBy = $request->get('sort_by', 'day_of_week');
-            $sortOrder = $request->get('sort_order', 'asc');
-            $query->orderBy($sortBy, $sortOrder);
+                    // Search
+                    if ($request->has('search')) {
+                        $search = $request->search;
+                        $query->where(function($q) use ($search) {
+                            $q->where('course_code', 'like', "%{$search}%")
+                              ->orWhere('course_name', 'like', "%{$search}%")
+                              ->orWhere('section_code', 'like', "%{$search}%")
+                              ->orWhere('room', 'like', "%{$search}%");
+                        });
+                    }
 
-            $classSections = $query->get();
+                    // Sort
+                    $sortBy = $request->get('sort_by', 'day_of_week');
+                    $sortOrder = $request->get('sort_order', 'asc');
+                    $query->orderBy($sortBy, $sortOrder);
 
-            // Add instructor information
-            $classSections->each(function($section) {
-                $primaryFaculty = $section->primaryFaculty();
-                $section->instructor = $primaryFaculty ? $primaryFaculty->faculty->name : 'Unassigned';
-                $section->instructor_id = $primaryFaculty ? $primaryFaculty->faculty_id : null;
-            });
+                    $classSections = $query->get();
+
+                    // Add instructor information
+                    $classSections->each(function($section) {
+                        $primaryFaculty = $section->primaryFaculty();
+                        $section->instructor = $primaryFaculty ? $primaryFaculty->faculty->name : 'Unassigned';
+                        $section->instructor_id = $primaryFaculty ? $primaryFaculty->faculty_id : null;
+                    });
+
+                    return $classSections;
+                },
+                CacheService::DEFAULT_TTL
+            );
 
             return response()->json([
                 'success' => true,
                 'data' => $classSections
-            ]);
+            ])->header('X-Cache-Enabled', 'true');
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -181,6 +208,9 @@ class ClassSectionController extends Controller
             $primaryFaculty = $classSection->primaryFaculty();
             $classSection->instructor = $primaryFaculty ? $primaryFaculty->faculty->name : 'Unassigned';
 
+            // Invalidate class section and statistics caches
+            CacheService::invalidateRelated(CacheService::PREFIX_CLASS_SECTIONS);
+
             return response()->json([
                 'success' => true,
                 'message' => 'Class section created successfully',
@@ -198,19 +228,29 @@ class ClassSectionController extends Controller
 
     /**
      * Display the specified class section
+     * Implements caching for individual section retrieval
      */
     public function show($id)
     {
         try {
-            $classSection = ClassSection::with(['facultyAssignments.faculty'])->findOrFail($id);
-            
-            $primaryFaculty = $classSection->primaryFaculty();
-            $classSection->instructor = $primaryFaculty ? $primaryFaculty->faculty->name : 'Unassigned';
+            $classSection = CacheService::remember(
+                CacheService::PREFIX_CLASS_SECTIONS,
+                ['id' => $id],
+                function () use ($id) {
+                    $classSection = ClassSection::with(['facultyAssignments.faculty'])->findOrFail($id);
+                    
+                    $primaryFaculty = $classSection->primaryFaculty();
+                    $classSection->instructor = $primaryFaculty ? $primaryFaculty->faculty->name : 'Unassigned';
+
+                    return $classSection;
+                },
+                CacheService::DEFAULT_TTL
+            );
 
             return response()->json([
                 'success' => true,
                 'data' => $classSection
-            ]);
+            ])->header('X-Cache-Enabled', 'true');
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -316,6 +356,9 @@ class ClassSectionController extends Controller
             $classSection->instructor = $primaryFaculty ? $primaryFaculty->faculty->name : 'Unassigned';
             $classSection->instructor_id = $primaryFaculty ? $primaryFaculty->faculty_id : null;
 
+            // Invalidate class section and statistics caches
+            CacheService::invalidateRelated(CacheService::PREFIX_CLASS_SECTIONS);
+
             return response()->json([
                 'success' => true,
                 'message' => 'Class section updated successfully',
@@ -358,6 +401,9 @@ class ClassSectionController extends Controller
 
             $classSection->delete();
 
+            // Invalidate class section and statistics caches
+            CacheService::invalidateRelated(CacheService::PREFIX_CLASS_SECTIONS);
+
             return response()->json([
                 'success' => true,
                 'message' => 'Class section deleted successfully'
@@ -373,51 +419,70 @@ class ClassSectionController extends Controller
 
     /**
      * Get statistics for class sections
+     * Implements caching for statistics
      */
     public function statistics(Request $request)
     {
         try {
             $user = auth()->user();
-            $semester = $request->get('semester');
-            $academicYear = $request->get('academic_year');
+            
+            $cacheParams = [
+                'user_id' => $user ? $user->id : 'guest',
+                'user_role' => $user ? $user->role : 'guest',
+                'faculty_id' => ($user && $user->facultyProfile) ? $user->facultyProfile->id : null,
+                'semester' => $request->get('semester', ''),
+                'academic_year' => $request->get('academic_year', ''),
+            ];
 
-            $query = ClassSection::query();
+            $statistics = CacheService::remember(
+                CacheService::PREFIX_STATISTICS . '_' . CacheService::PREFIX_CLASS_SECTIONS,
+                $cacheParams,
+                function () use ($request, $user) {
+                    $semester = $request->get('semester');
+                    $academicYear = $request->get('academic_year');
 
-            // If user is faculty (not admin or dept_chair), only show their assigned classes
-            if ($user && in_array($user->role, ['faculty']) && $user->facultyProfile) {
-                $facultyId = $user->facultyProfile->id;
-                $query->whereHas('facultyAssignments', function($q) use ($facultyId) {
-                    $q->where('faculty_id', $facultyId)
-                      ->where('status', 'active');
-                });
-            }
+                    $query = ClassSection::query();
 
-            if ($semester) {
-                $query->where('semester', $semester);
-            }
+                    // If user is faculty (not admin or dept_chair), only show their assigned classes
+                    if ($user && in_array($user->role, ['faculty']) && $user->facultyProfile) {
+                        $facultyId = $user->facultyProfile->id;
+                        $query->whereHas('facultyAssignments', function($q) use ($facultyId) {
+                            $q->where('faculty_id', $facultyId)
+                              ->where('status', 'active');
+                        });
+                    }
 
-            if ($academicYear) {
-                $query->where('academic_year', $academicYear);
-            }
+                    if ($semester) {
+                        $query->where('semester', $semester);
+                    }
 
-            $totalClasses = $query->count();
-            $activeClasses = (clone $query)->where('status', 'active')->count();
-            $totalStudents = (clone $query)->sum('current_enrollment');
-            $totalCapacity = (clone $query)->sum('max_capacity');
-            $uniqueRooms = (clone $query)->distinct('room')->count('room');
-            $avgCapacity = $totalCapacity > 0 ? round(($totalStudents / $totalCapacity) * 100, 2) : 0;
+                    if ($academicYear) {
+                        $query->where('academic_year', $academicYear);
+                    }
+
+                    $totalClasses = $query->count();
+                    $activeClasses = (clone $query)->where('status', 'active')->count();
+                    $totalStudents = (clone $query)->sum('current_enrollment');
+                    $totalCapacity = (clone $query)->sum('max_capacity');
+                    $uniqueRooms = (clone $query)->distinct('room')->count('room');
+                    $avgCapacity = $totalCapacity > 0 ? round(($totalStudents / $totalCapacity) * 100, 2) : 0;
+
+                    return [
+                        'total_classes' => $totalClasses,
+                        'active_classes' => $activeClasses,
+                        'total_students' => $totalStudents,
+                        'total_capacity' => $totalCapacity,
+                        'unique_rooms' => $uniqueRooms,
+                        'avg_capacity_percentage' => $avgCapacity,
+                    ];
+                },
+                CacheService::DEFAULT_TTL
+            );
 
             return response()->json([
                 'success' => true,
-                'data' => [
-                    'total_classes' => $totalClasses,
-                    'active_classes' => $activeClasses,
-                    'total_students' => $totalStudents,
-                    'total_capacity' => $totalCapacity,
-                    'unique_rooms' => $uniqueRooms,
-                    'avg_capacity_percentage' => $avgCapacity,
-                ]
-            ]);
+                'data' => $statistics
+            ])->header('X-Cache-Enabled', 'true');
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,

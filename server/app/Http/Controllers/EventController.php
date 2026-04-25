@@ -3,56 +3,72 @@
 namespace App\Http\Controllers;
 
 use App\Models\Event;
+use App\Services\CacheService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Cache;
 
 class EventController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $query = Event::query();
+        $cacheParams = [
+            'status' => $request->get('status', 'All'),
+            'search' => $request->get('search', ''),
+            'start' => $request->get('start', ''),
+            'end' => $request->get('end', ''),
+        ];
 
-        // Filter by status
-        if ($request->has('status') && $request->status !== 'All') {
-            $query->where('status', $request->status);
-        }
+        $events = CacheService::remember(
+            'events',
+            $cacheParams,
+            function () use ($request) {
+                $query = Event::query();
 
-        // Search by title or location
-        if ($request->has('search') && $request->search) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('location', 'like', "%{$search}%");
-            });
-        }
+                // Filter by status
+                if ($request->has('status') && $request->status !== 'All') {
+                    $query->where('status', $request->status);
+                }
 
-        // Filter by date range (for calendar view)
-        if ($request->has('start') && $request->has('end')) {
-            $query->whereBetween('date', [$request->start, $request->end]);
-        }
+                // Search by title or location
+                if ($request->has('search') && $request->search) {
+                    $search = $request->search;
+                    $query->where(function ($q) use ($search) {
+                        $q->where('title', 'like', "%{$search}%")
+                          ->orWhere('location', 'like', "%{$search}%");
+                    });
+                }
 
-        $events = $query->orderBy('date', 'asc')->orderBy('time', 'asc')->get();
+                // Filter by date range (for calendar view)
+                if ($request->has('start') && $request->has('end')) {
+                    $query->whereBetween('date', [$request->start, $request->end]);
+                }
 
-        // Transform for frontend
-        $events = $events->map(function ($event) {
-            return [
-                'id' => $event->id,
-                'title' => $event->title,
-                'date' => $event->formatted_date,
-                'time' => $event->formatted_time,
-                'location' => $event->location,
-                'type' => $event->type,
-                'status' => $event->status,
-                'attendees' => $event->attendees,
-                'description' => $event->description,
-                'created_by' => $event->created_by,
-            ];
-        });
+                $events = $query->orderBy('date', 'asc')->orderBy('time', 'asc')->get();
+
+                // Transform for frontend
+                return $events->map(function ($event) {
+                    return [
+                        'id' => $event->id,
+                        'title' => $event->title,
+                        'date' => $event->formatted_date,
+                        'time' => $event->formatted_time,
+                        'location' => $event->location,
+                        'type' => $event->type,
+                        'status' => $event->status,
+                        'attendees' => $event->attendees,
+                        'description' => $event->description,
+                        'created_by' => $event->created_by,
+                    ];
+                });
+            },
+            CacheService::DEFAULT_TTL
+        );
 
         return response()->json([
             'success' => true,
             'data' => $events,
-        ]);
+        ])->header('X-Cache-Enabled', 'true');
     }
 
     public function store(Request $request): JsonResponse
@@ -79,6 +95,9 @@ class EventController extends Controller
 
         $event = Event::create($validated);
 
+        // Invalidate event caches
+        CacheService::invalidateRelated('events');
+
         return response()->json([
             'success' => true,
             'message' => 'Event created successfully',
@@ -98,20 +117,29 @@ class EventController extends Controller
 
     public function show(Event $event): JsonResponse
     {
+        $cachedEvent = CacheService::remember(
+            'events',
+            ['id' => $event->id],
+            function () use ($event) {
+                return [
+                    'id' => $event->id,
+                    'title' => $event->title,
+                    'date' => $event->formatted_date,
+                    'time' => $event->formatted_time,
+                    'location' => $event->location,
+                    'type' => $event->type,
+                    'status' => $event->status,
+                    'attendees' => $event->attendees,
+                    'description' => $event->description,
+                ];
+            },
+            CacheService::DEFAULT_TTL
+        );
+
         return response()->json([
             'success' => true,
-            'data' => [
-                'id' => $event->id,
-                'title' => $event->title,
-                'date' => $event->formatted_date,
-                'time' => $event->formatted_time,
-                'location' => $event->location,
-                'type' => $event->type,
-                'status' => $event->status,
-                'attendees' => $event->attendees,
-                'description' => $event->description,
-            ],
-        ]);
+            'data' => $cachedEvent,
+        ])->header('X-Cache-Enabled', 'true');
     }
 
     public function update(Request $request, Event $event): JsonResponse
@@ -134,6 +162,9 @@ class EventController extends Controller
 
         $event->update($validated);
 
+        // Invalidate event caches
+        CacheService::invalidateRelated('events');
+
         return response()->json([
             'success' => true,
             'message' => 'Event updated successfully',
@@ -155,6 +186,9 @@ class EventController extends Controller
     {
         $event->delete();
 
+        // Invalidate event caches
+        CacheService::invalidateRelated('events');
+
         return response()->json([
             'success' => true,
             'message' => 'Event deleted successfully',
@@ -163,23 +197,25 @@ class EventController extends Controller
 
     public function statistics(): JsonResponse
     {
-        $total = Event::count();
-        $upcoming = Event::where('status', 'Upcoming')->count();
-        $ongoing = Event::where('status', 'Ongoing')->count();
-        $completed = Event::where('status', 'Completed')->count();
-        $cancelled = Event::where('status', 'Cancelled')->count();
-        $totalAttendees = Event::sum('attendees');
+        $stats = CacheService::remember(
+            'statistics_events',
+            [],
+            function () {
+                return [
+                    'total' => Event::count(),
+                    'upcoming' => Event::where('status', 'Upcoming')->count(),
+                    'ongoing' => Event::where('status', 'Ongoing')->count(),
+                    'completed' => Event::where('status', 'Completed')->count(),
+                    'cancelled' => Event::where('status', 'Cancelled')->count(),
+                    'totalAttendees' => Event::sum('attendees'),
+                ];
+            },
+            CacheService::DEFAULT_TTL
+        );
 
         return response()->json([
             'success' => true,
-            'data' => [
-                'total' => $total,
-                'upcoming' => $upcoming,
-                'ongoing' => $ongoing,
-                'completed' => $completed,
-                'cancelled' => $cancelled,
-                'totalAttendees' => $totalAttendees,
-            ],
-        ]);
+            'data' => $stats,
+        ])->header('X-Cache-Enabled', 'true');
     }
 }

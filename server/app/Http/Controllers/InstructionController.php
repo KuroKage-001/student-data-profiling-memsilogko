@@ -3,66 +3,93 @@
 namespace App\Http\Controllers;
 
 use App\Models\Instruction;
+use App\Services\CacheService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Cache;
 
 class InstructionController extends Controller
 {
     /**
      * Display a listing of the resource with search and filter.
+     * Implements caching for improved performance.
      */
     public function index(Request $request)
     {
-        $query = Instruction::query();
+        // Generate cache parameters from request
+        $cacheParams = [
+            'search' => $request->get('search', ''),
+            'type' => $request->get('type', ''),
+            'department' => $request->get('department', ''),
+            'semester' => $request->get('semester', ''),
+            'academic_year' => $request->get('academic_year', ''),
+            'status' => $request->get('status', ''),
+            'sort_by' => $request->get('sort_by', 'created_at'),
+            'sort_order' => $request->get('sort_order', 'desc'),
+            'per_page' => $request->get('per_page', 10),
+            'page' => $request->get('page', 1),
+        ];
 
-        // Search functionality
-        if ($request->has('search') && $request->search) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('course_name', 'like', "%{$search}%")
-                  ->orWhere('course_code', 'like', "%{$search}%")
-                  ->orWhere('instructor', 'like', "%{$search}%");
-            });
-        }
+        // Use cache service to remember the query result
+        $instructions = CacheService::remember(
+            CacheService::PREFIX_INSTRUCTIONS,
+            $cacheParams,
+            function () use ($request) {
+                $query = Instruction::query();
 
-        // Filter by type
-        if ($request->has('type') && $request->type) {
-            $query->where('type', $request->type);
-        }
+                // Search functionality
+                if ($request->has('search') && $request->search) {
+                    $search = $request->search;
+                    $query->where(function($q) use ($search) {
+                        $q->where('title', 'like', "%{$search}%")
+                          ->orWhere('course_name', 'like', "%{$search}%")
+                          ->orWhere('course_code', 'like', "%{$search}%")
+                          ->orWhere('instructor', 'like', "%{$search}%");
+                    });
+                }
 
-        // Filter by department
-        if ($request->has('department') && $request->department) {
-            $query->where('department', $request->department);
-        }
+                // Filter by type
+                if ($request->has('type') && $request->type) {
+                    $query->where('type', $request->type);
+                }
 
-        // Filter by semester
-        if ($request->has('semester') && $request->semester) {
-            $query->where('semester', $request->semester);
-        }
+                // Filter by department
+                if ($request->has('department') && $request->department) {
+                    $query->where('department', $request->department);
+                }
 
-        // Filter by academic year
-        if ($request->has('academic_year') && $request->academic_year) {
-            $query->where('academic_year', $request->academic_year);
-        }
+                // Filter by semester
+                if ($request->has('semester') && $request->semester) {
+                    $query->where('semester', $request->semester);
+                }
 
-        // Filter by status
-        if ($request->has('status') && $request->status) {
-            $query->where('status', $request->status);
-        }
+                // Filter by academic year
+                if ($request->has('academic_year') && $request->academic_year) {
+                    $query->where('academic_year', $request->academic_year);
+                }
 
-        // Sort
-        $sortBy = $request->get('sort_by', 'created_at');
-        $sortOrder = $request->get('sort_order', 'desc');
-        $query->orderBy($sortBy, $sortOrder);
+                // Filter by status
+                if ($request->has('status') && $request->status) {
+                    $query->where('status', $request->status);
+                }
 
-        $instructions = $query->paginate($request->get('per_page', 10));
+                // Sort
+                $sortBy = $request->get('sort_by', 'created_at');
+                $sortOrder = $request->get('sort_order', 'desc');
+                $query->orderBy($sortBy, $sortOrder);
 
-        return response()->json($instructions);
+                return $query->paginate($request->get('per_page', 10));
+            },
+            CacheService::DEFAULT_TTL
+        );
+
+        return response()->json($instructions)
+            ->header('X-Cache-Enabled', 'true');
     }
 
     /**
      * Store a newly created resource in storage.
+     * Invalidates cache after successful creation.
      */
     public function store(Request $request)
     {
@@ -99,6 +126,9 @@ class InstructionController extends Controller
 
         $instruction = Instruction::create($data);
 
+        // Invalidate all instruction caches
+        CacheService::invalidate(CacheService::PREFIX_INSTRUCTIONS);
+
         return response()->json([
             'message' => 'Instruction created successfully',
             'data' => $instruction
@@ -107,15 +137,26 @@ class InstructionController extends Controller
 
     /**
      * Display the specified resource.
+     * Implements caching for individual instruction retrieval.
      */
     public function show(string $id)
     {
-        $instruction = Instruction::findOrFail($id);
-        return response()->json($instruction);
+        $instruction = CacheService::remember(
+            CacheService::PREFIX_INSTRUCTIONS,
+            ['id' => $id],
+            function () use ($id) {
+                return Instruction::findOrFail($id);
+            },
+            CacheService::DEFAULT_TTL
+        );
+
+        return response()->json($instruction)
+            ->header('X-Cache-Enabled', 'true');
     }
 
     /**
      * Update the specified resource in storage.
+     * Invalidates cache after successful update.
      */
     public function update(Request $request, string $id)
     {
@@ -154,6 +195,9 @@ class InstructionController extends Controller
 
         $instruction->update($data);
 
+        // Invalidate all instruction caches
+        CacheService::invalidate(CacheService::PREFIX_INSTRUCTIONS);
+
         return response()->json([
             'message' => 'Instruction updated successfully',
             'data' => $instruction
@@ -162,11 +206,15 @@ class InstructionController extends Controller
 
     /**
      * Remove the specified resource from storage.
+     * Invalidates cache after successful deletion.
      */
     public function destroy(string $id)
     {
         $instruction = Instruction::findOrFail($id);
         $instruction->delete();
+
+        // Invalidate all instruction caches
+        CacheService::invalidate(CacheService::PREFIX_INSTRUCTIONS);
 
         return response()->json([
             'message' => 'Instruction deleted successfully'

@@ -5,80 +5,104 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\StudentSkill;
 use App\Models\StudentActivity;
+use App\Services\CacheService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 
 class StudentController extends Controller
 {
     /**
      * Display a listing of students
+     * Implements caching for improved performance
      */
     public function index(Request $request)
     {
         try {
-            $query = User::where('role', 'student')->with(['skills', 'activities', 'violations', 'affiliations', 'academicRecords.subjects']);
+            // Generate cache parameters
+            $cacheParams = [
+                'search' => $request->get('search', ''),
+                'status' => $request->get('status', 'all'),
+                'year_level' => $request->get('year_level', 'all'),
+                'program' => $request->get('program', 'all'),
+                'skills' => $request->get('skills', ''),
+                'activities' => $request->get('activities', ''),
+                'sort_by' => $request->get('sort_by', 'created_at'),
+                'sort_order' => $request->get('sort_order', 'desc'),
+                'per_page' => $request->get('per_page', 10),
+                'page' => $request->get('page', 1),
+            ];
 
-            // Search functionality
-            if ($request->has('search')) {
-                $search = $request->search;
-                $query->where(function($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%")
-                      ->orWhere('email', 'like', "%{$search}%")
-                      ->orWhere('student_id', 'like', "%{$search}%")
-                      ->orWhere('program', 'like', "%{$search}%");
-                });
-            }
+            $students = CacheService::remember(
+                'students',
+                $cacheParams,
+                function () use ($request) {
+                    $query = User::where('role', 'student')->with(['skills', 'activities', 'violations', 'affiliations', 'academicRecords.subjects']);
 
-            // Filter by status
-            if ($request->has('status') && $request->status !== 'all') {
-                $query->where('status', $request->status);
-            }
+                    // Search functionality
+                    if ($request->has('search')) {
+                        $search = $request->search;
+                        $query->where(function($q) use ($search) {
+                            $q->where('name', 'like', "%{$search}%")
+                              ->orWhere('email', 'like', "%{$search}%")
+                              ->orWhere('student_id', 'like', "%{$search}%")
+                              ->orWhere('program', 'like', "%{$search}%");
+                        });
+                    }
 
-            // Filter by year level
-            if ($request->has('year_level') && $request->year_level !== 'all') {
-                $query->where('year_level', $request->year_level);
-            }
+                    // Filter by status
+                    if ($request->has('status') && $request->status !== 'all') {
+                        $query->where('status', $request->status);
+                    }
 
-            // Filter by program
-            if ($request->has('program') && $request->program !== 'all') {
-                $query->where('program', $request->program);
-            }
+                    // Filter by year level
+                    if ($request->has('year_level') && $request->year_level !== 'all') {
+                        $query->where('year_level', $request->year_level);
+                    }
 
-            // Filter by skills
-            if ($request->has('skills') && !empty($request->skills)) {
-                $skillSearch = $request->skills;
-                $query->whereHas('skills', function($q) use ($skillSearch) {
-                    $q->where('skill_name', 'like', "%{$skillSearch}%")
-                      ->orWhere('description', 'like', "%{$skillSearch}%");
-                });
-            }
+                    // Filter by program
+                    if ($request->has('program') && $request->program !== 'all') {
+                        $query->where('program', $request->program);
+                    }
 
-            // Filter by activities
-            if ($request->has('activities') && !empty($request->activities)) {
-                $activitySearch = $request->activities;
-                $query->whereHas('activities', function($q) use ($activitySearch) {
-                    $q->where('activity_name', 'like', "%{$activitySearch}%")
-                      ->orWhere('description', 'like', "%{$activitySearch}%")
-                      ->orWhere('organization', 'like', "%{$activitySearch}%")
-                      ->orWhere('role', 'like', "%{$activitySearch}%");
-                });
-            }
+                    // Filter by skills
+                    if ($request->has('skills') && !empty($request->skills)) {
+                        $skillSearch = $request->skills;
+                        $query->whereHas('skills', function($q) use ($skillSearch) {
+                            $q->where('skill_name', 'like', "%{$skillSearch}%")
+                              ->orWhere('description', 'like', "%{$skillSearch}%");
+                        });
+                    }
 
-            // Sorting
-            $sortBy = $request->get('sort_by', 'created_at');
-            $sortOrder = $request->get('sort_order', 'desc');
-            $query->orderBy($sortBy, $sortOrder);
+                    // Filter by activities
+                    if ($request->has('activities') && !empty($request->activities)) {
+                        $activitySearch = $request->activities;
+                        $query->whereHas('activities', function($q) use ($activitySearch) {
+                            $q->where('activity_name', 'like', "%{$activitySearch}%")
+                              ->orWhere('description', 'like', "%{$activitySearch}%")
+                              ->orWhere('organization', 'like', "%{$activitySearch}%")
+                              ->orWhere('role', 'like', "%{$activitySearch}%");
+                        });
+                    }
 
-            // Pagination
-            $perPage = $request->get('per_page', 10);
-            $students = $query->paginate($perPage);
+                    // Sorting
+                    $sortBy = $request->get('sort_by', 'created_at');
+                    $sortOrder = $request->get('sort_order', 'desc');
+                    $query->orderBy($sortBy, $sortOrder);
+
+                    // Pagination
+                    $perPage = $request->get('per_page', 10);
+                    return $query->paginate($perPage);
+                },
+                CacheService::DEFAULT_TTL
+            );
 
             return response()->json([
                 'success' => true,
                 'data' => $students
-            ]);
+            ])->header('X-Cache-Enabled', 'true');
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -180,6 +204,9 @@ class StudentController extends Controller
 
             DB::commit();
 
+            // Invalidate student caches
+            CacheService::invalidateRelated('students');
+
             // Load relationships
             $user->load(['skills', 'activities', 'violations', 'affiliations', 'academicRecords.subjects']);
 
@@ -199,18 +226,26 @@ class StudentController extends Controller
 
     /**
      * Display the specified student
+     * Implements caching for individual student retrieval
      */
     public function show($id)
     {
         try {
-            $student = User::where('role', 'student')
-                ->with(['skills', 'activities', 'violations', 'affiliations', 'academicRecords.subjects'])
-                ->findOrFail($id);
+            $student = CacheService::remember(
+                'students',
+                ['id' => $id],
+                function () use ($id) {
+                    return User::where('role', 'student')
+                        ->with(['skills', 'activities', 'violations', 'affiliations', 'academicRecords.subjects'])
+                        ->findOrFail($id);
+                },
+                CacheService::DEFAULT_TTL
+            );
             
             return response()->json([
                 'success' => true,
                 'data' => $student
-            ]);
+            ])->header('X-Cache-Enabled', 'true');
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -302,6 +337,9 @@ class StudentController extends Controller
 
             DB::commit();
 
+            // Invalidate student caches
+            CacheService::invalidateRelated('students');
+
             // Load relationships
             $student->load(['skills', 'activities', 'violations', 'affiliations', 'academicRecords.subjects']);
 
@@ -321,12 +359,16 @@ class StudentController extends Controller
 
     /**
      * Remove the specified student
+     * Invalidates cache after deletion
      */
     public function destroy($id)
     {
         try {
             $student = User::where('role', 'student')->findOrFail($id);
             $student->delete();
+
+            // Invalidate student caches
+            CacheService::invalidateRelated('students');
 
             return response()->json([
                 'success' => true,
@@ -342,30 +384,38 @@ class StudentController extends Controller
 
     /**
      * Get student statistics
+     * Implements caching for statistics
      */
     public function statistics()
     {
         try {
-            $stats = [
-                'total_students' => User::where('role', 'student')->count(),
-                'active_students' => User::where('role', 'student')->where('status', 'active')->count(),
-                'inactive_students' => User::where('role', 'student')->where('status', 'inactive')->count(),
-                'suspended_students' => User::where('role', 'student')->where('status', 'suspended')->count(),
-                'by_program' => User::where('role', 'student')
-                    ->select('program', \DB::raw('count(*) as count'))
-                    ->groupBy('program')
-                    ->get(),
-                'by_year_level' => User::where('role', 'student')
-                    ->select('year_level', \DB::raw('count(*) as count'))
-                    ->groupBy('year_level')
-                    ->get(),
-                'average_gpa' => User::where('role', 'student')->avg('gpa'),
-            ];
+            $stats = CacheService::remember(
+                'statistics_students',
+                [],
+                function () {
+                    return [
+                        'total_students' => User::where('role', 'student')->count(),
+                        'active_students' => User::where('role', 'student')->where('status', 'active')->count(),
+                        'inactive_students' => User::where('role', 'student')->where('status', 'inactive')->count(),
+                        'suspended_students' => User::where('role', 'student')->where('status', 'suspended')->count(),
+                        'by_program' => User::where('role', 'student')
+                            ->select('program', \DB::raw('count(*) as count'))
+                            ->groupBy('program')
+                            ->get(),
+                        'by_year_level' => User::where('role', 'student')
+                            ->select('year_level', \DB::raw('count(*) as count'))
+                            ->groupBy('year_level')
+                            ->get(),
+                        'average_gpa' => User::where('role', 'student')->avg('gpa'),
+                    ];
+                },
+                CacheService::DEFAULT_TTL
+            );
 
             return response()->json([
                 'success' => true,
                 'data' => $stats
-            ]);
+            ])->header('X-Cache-Enabled', 'true');
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,

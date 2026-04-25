@@ -26,6 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'check.status' => \App\Http\Middleware\CheckUserStatus::class,
             'role' => \App\Http\Middleware\CheckRole::class,
+            'cache.response' => \App\Http\Middleware\CacheResponse::class,
         ]);
         
         // Ensure CORS is handled globally for all routes

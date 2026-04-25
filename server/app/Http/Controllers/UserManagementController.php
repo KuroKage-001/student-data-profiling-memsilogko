@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Faculty;
+use App\Services\CacheService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 
 class UserManagementController extends Controller
 {
@@ -64,44 +66,63 @@ class UserManagementController extends Controller
     }
     /**
      * Display a listing of users
+     * Implements caching for improved performance
      */
     public function index(Request $request)
     {
         try {
-            $query = User::query();
+            // Generate cache parameters
+            $cacheParams = [
+                'search' => $request->get('search', ''),
+                'role' => $request->get('role', 'all'),
+                'status' => $request->get('status', 'all'),
+                'sort_by' => $request->get('sort_by', 'created_at'),
+                'sort_order' => $request->get('sort_order', 'desc'),
+                'per_page' => $request->get('per_page', 10),
+                'page' => $request->get('page', 1),
+            ];
 
-            // Search functionality
-            if ($request->has('search')) {
-                $search = $request->search;
-                $query->where(function($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%")
-                      ->orWhere('email', 'like', "%{$search}%");
-                });
-            }
+            $users = CacheService::remember(
+                'users',
+                $cacheParams,
+                function () use ($request) {
+                    $query = User::query();
 
-            // Filter by role
-            if ($request->has('role') && $request->role !== 'all') {
-                $query->where('role', $request->role);
-            }
+                    // Search functionality
+                    if ($request->has('search')) {
+                        $search = $request->search;
+                        $query->where(function($q) use ($search) {
+                            $q->where('name', 'like', "%{$search}%")
+                              ->orWhere('email', 'like', "%{$search}%");
+                        });
+                    }
 
-            // Filter by status
-            if ($request->has('status') && $request->status !== 'all') {
-                $query->where('status', $request->status);
-            }
+                    // Filter by role
+                    if ($request->has('role') && $request->role !== 'all') {
+                        $query->where('role', $request->role);
+                    }
 
-            // Sorting
-            $sortBy = $request->get('sort_by', 'created_at');
-            $sortOrder = $request->get('sort_order', 'desc');
-            $query->orderBy($sortBy, $sortOrder);
+                    // Filter by status
+                    if ($request->has('status') && $request->status !== 'all') {
+                        $query->where('status', $request->status);
+                    }
 
-            // Pagination
-            $perPage = $request->get('per_page', 10);
-            $users = $query->paginate($perPage);
+                    // Sorting
+                    $sortBy = $request->get('sort_by', 'created_at');
+                    $sortOrder = $request->get('sort_order', 'desc');
+                    $query->orderBy($sortBy, $sortOrder);
+
+                    // Pagination
+                    $perPage = $request->get('per_page', 10);
+                    return $query->paginate($perPage);
+                },
+                CacheService::DEFAULT_TTL
+            );
 
             return response()->json([
                 'success' => true,
                 'data' => $users
-            ]);
+            ])->header('X-Cache-Enabled', 'true');
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -202,6 +223,9 @@ class UserManagementController extends Controller
 
             DB::commit();
 
+            // Invalidate user caches
+            CacheService::invalidateRelated('users');
+
             return response()->json([
                 'success' => true,
                 'message' => 'User created successfully' . ($request->role === 'faculty' ? ' with faculty profile' : ''),
@@ -243,16 +267,24 @@ class UserManagementController extends Controller
 
     /**
      * Display the specified user
+     * Implements caching for individual user retrieval
      */
     public function show($id)
     {
         try {
-            $user = User::findOrFail($id);
+            $user = CacheService::remember(
+                'users',
+                ['id' => $id],
+                function () use ($id) {
+                    return User::findOrFail($id);
+                },
+                CacheService::DEFAULT_TTL
+            );
             
             return response()->json([
                 'success' => true,
                 'data' => $user
-            ]);
+            ])->header('X-Cache-Enabled', 'true');
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -390,6 +422,9 @@ class UserManagementController extends Controller
 
             DB::commit();
 
+            // Invalidate user caches
+            CacheService::invalidateRelated('users');
+
             return response()->json([
                 'success' => true,
                 'message' => 'User updated successfully',
@@ -406,6 +441,7 @@ class UserManagementController extends Controller
 
     /**
      * Remove the specified user
+     * Invalidates cache after deletion
      */
     public function destroy($id)
     {
@@ -422,6 +458,9 @@ class UserManagementController extends Controller
 
             $user->delete();
 
+            // Invalidate user caches
+            CacheService::invalidateRelated('users');
+
             return response()->json([
                 'success' => true,
                 'message' => 'User deleted successfully'
@@ -436,27 +475,35 @@ class UserManagementController extends Controller
 
     /**
      * Get user statistics
+     * Implements caching for statistics
      */
     public function statistics()
     {
         try {
-            $stats = [
-                'total_users' => User::count(),
-                'active_users' => User::where('status', 'active')->count(),
-                'inactive_users' => User::where('status', 'inactive')->count(),
-                'suspended_users' => User::where('status', 'suspended')->count(),
-                'admins' => User::where('role', 'admin')->count(),
-                'faculty' => User::where('role', 'faculty')->count(),
-                'students' => User::where('role', 'student')->count(),
-                'dept_chairs' => User::where('role', 'dept_chair')->count(),
-                'dept_chair_it' => User::where('role', 'dept_chair')->where('department', 'IT')->count(),
-                'dept_chair_cs' => User::where('role', 'dept_chair')->where('department', 'CS')->count(),
-            ];
+            $stats = CacheService::remember(
+                'statistics_users',
+                [],
+                function () {
+                    return [
+                        'total_users' => User::count(),
+                        'active_users' => User::where('status', 'active')->count(),
+                        'inactive_users' => User::where('status', 'inactive')->count(),
+                        'suspended_users' => User::where('status', 'suspended')->count(),
+                        'admins' => User::where('role', 'admin')->count(),
+                        'faculty' => User::where('role', 'faculty')->count(),
+                        'students' => User::where('role', 'student')->count(),
+                        'dept_chairs' => User::where('role', 'dept_chair')->count(),
+                        'dept_chair_it' => User::where('role', 'dept_chair')->where('department', 'IT')->count(),
+                        'dept_chair_cs' => User::where('role', 'dept_chair')->where('department', 'CS')->count(),
+                    ];
+                },
+                CacheService::DEFAULT_TTL
+            );
 
             return response()->json([
                 'success' => true,
                 'data' => $stats
-            ]);
+            ])->header('X-Cache-Enabled', 'true');
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
