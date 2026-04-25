@@ -145,29 +145,52 @@ class FacultyAssignmentController extends Controller
     public function getFacultyClasses($facultyId)
     {
         try {
-            $faculty = Faculty::findOrFail($facultyId);
+            // Try to find faculty by ID first, then by user_id
+            $faculty = Faculty::find($facultyId);
+            
+            if (!$faculty) {
+                // If not found by ID, try finding by user_id
+                $faculty = Faculty::where('user_id', $facultyId)->first();
+            }
+            
+            if (!$faculty) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Faculty not found'
+                ], 404);
+            }
 
-            $assignments = FacultyClassAssignment::where('faculty_id', $facultyId)
+            $assignments = FacultyClassAssignment::where('faculty_id', $faculty->id)
                 ->where('status', 'active')
-                ->with('classSection')
+                ->with(['classSection', 'faculty'])
                 ->get();
 
-            $classes = $assignments->map(function($assignment) {
+            $classes = $assignments->map(function($assignment) use ($faculty) {
                 $section = $assignment->classSection;
+                
+                // Skip if class section doesn't exist
+                if (!$section) {
+                    return null;
+                }
+                
+                // Build the class section data with instructor name
+                $sectionData = $section->toArray();
+                $sectionData['instructor'] = $faculty->name;
+                $sectionData['time_range'] = $section->time_range;
+                $sectionData['enrollment_percentage'] = $section->enrollment_percentage;
+                
                 return [
                     'assignment_id' => $assignment->id,
                     'assignment_type' => $assignment->assignment_type,
-                    'class_section' => $section,
-                    'time_range' => $section->time_range,
-                    'enrollment_percentage' => $section->enrollment_percentage,
+                    'class_section' => $sectionData,
                 ];
-            });
+            })->filter(); // Remove null values
 
             return response()->json([
                 'success' => true,
                 'data' => [
                     'faculty' => $faculty,
-                    'classes' => $classes,
+                    'classes' => $classes->values(), // Re-index array after filtering
                     'total_classes' => $classes->count(),
                 ]
             ]);

@@ -22,7 +22,8 @@ const DashboardStats = () => {
       icon: FaUserGraduate,
       iconBg: 'bg-orange-100',
       iconColor: 'text-orange-600',
-      hideForDeptChair: true
+      hideForDeptChair: true,
+      hideForFaculty: true
     },
     {
       title: 'Active Faculty',
@@ -30,7 +31,8 @@ const DashboardStats = () => {
       icon: FaChalkboardTeacher,
       iconBg: 'bg-blue-100',
       iconColor: 'text-blue-600',
-      hideForDeptChair: false
+      hideForDeptChair: false,
+      hideForFaculty: true
     },
     {
       title: 'Total Faculty',
@@ -38,7 +40,8 @@ const DashboardStats = () => {
       icon: FaClipboardCheck,
       iconBg: 'bg-green-100',
       iconColor: 'text-green-600',
-      hideForDeptChair: false
+      hideForDeptChair: false,
+      hideForFaculty: true
     },
     {
       title: 'Faculty on Leave',
@@ -46,14 +49,17 @@ const DashboardStats = () => {
       icon: FaClock,
       iconBg: 'bg-yellow-100',
       iconColor: 'text-yellow-600',
-      hideForDeptChair: false
+      hideForDeptChair: false,
+      hideForFaculty: true
     }
   ];
 
   // Filter stats based on user role
-  const stats = (isDeptChair || isFaculty)
-    ? allStats.filter(stat => !stat.hideForDeptChair)
-    : allStats;
+  const stats = allStats.filter(stat => {
+    if (isDeptChair && stat.hideForDeptChair) return false;
+    if (isFaculty && stat.hideForFaculty) return false;
+    return true;
+  });
 
   if (isError) {
     return (
@@ -63,8 +69,20 @@ const DashboardStats = () => {
     );
   }
 
+  // Determine grid layout based on number of stats
+  const getGridClass = () => {
+    if (isFaculty) return 'md:grid-cols-1'; // Faculty sees no stats (will be hidden)
+    if (isDeptChair) return 'md:grid-cols-3'; // Dept Chair sees 3 stats
+    return 'md:grid-cols-2 lg:grid-cols-4'; // Admin sees all 4 stats
+  };
+
+  // If faculty user has no stats to show, hide the entire stats section
+  if (isFaculty && stats.length === 0) {
+    return null;
+  }
+
   return (
-    <div className={`grid grid-cols-1 ${(isDeptChair || isFaculty) ? 'md:grid-cols-3' : 'md:grid-cols-2 lg:grid-cols-4'} gap-4 sm:gap-5`}>
+    <div className={`grid grid-cols-1 ${getGridClass()} gap-4 sm:gap-5`}>
       {stats.map((stat, index) => (
         <div key={index} className="bg-white rounded-2xl p-5 sm:p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300">
           <div className="flex items-start justify-between">

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ClassSection;
+use App\Models\Faculty;
 use App\Models\FacultyClassAssignment;
 use App\Services\CacheService;
 use Illuminate\Http\Request;
@@ -21,11 +22,25 @@ class ClassSectionController extends Controller
         try {
             $user = auth()->user();
             
+            // Check if faculty user has a faculty profile
+            $facultyProfile = null;
+            if ($user && $user->role === 'faculty') {
+                $facultyProfile = Faculty::where('user_id', $user->id)->first();
+                
+                // If faculty user has no faculty profile, return empty array
+                if (!$facultyProfile) {
+                    return response()->json([
+                        'success' => true,
+                        'data' => []
+                    ]);
+                }
+            }
+            
             // Generate cache parameters
             $cacheParams = [
                 'user_id' => $user ? $user->id : 'guest',
                 'user_role' => $user ? $user->role : 'guest',
-                'faculty_id' => ($user && $user->facultyProfile) ? $user->facultyProfile->id : null,
+                'faculty_id' => $facultyProfile ? $facultyProfile->id : null,
                 'semester' => $request->get('semester', ''),
                 'academic_year' => $request->get('academic_year', ''),
                 'day' => $request->get('day', ''),
@@ -38,12 +53,12 @@ class ClassSectionController extends Controller
             $classSections = CacheService::remember(
                 CacheService::PREFIX_CLASS_SECTIONS,
                 $cacheParams,
-                function () use ($request, $user) {
+                function () use ($request, $user, $facultyProfile) {
                     $query = ClassSection::query()->with(['facultyAssignments.faculty']);
 
                     // If user is faculty (not admin or dept_chair), only show their assigned classes
-                    if ($user && in_array($user->role, ['faculty']) && $user->facultyProfile) {
-                        $facultyId = $user->facultyProfile->id;
+                    if ($user && $user->role === 'faculty' && $facultyProfile) {
+                        $facultyId = $facultyProfile->id;
                         $query->whereHas('facultyAssignments', function($q) use ($facultyId) {
                             $q->where('faculty_id', $facultyId)
                               ->where('status', 'active');
@@ -426,10 +441,36 @@ class ClassSectionController extends Controller
         try {
             $user = auth()->user();
             
+            // Load faculty profile if user is faculty
+            $facultyProfile = null;
+            if ($user && $user->role === 'faculty') {
+                $facultyProfile = Faculty::where('user_id', $user->id)->first();
+                
+                // If faculty user has no faculty profile, return zero statistics
+                if (!$facultyProfile) {
+                    \Log::warning('Faculty user has no faculty profile', [
+                        'user_id' => $user->id,
+                        'user_email' => $user->email,
+                    ]);
+                    
+                    return response()->json([
+                        'success' => true,
+                        'data' => [
+                            'total_classes' => 0,
+                            'active_classes' => 0,
+                            'total_students' => 0,
+                            'total_capacity' => 0,
+                            'unique_rooms' => 0,
+                            'avg_capacity_percentage' => 0,
+                        ]
+                    ]);
+                }
+            }
+            
             $cacheParams = [
                 'user_id' => $user ? $user->id : 'guest',
                 'user_role' => $user ? $user->role : 'guest',
-                'faculty_id' => ($user && $user->facultyProfile) ? $user->facultyProfile->id : null,
+                'faculty_id' => $facultyProfile ? $facultyProfile->id : null,
                 'semester' => $request->get('semester', ''),
                 'academic_year' => $request->get('academic_year', ''),
             ];
@@ -437,15 +478,15 @@ class ClassSectionController extends Controller
             $statistics = CacheService::remember(
                 CacheService::PREFIX_STATISTICS . '_' . CacheService::PREFIX_CLASS_SECTIONS,
                 $cacheParams,
-                function () use ($request, $user) {
+                function () use ($request, $user, $facultyProfile) {
                     $semester = $request->get('semester');
                     $academicYear = $request->get('academic_year');
 
                     $query = ClassSection::query();
 
                     // If user is faculty (not admin or dept_chair), only show their assigned classes
-                    if ($user && in_array($user->role, ['faculty']) && $user->facultyProfile) {
-                        $facultyId = $user->facultyProfile->id;
+                    if ($user && $user->role === 'faculty' && $facultyProfile) {
+                        $facultyId = $facultyProfile->id;
                         $query->whereHas('facultyAssignments', function($q) use ($facultyId) {
                             $q->where('faculty_id', $facultyId)
                               ->where('status', 'active');

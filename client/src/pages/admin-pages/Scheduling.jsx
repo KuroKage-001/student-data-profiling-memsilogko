@@ -45,20 +45,37 @@ const Scheduling = () => {
   useEffect(() => {
     fetchSchedules();
     fetchStatistics();
-  }, []);
+  }, [isFaculty, user?.id]);
 
   const fetchSchedules = async () => {
     try {
       setLoading(true);
-      const response = await classSectionService.getAllSections({
-        status: 'active',
-      });
       
-      // Handle both response formats
-      if (Array.isArray(response)) {
-        setSchedules(response);
-      } else if (response?.success && response?.data) {
-        setSchedules(response.data);
+      // If user is faculty, fetch only their classes
+      let response;
+      if (isFaculty && user?.id) {
+        response = await classSectionService.getFacultyClasses(user.id);
+        
+        // Handle faculty-specific response format
+        if (response?.success && response?.data?.classes) {
+          // Extract class_section from each assignment
+          const facultySchedules = response.data.classes.map(item => item.class_section);
+          setSchedules(facultySchedules);
+        } else if (Array.isArray(response)) {
+          setSchedules(response);
+        }
+      } else {
+        // Admin and dept_chair can see all schedules
+        response = await classSectionService.getAllSections({
+          status: 'active',
+        });
+        
+        // Handle both response formats
+        if (Array.isArray(response)) {
+          setSchedules(response);
+        } else if (response?.success && response?.data) {
+          setSchedules(response.data);
+        }
       }
     } catch (error) {
       toast.error('Failed to load schedules');
@@ -69,7 +86,9 @@ const Scheduling = () => {
 
   const fetchStatistics = async () => {
     try {
-      const response = await classSectionService.getStatistics();
+      // If user is faculty, pass their ID to get filtered statistics
+      const params = isFaculty && user?.id ? { faculty_id: user.id } : {};
+      const response = await classSectionService.getStatistics(params);
       
       // Handle both response formats
       if (response?.success && response?.data) {
