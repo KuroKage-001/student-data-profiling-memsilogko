@@ -36,6 +36,9 @@ class ClassSectionController extends Controller
                 }
             }
             
+            // Check if cache should be bypassed (for real-time updates)
+            $noCache = $request->get('no_cache', false);
+            
             // Generate cache parameters
             $cacheParams = [
                 'user_id' => $user ? $user->id : 'guest',
@@ -48,6 +51,7 @@ class ClassSectionController extends Controller
                 'search' => $request->get('search', ''),
                 'sort_by' => $request->get('sort_by', 'day_of_week'),
                 'sort_order' => $request->get('sort_order', 'asc'),
+                'timestamp' => $noCache ? time() : floor(time() / 60), // Cache per minute, or bypass with timestamp
             ];
 
             $classSections = CacheService::remember(
@@ -114,13 +118,13 @@ class ClassSectionController extends Controller
 
                     return $classSections;
                 },
-                CacheService::DEFAULT_TTL
+                $noCache ? 1 : CacheService::SHORT_TTL // Use 1 second TTL if no_cache, otherwise 1 minute
             );
 
             return response()->json([
                 'success' => true,
                 'data' => $classSections
-            ])->header('X-Cache-Enabled', 'true');
+            ])->header('X-Cache-Enabled', $noCache ? 'false' : 'true');
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -467,12 +471,16 @@ class ClassSectionController extends Controller
                 }
             }
             
+            // Check if cache should be bypassed (for real-time updates)
+            $noCache = $request->get('no_cache', false);
+            
             $cacheParams = [
                 'user_id' => $user ? $user->id : 'guest',
                 'user_role' => $user ? $user->role : 'guest',
                 'faculty_id' => $facultyProfile ? $facultyProfile->id : null,
                 'semester' => $request->get('semester', ''),
                 'academic_year' => $request->get('academic_year', ''),
+                'timestamp' => $noCache ? time() : floor(time() / 60), // Cache per minute, or bypass with timestamp
             ];
 
             $statistics = CacheService::remember(
@@ -517,13 +525,13 @@ class ClassSectionController extends Controller
                         'avg_capacity_percentage' => $avgCapacity,
                     ];
                 },
-                CacheService::DEFAULT_TTL
+                $noCache ? 1 : CacheService::SHORT_TTL // Use 1 second TTL if no_cache, otherwise 1 minute
             );
 
             return response()->json([
                 'success' => true,
                 'data' => $statistics
-            ])->header('X-Cache-Enabled', 'true');
+            ])->header('X-Cache-Enabled', $noCache ? 'false' : 'true');
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,

@@ -66,8 +66,10 @@ const Scheduling = () => {
         }
       } else {
         // Admin and dept_chair can see all schedules
+        // Add no_cache parameter for real-time updates
         response = await classSectionService.getAllSections({
           status: 'active',
+          no_cache: true, // Force fresh data
         });
         
         // Handle both response formats
@@ -87,7 +89,10 @@ const Scheduling = () => {
   const fetchStatistics = async () => {
     try {
       // If user is faculty, pass their ID to get filtered statistics
-      const params = isFaculty && user?.id ? { faculty_id: user.id } : {};
+      // Add no_cache parameter for real-time updates
+      const params = isFaculty && user?.id 
+        ? { faculty_id: user.id, no_cache: true } 
+        : { no_cache: true };
       const response = await classSectionService.getStatistics(params);
       
       // Handle both response formats

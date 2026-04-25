@@ -45,33 +45,22 @@ class StudentEnrollmentController extends Controller
             $classSectionId = $request->query('class_section_id');
             $program = $request->query('program'); // IT or CS
             
-            \Log::info('Getting eligible students', [
-                'class_section_id' => $classSectionId,
-                'program' => $program
-            ]);
-            
-            // First, let's check all users with role 'student'
-            $allStudents = User::where('role', 'student')->get(['id', 'name', 'email', 'role', 'program', 'status']);
-            \Log::info('All students in database', [
-                'count' => $allStudents->count(),
-                'students' => $allStudents->toArray()
-            ]);
-            
             $query = User::where('role', 'student')
                 ->where('status', 'active');
             
             // Filter by program if provided
+            // Program field contains full name like "Bachelor of Science in Information Technology"
+            // So we need to use LIKE to match "IT" or "CS"
             if ($program) {
-                $query->where('program', $program);
+                if ($program === 'IT') {
+                    $query->where('program', 'like', '%Information Technology%');
+                } elseif ($program === 'CS') {
+                    $query->where('program', 'like', '%Computer Science%');
+                } else {
+                    // Fallback to exact match for other programs
+                    $query->where('program', $program);
+                }
             }
-            
-            // Log total students before filtering by enrollment
-            $totalStudents = (clone $query)->count();
-            $studentsBeforeFilter = (clone $query)->get(['id', 'name', 'program', 'status']);
-            \Log::info('Students matching criteria before enrollment filter', [
-                'count' => $totalStudents,
-                'students' => $studentsBeforeFilter->toArray()
-            ]);
             
             // Exclude already enrolled students if class section is provided
             if ($classSectionId) {
@@ -85,27 +74,11 @@ class StudentEnrollmentController extends Controller
                 ->orderBy('name')
                 ->get();
 
-            \Log::info('Eligible students found', [
-                'count' => $students->count(),
-                'students' => $students->toArray()
-            ]);
-
             return response()->json([
                 'success' => true,
-                'data' => $students,
-                'debug' => [
-                    'total_students_in_db' => User::where('role', 'student')->count(),
-                    'active_students' => User::where('role', 'student')->where('status', 'active')->count(),
-                    'program_filter' => $program,
-                    'students_with_program' => User::where('role', 'student')->where('program', $program)->count(),
-                ]
+                'data' => $students
             ]);
         } catch (\Exception $e) {
-            \Log::error('Error fetching eligible students', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to fetch eligible students',
@@ -161,7 +134,7 @@ class StudentEnrollmentController extends Controller
             $student = User::findOrFail($request->user_id);
             $courseProgram = $this->extractProgramFromCourseCode($classSection->course_code);
             
-            if ($courseProgram && $student->program !== $courseProgram) {
+            if ($courseProgram && !$this->studentMatchesProgram($student->program, $courseProgram)) {
                 return response()->json([
                     'success' => false,
                     'message' => "Only {$courseProgram} students can enroll in this course"
@@ -280,6 +253,30 @@ class StudentEnrollmentController extends Controller
     }
 
     /**
+     * Check if student's program matches the course program
+     * Student program is full name like "Bachelor of Science in Information Technology"
+     * Course program is short code like "IT" or "CS"
+     */
+    private function studentMatchesProgram($studentProgram, $courseProgram)
+    {
+        if (!$studentProgram || !$courseProgram) {
+            return true; // Allow if either is not set
+        }
+
+        $studentProgram = strtolower($studentProgram);
+        $courseProgram = strtoupper($courseProgram);
+
+        if ($courseProgram === 'IT') {
+            return str_contains($studentProgram, 'information technology');
+        } elseif ($courseProgram === 'CS') {
+            return str_contains($studentProgram, 'computer science');
+        }
+
+        // Fallback to exact match
+        return strtolower($studentProgram) === strtolower($courseProgram);
+    }
+
+    /**
      * Faculty enroll student (only in their assigned classes)
      */
     public function facultyEnrollStudent(Request $request)
@@ -351,7 +348,7 @@ class StudentEnrollmentController extends Controller
             $student = User::findOrFail($request->user_id);
             $courseProgram = $this->extractProgramFromCourseCode($classSection->course_code);
             
-            if ($courseProgram && $student->program !== $courseProgram) {
+            if ($courseProgram && !$this->studentMatchesProgram($student->program, $courseProgram)) {
                 return response()->json([
                     'success' => false,
                     'message' => "Only {$courseProgram} students can enroll in this course"
