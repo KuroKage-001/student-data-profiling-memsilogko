@@ -1,5 +1,5 @@
 import { FaUserGraduate, FaChalkboardTeacher, FaClipboardCheck, FaClock } from 'react-icons/fa';
-import { useDashboardStats } from '../../../hooks/admin-dashboard-hook';
+import { useDashboardStats } from '../../../hooks/useAdminDashboard';
 import { useAuth } from '../../../context/AuthContext';
 
 const DashboardStats = () => {

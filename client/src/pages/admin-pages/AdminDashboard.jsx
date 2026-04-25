@@ -3,7 +3,7 @@ import AdminLayout from '../../layouts/AdminLayout';
 import DashboardStats from '../../components/admin-components/dashboard/DashboardStats';
 import UniversityMap from '../../components/admin-components/dashboard/UniversityMap';
 import usePageTitle from '../../hooks/usePageTitle';
-import { useDashboardStats } from '../../hooks/admin-dashboard-hook';
+import { useDashboardStats } from '../../hooks/useAdminDashboard';
 import { AdminDashboardSkeleton } from '../../layouts/skeleton-loading';
 import { useAuth } from '../../context/AuthContext';
 import { FaUserGraduate, FaChalkboardTeacher, FaArrowRight, FaClock } from 'react-icons/fa';

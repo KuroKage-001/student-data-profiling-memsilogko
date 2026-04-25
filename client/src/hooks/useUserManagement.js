@@ -1,17 +1,20 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { userManagementService } from '../../services/user-management-service/userManagementService';
+import { userManagementService } from '../services/user-management-service/userManagementService';
 
-// Query keys
+// Query keys for cache management
 export const userKeys = {
   all: ['users'],
   lists: () => [...userKeys.all, 'list'],
   list: (params) => [...userKeys.lists(), params],
   details: () => [...userKeys.all, 'detail'],
   detail: (id) => [...userKeys.details(), id],
+  statistics: () => [...userKeys.all, 'statistics'],
 };
 
 /**
  * Hook to fetch all users with React Query
+ * @param {Object} params - Query parameters (role, status, search, etc.)
+ * @returns {Object} Query result with users data, loading state, and error
  */
 export const useUsers = (params = {}) => {
   return useQuery({
@@ -35,7 +38,9 @@ export const useUsers = (params = {}) => {
 };
 
 /**
- * Hook to fetch a single user
+ * Hook to fetch a single user by ID
+ * @param {number|string} id - User ID
+ * @returns {Object} Query result with user data, loading state, and error
  */
 export const useUser = (id) => {
   return useQuery({
@@ -53,6 +58,7 @@ export const useUser = (id) => {
 
 /**
  * Hook to create a new user
+ * @returns {Object} Mutation object with mutate, mutateAsync, isPending, etc.
  */
 export const useCreateUser = () => {
   const queryClient = useQueryClient();
@@ -74,6 +80,7 @@ export const useCreateUser = () => {
 
 /**
  * Hook to update an existing user
+ * @returns {Object} Mutation object with mutate, mutateAsync, isPending, etc.
  */
 export const useUpdateUser = () => {
   const queryClient = useQueryClient();
@@ -96,6 +103,7 @@ export const useUpdateUser = () => {
 
 /**
  * Hook to delete a user
+ * @returns {Object} Mutation object with mutate, mutateAsync, isPending, etc.
  */
 export const useDeleteUser = () => {
   const queryClient = useQueryClient();
@@ -117,10 +125,11 @@ export const useDeleteUser = () => {
 
 /**
  * Hook to fetch user statistics
+ * @returns {Object} Query result with statistics data, loading state, and error
  */
 export const useUserStatistics = () => {
   return useQuery({
-    queryKey: [...userKeys.all, 'statistics'],
+    queryKey: userKeys.statistics(),
     queryFn: async () => {
       const result = await userManagementService.getStatistics();
       if (!result.success) {

@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { FaTimes, FaUserGraduate, FaEnvelope, FaPhone, FaMapMarkerAlt, FaGraduationCap, FaCalendarAlt, FaUserFriends, FaStickyNote, FaIdCard, FaTrophy, FaRunning } from 'react-icons/fa';
 import UserSearchDropdown from './UserSearchDropdown';
-import { useUsers } from '../../../hooks/user-management-hook';
+import { useUsers } from '../../../hooks/useUserManagement';
 import { useNextStudentNumber } from '../../../hooks/student-profile-hook';
 
 const StudentFormModal = ({ student, onClose, onSubmit, loading, serverErrors }) => {

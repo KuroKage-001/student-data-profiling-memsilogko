@@ -5,7 +5,7 @@ import AdminLayout from '../../layouts/AdminLayout';
 import UserList from '../../components/admin-components/user-management-compo/UserList';
 import UserFormModal from '../../components/admin-components/user-management-compo/UserFormModal';
 import DeleteConfirmModal from '../../components/admin-components/user-management-compo/DeleteConfirmModal';
-import { useUsers, useCreateUser, useUpdateUser, useDeleteUser } from '../../hooks/user-management-hook';
+import { useUsers, useCreateUser, useUpdateUser, useDeleteUser } from '../../hooks/useUserManagement';
 import { UserManagementSkeleton } from '../../layouts/skeleton-loading';
 import useToast from '../../hooks/useToast';
 import usePageTitle from '../../hooks/usePageTitle';
