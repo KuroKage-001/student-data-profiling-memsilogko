@@ -53,7 +53,7 @@ class StudentDashboardController extends Controller
 
             // Count upcoming events
             $upcomingEvents = Event::where('date', '>=', Carbon::now())
-                ->where('status', 'active')
+                ->whereIn('status', ['Upcoming', 'Ongoing'])
                 ->count();
 
             return response()->json([
@@ -180,7 +180,7 @@ class StudentDashboardController extends Controller
     {
         try {
             $events = Event::where('date', '>=', Carbon::now())
-                ->where('status', 'active')
+                ->whereIn('status', ['Upcoming', 'Ongoing'])
                 ->orderBy('date', 'asc')
                 ->limit(10)
                 ->get(['id', 'title', 'description', 'date', 'time', 'location', 'type']);
