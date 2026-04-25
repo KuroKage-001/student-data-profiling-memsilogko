@@ -33,7 +33,9 @@ export const useUsers = (params = {}) => {
       // If paginated, return the data array
       return result.data?.data || [];
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 15 * 60 * 1000, // 15 minutes - data stays fresh
+    gcTime: 60 * 60 * 1000, // 1 hour - keep in cache even when unused
+    refetchOnMount: false, // Don't refetch if data is fresh
   });
 };
 
@@ -137,6 +139,7 @@ export const useUserStatistics = () => {
       }
       return result.data;
     },
-    staleTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 15 * 60 * 1000, // 15 minutes
+    gcTime: 60 * 60 * 1000, // 1 hour
   });
 };
