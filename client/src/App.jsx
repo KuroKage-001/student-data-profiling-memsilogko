@@ -7,13 +7,16 @@ import LoadingPage from './components/system-components/LoadingPage';
 import { useDynamicRoutes } from './hooks/useDynamicRoutes';
 import { specialRoutes } from './config/routeConfig';
 
-// Create a client
+// Create a client with professional caching configuration
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      refetchOnWindowFocus: false,
-      retry: 1,
-      staleTime: 5 * 60 * 1000, // 5 minutes
+      refetchOnWindowFocus: false, // Don't refetch on window focus
+      retry: 2, // Retry failed requests twice
+      staleTime: 10 * 60 * 1000, // Data stays fresh for 10 minutes
+      cacheTime: 30 * 60 * 1000, // Keep unused data in cache for 30 minutes
+      refetchOnMount: false, // Don't refetch on component mount if data is fresh
+      refetchOnReconnect: true, // Refetch when internet reconnects
     },
   },
 });

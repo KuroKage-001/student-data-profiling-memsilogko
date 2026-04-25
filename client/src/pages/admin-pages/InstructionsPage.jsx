@@ -3,7 +3,7 @@ import AdminLayout from '../../layouts/AdminLayout';
 import usePageTitle from '../../hooks/usePageTitle';
 import { FaBook, FaSearch, FaPlus, FaChartBar, FaCheckCircle, FaClipboardList, FaGraduationCap } from 'react-icons/fa';
 import { usePermissions } from '../../hooks/usePermissions';
-import { instructionsAPI } from '../../services/instructionsService';
+import useInstructionsQuery from '../../hooks/useInstructionsQuery';
 import { InstructionFormModal, InstructionDeleteModal } from '../../components/admin-components/instructions-compo';
 import { InstructionsSkeleton } from '../../layouts/skeleton-loading';
 import { toast } from 'react-toastify';
@@ -12,8 +12,6 @@ const InstructionsPage = () => {
   usePageTitle('Instructions');
   const { canCreate, canEdit, canDelete, isAdmin } = usePermissions();
   
-  const [instructions, setInstructions] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('All');
   const [filterDepartment, setFilterDepartment] = useState('All');
@@ -42,42 +40,17 @@ const InstructionsPage = () => {
     learning_outcomes: '',
   });
 
-  // Fetch instructions
-  useEffect(() => {
-    fetchInstructions();
-  }, []);
-
-  const fetchInstructions = async () => {
-    try {
-      setLoading(true);
-      const response = await instructionsAPI.getAll();
-      
-      // Handle different response structures
-      let instructionsData = [];
-      
-      if (response && typeof response === 'object') {
-        // Laravel pagination: { data: [...], current_page, total, ... }
-        if (response.data && Array.isArray(response.data)) {
-          instructionsData = response.data;
-        }
-        // Direct array response
-        else if (Array.isArray(response)) {
-          instructionsData = response;
-        }
-        // Nested data.data structure
-        else if (response.data && response.data.data && Array.isArray(response.data.data)) {
-          instructionsData = response.data.data;
-        }
-      }
-      
-      setInstructions(instructionsData);
-    } catch (error) {
-      console.error('Failed to fetch instructions:', error);
-      toast.error(error.message || 'Failed to load instructions');
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Use cached query hook
+  const {
+    instructions,
+    loading,
+    error,
+    isFetching,
+    createInstruction,
+    updateInstruction,
+    deleteInstruction,
+    invalidateAll,
+  } = useInstructionsQuery();
 
   const handleAdd = () => {
     setEditingInstruction(null);
@@ -128,15 +101,14 @@ const InstructionsPage = () => {
 
     try {
       if (editingInstruction) {
-        await instructionsAPI.update(editingInstruction.id, formData);
+        await updateInstruction(editingInstruction.id, formData);
         toast.success('Instruction updated successfully');
       } else {
-        await instructionsAPI.create(formData);
+        await createInstruction(formData);
         toast.success('Instruction created successfully');
       }
       
       setShowForm(false);
-      fetchInstructions();
     } catch (error) {
       console.error('Failed to save instruction:', error);
       toast.error(error.message || 'Failed to save instruction');
@@ -150,11 +122,10 @@ const InstructionsPage = () => {
 
     setSubmitting(true);
     try {
-      await instructionsAPI.delete(deletingInstruction.id);
+      await deleteInstruction(deletingInstruction.id);
       toast.success('Instruction deleted successfully');
       setShowDeleteModal(false);
       setDeletingInstruction(null);
-      fetchInstructions();
     } catch (error) {
       console.error('Failed to delete instruction:', error);
       toast.error(error.message || 'Failed to delete instruction');
@@ -274,6 +245,14 @@ const InstructionsPage = () => {
 
         {/* Search and Filters - Enhanced Design */}
         <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 mb-6">
+          {/* Cache Status Indicator */}
+          {isFetching && !loading && (
+            <div className="mb-3 px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg flex items-center gap-2 text-sm text-blue-700">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+              <span>Updating instructions data in background...</span>
+            </div>
+          )}
+          
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
             <div className="relative sm:col-span-2 lg:col-span-1">
               <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
@@ -319,16 +298,29 @@ const InstructionsPage = () => {
             </select>
           </div>
 
-          {isAdmin() && (
+          <div className="flex flex-wrap gap-2">
+            {isAdmin() && (
+              <button 
+                onClick={handleAdd}
+                className="group relative bg-linear-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white px-6 py-3.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 font-semibold shadow-md hover:shadow-xl hover:-translate-y-0.5 overflow-hidden flex-1 sm:flex-none"
+              >
+                <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+                <FaPlus className="text-sm relative z-10" />
+                <span className="relative z-10">Add New Instruction</span>
+              </button>
+            )}
             <button 
-              onClick={handleAdd}
-              className="group relative bg-linear-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white px-6 py-3.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 font-semibold shadow-md hover:shadow-xl hover:-translate-y-0.5 overflow-hidden w-full sm:w-auto"
+              onClick={invalidateAll}
+              disabled={isFetching}
+              title="Refresh instructions data"
+              className="group bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50 active:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed px-4 py-3.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 font-semibold shadow-md hover:shadow-lg text-sm"
             >
-              <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
-              <FaPlus className="text-sm relative z-10" />
-              <span className="relative z-10">Add New Instruction</span>
+              <svg className={`w-4 h-4 ${isFetching ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              <span className="hidden sm:inline">Refresh</span>
             </button>
-          )}
+          </div>
         </div>
 
         {/* Instructions List - Enhanced Container */}

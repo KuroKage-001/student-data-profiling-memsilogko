@@ -6,7 +6,7 @@ import { FacultyList, FacultyProfileModal, FacultyFormModal } from '../../compon
 import { FacultyProfilesSkeleton } from '../../layouts/skeleton-loading';
 import usePageTitle from '../../hooks/usePageTitle';
 import useToast from '../../hooks/useToast';
-import useFacultyProfile from '../../hooks/faculty-profile-hook/useFacultyProfile';
+import useFacultyProfileQuery from '../../hooks/faculty-profile-hook/useFacultyProfileQuery';
 import { useAuth } from '../../context/AuthContext';
 import { generateFacultyPDF } from '../../components/admin-components/faculty-profile-compo/facultyReportPdf.jsx';
 import { exportFacultyToExcel, SEARCH_DEBOUNCE_DELAY } from '../../utils/admin-utilities/faculty-profile-utils';
@@ -30,12 +30,13 @@ const FacultyProfiles = () => {
     status: 'all'
   });
 
+  // Use the cached query hook with initial filters
   const {
     faculty,
     loading,
     error,
     pagination,
-    fetchFaculty,
+    isFetching, // Background fetching indicator
     createFaculty,
     updateFaculty,
     searchFaculty,
@@ -44,15 +45,14 @@ const FacultyProfiles = () => {
     getStatuses,
     formatFacultyForDisplay,
     generateFacultyId,
-    clearError
-  } = useFacultyProfile();
+    clearError,
+    prefetchFaculty, // Prefetch for faster navigation
+    invalidateAll, // Force refresh all data
+  } = useFacultyProfileQuery(filters);
 
   const { showSuccess, showError, showInfo } = useToast();
 
-  // Fetch faculty on component mount
-  useEffect(() => {
-    fetchFaculty();
-  }, []);
+  // No need for initial fetch - React Query handles it automatically
 
   // Handle search with debounce
   useEffect(() => {
@@ -77,6 +77,10 @@ const FacultyProfiles = () => {
   const handleViewFaculty = (faculty) => {
     setSelectedFaculty(faculty);
     setIsViewModalOpen(true);
+    // Prefetch faculty details for instant loading if user edits
+    if (faculty.id) {
+      prefetchFaculty(faculty.id);
+    }
   };
 
   const handleEditFaculty = (faculty) => {
@@ -243,6 +247,14 @@ const FacultyProfiles = () => {
 
         {/* Search and Actions Section - Enhanced Design */}
         <div className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-lg border border-gray-100 mb-4 sm:mb-6 shrink-0">
+          {/* Cache Status Indicator */}
+          {isFetching && !loading && (
+            <div className="mb-3 px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg flex items-center gap-2 text-sm text-blue-700">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+              <span>Updating faculty data in background...</span>
+            </div>
+          )}
+          
           <div className="space-y-2.5 sm:space-y-3 lg:space-y-0 lg:flex lg:gap-3 lg:items-center lg:justify-between">
             {/* Search Input with Icon */}
             <div className="relative w-full lg:flex-1 lg:max-w-md">
@@ -271,6 +283,16 @@ const FacultyProfiles = () => {
                 className="group bg-white border-2 border-orange-600 text-orange-600 hover:bg-orange-600 hover:text-white active:bg-orange-700 active:text-white px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all duration-300 flex items-center justify-center gap-2 font-semibold shadow-md hover:shadow-lg text-sm flex-1 sm:flex-none">
                 <FaFileExport className="text-xs" />
                 <span>Export</span>
+              </button>
+              <button 
+                onClick={invalidateAll}
+                disabled={isFetching}
+                title="Refresh faculty data"
+                className="group bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50 active:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all duration-300 flex items-center justify-center gap-2 font-semibold shadow-md hover:shadow-lg text-sm">
+                <svg className={`w-4 h-4 ${isFetching ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                <span className="hidden sm:inline">Refresh</span>
               </button>
             </div>
           </div>

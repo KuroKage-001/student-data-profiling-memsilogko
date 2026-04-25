@@ -3,7 +3,7 @@ import AdminLayout from '../../layouts/AdminLayout';
 import usePageTitle from '../../hooks/usePageTitle';
 import { FaFlask, FaSearch, FaPlus, FaChartBar, FaCheckCircle, FaClock, FaFileAlt } from 'react-icons/fa';
 import { usePermissions } from '../../hooks/usePermissions';
-import { researchAPI } from '../../services/researchService';
+import useResearchQuery from '../../hooks/useResearchQuery';
 import { ResearchFormModal, ResearchDeleteModal } from '../../components/admin-components/research-compo';
 import { ResearchSkeleton } from '../../layouts/skeleton-loading';
 import { toast } from 'react-toastify';
@@ -12,8 +12,6 @@ const Research = () => {
   usePageTitle('Research');
   const { canCreate, canEdit, canDelete } = usePermissions();
   
-  const [materials, setMaterials] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterDepartment, setFilterDepartment] = useState('All');
   const [filterType, setFilterType] = useState('All');
@@ -38,42 +36,17 @@ const Research = () => {
     external_link: '',
   });
 
-  // Fetch materials
-  useEffect(() => {
-    fetchMaterials();
-  }, []);
-
-  const fetchMaterials = async () => {
-    try {
-      setLoading(true);
-      const response = await researchAPI.getAll();
-      
-      // Handle different response structures
-      let materialsData = [];
-      
-      if (response && typeof response === 'object') {
-        // Laravel pagination: { data: [...], current_page, total, ... }
-        if (response.data && Array.isArray(response.data)) {
-          materialsData = response.data;
-        }
-        // Direct array response
-        else if (Array.isArray(response)) {
-          materialsData = response;
-        }
-        // Nested data.data structure
-        else if (response.data && response.data.data && Array.isArray(response.data.data)) {
-          materialsData = response.data.data;
-        }
-      }
-      
-      setMaterials(materialsData);
-    } catch (error) {
-      console.error('Failed to fetch research materials:', error);
-      toast.error(error.message || 'Failed to load research materials');
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Use cached query hook
+  const {
+    materials,
+    loading,
+    error,
+    isFetching,
+    createResearch,
+    updateResearch,
+    deleteResearch,
+    invalidateAll,
+  } = useResearchQuery();
 
   const handleAdd = () => {
     setEditingMaterial(null);
@@ -116,15 +89,14 @@ const Research = () => {
 
     try {
       if (editingMaterial) {
-        await researchAPI.update(editingMaterial.id, formData);
+        await updateResearch(editingMaterial.id, formData);
         toast.success('Research material updated successfully');
       } else {
-        await researchAPI.create(formData);
+        await createResearch(formData);
         toast.success('Research material created successfully');
       }
       
       setShowForm(false);
-      fetchMaterials();
     } catch (error) {
       console.error('Failed to save research material:', error);
       toast.error(error.message || 'Failed to save research material');
@@ -138,11 +110,10 @@ const Research = () => {
 
     setSubmitting(true);
     try {
-      await researchAPI.delete(deletingMaterial.id);
+      await deleteResearch(deletingMaterial.id);
       toast.success('Research material deleted successfully');
       setShowDeleteModal(false);
       setDeletingMaterial(null);
-      fetchMaterials();
     } catch (error) {
       console.error('Failed to delete research material:', error);
       toast.error(error.message || 'Failed to delete research material');
@@ -252,6 +223,14 @@ const Research = () => {
 
         {/* Search and Filters - Enhanced Design */}
         <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 mb-6">
+          {/* Cache Status Indicator */}
+          {isFetching && !loading && (
+            <div className="mb-3 px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg flex items-center gap-2 text-sm text-blue-700">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+              <span>Updating research data in background...</span>
+            </div>
+          )}
+          
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
             <div className="relative sm:col-span-2 lg:col-span-1">
               <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
@@ -297,16 +276,29 @@ const Research = () => {
             </select>
           </div>
 
-          {canCreate('research') && (
+          <div className="flex flex-wrap gap-2">
+            {canCreate('research') && (
+              <button 
+                onClick={handleAdd}
+                className="group relative bg-linear-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white px-6 py-3.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 font-semibold shadow-md hover:shadow-xl hover:-translate-y-0.5 overflow-hidden flex-1 sm:flex-none"
+              >
+                <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+                <FaPlus className="text-sm relative z-10" />
+                <span className="relative z-10">Add New Research</span>
+              </button>
+            )}
             <button 
-              onClick={handleAdd}
-              className="group relative bg-linear-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white px-6 py-3.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 font-semibold shadow-md hover:shadow-xl hover:-translate-y-0.5 overflow-hidden w-full sm:w-auto"
+              onClick={invalidateAll}
+              disabled={isFetching}
+              title="Refresh research data"
+              className="group bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50 active:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed px-4 py-3.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 font-semibold shadow-md hover:shadow-lg text-sm"
             >
-              <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
-              <FaPlus className="text-sm relative z-10" />
-              <span className="relative z-10">Add New Research</span>
+              <svg className={`w-4 h-4 ${isFetching ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              <span className="hidden sm:inline">Refresh</span>
             </button>
-          )}
+          </div>
         </div>
 
         {/* Research Materials List - Enhanced Container */}
