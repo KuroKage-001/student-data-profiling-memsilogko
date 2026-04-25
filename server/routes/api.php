@@ -102,6 +102,22 @@ Route::middleware(['auth:api', 'check.status'])->group(function () {
 Route::middleware(['auth:api', 'check.status'])->group(function () {
     Route::apiResource('class-sections', App\Http\Controllers\ClassSectionController::class);
     Route::get('class-sections-statistics', [App\Http\Controllers\ClassSectionController::class, 'statistics']);
+    
+    // Student Enrollment Routes (Admin, Dept Chair, and Faculty)
+    Route::get('class-sections/{classSectionId}/enrollments', [App\Http\Controllers\StudentEnrollmentController::class, 'getClassEnrollments']);
+    Route::get('eligible-students', [App\Http\Controllers\StudentEnrollmentController::class, 'getEligibleStudents']);
+    
+    // Admin and Dept Chair can enroll/drop in any class
+    Route::middleware('role:admin,dept_chair')->group(function () {
+        Route::post('enrollments', [App\Http\Controllers\StudentEnrollmentController::class, 'enrollStudent']);
+        Route::delete('enrollments/{enrollmentId}', [App\Http\Controllers\StudentEnrollmentController::class, 'dropStudent']);
+    });
+    
+    // Faculty can enroll/drop only in their assigned classes
+    Route::middleware('role:faculty')->group(function () {
+        Route::post('faculty-enrollments', [App\Http\Controllers\StudentEnrollmentController::class, 'facultyEnrollStudent']);
+        Route::delete('faculty-enrollments/{enrollmentId}', [App\Http\Controllers\StudentEnrollmentController::class, 'facultyDropStudent']);
+    });
 });
 
 // Faculty Class Assignments API Routes (Protected)

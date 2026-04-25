@@ -94,8 +94,12 @@ const AdminNavbar = ({ onToggleSidebar }) => {
                 <div className="absolute right-0 top-full mt-3 w-56 bg-white border border-gray-200 rounded-2xl shadow-2xl z-50 overflow-hidden animate-fadeIn">
                   <div className="py-2">
                   <div className="px-4 py-3 border-b border-gray-100">
-                    <p className="text-sm font-semibold text-gray-900">Admin Account</p>
-                    <p className="text-xs text-gray-500 mt-0.5">admin@ccs.edu</p>
+                    <p className="text-sm font-semibold text-gray-900">
+                      {user?.role === 'faculty' ? 'Faculty Account' : 'Admin Account'}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      {user?.email || 'admin@ccs.edu'}
+                    </p>
                   </div>
                   
                   <button

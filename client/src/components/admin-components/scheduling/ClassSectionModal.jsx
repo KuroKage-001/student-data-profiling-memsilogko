@@ -1,11 +1,18 @@
 import { useState, useEffect, useRef } from 'react';
-import { FaTimes, FaUser, FaBook, FaClock, FaDoorOpen, FaCalendar } from 'react-icons/fa';
+import { FaTimes, FaUser, FaBook, FaClock, FaDoorOpen, FaCalendar, FaUserPlus, FaTrash } from 'react-icons/fa';
 import facultyService from '../../../services/faculty-profile-service/facultyService';
+import enrollmentService from '../../../services/enrollmentService';
+import { toast } from 'react-toastify';
+import { useAuth } from '../../../context/AuthContext';
 
 const ClassSectionModal = ({ mode, section, onClose, onSubmit }) => {
   const isEdit = mode === 'edit';
   const isView = mode === 'view';
+  const isEnroll = mode === 'enroll'; // New mode for faculty enrollment
   const facultyDropdownRef = useRef(null);
+  const studentDropdownRef = useRef(null);
+  const { user } = useAuth();
+  const isFaculty = user && user.role === 'faculty';
   
   const [formData, setFormData] = useState({
     section_code: '',
@@ -25,6 +32,13 @@ const ClassSectionModal = ({ mode, section, onClose, onSubmit }) => {
   const [facultyList, setFacultyList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  
+  // Enrollment state
+  const [enrollments, setEnrollments] = useState([]);
+  const [eligibleStudents, setEligibleStudents] = useState([]);
+  const [showStudentDropdown, setShowStudentDropdown] = useState(false);
+  const [studentSearch, setStudentSearch] = useState('');
+  const [enrollmentLoading, setEnrollmentLoading] = useState(false);
   
   // Search state for faculty dropdown
   const [facultySearch, setFacultySearch] = useState('');
@@ -67,11 +81,134 @@ const ClassSectionModal = ({ mode, section, onClose, onSubmit }) => {
       if (facultyDropdownRef.current && !facultyDropdownRef.current.contains(event.target)) {
         setShowFacultyDropdown(false);
       }
+      if (studentDropdownRef.current && !studentDropdownRef.current.contains(event.target)) {
+        setShowStudentDropdown(false);
+      }
     };
     
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Fetch enrollments when viewing or editing
+  useEffect(() => {
+    if (section && section.id && (isEdit || isView || isEnroll)) {
+      fetchEnrollments();
+    }
+  }, [section, isEdit, isView, isEnroll]);
+
+  // Fetch eligible students when course code changes
+  useEffect(() => {
+    if ((mode === 'edit' || mode === 'create' || mode === 'enroll') && formData.course_code) {
+      const program = extractProgramFromCourseCode(formData.course_code);
+      if (program) {
+        fetchEligibleStudents(program);
+      }
+    }
+  }, [formData.course_code, mode]);
+
+  const extractProgramFromCourseCode = (courseCode) => {
+    const match = courseCode.match(/^(IT|CS)\s/i);
+    return match ? match[1].toUpperCase() : null;
+  };
+
+  const fetchEnrollments = async () => {
+    if (!section?.id) return;
+    
+    try {
+      const response = await enrollmentService.getClassEnrollments(section.id);
+      if (response.success) {
+        setEnrollments(response.data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching enrollments:', error);
+    }
+  };
+
+  const fetchEligibleStudents = async (program) => {
+    try {
+      const response = await enrollmentService.getEligibleStudents(
+        section?.id || null,
+        program
+      );
+      if (response.success) {
+        setEligibleStudents(response.data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching eligible students:', error);
+      setEligibleStudents([]);
+    }
+  };
+
+  const handleEnrollStudent = async (student) => {
+    if (!section?.id) {
+      toast.error('Please save the class section first before enrolling students');
+      return;
+    }
+
+    setEnrollmentLoading(true);
+    try {
+      // Use faculty-specific endpoint if user is faculty
+      const enrollFunction = isFaculty 
+        ? enrollmentService.facultyEnrollStudent 
+        : enrollmentService.enrollStudent;
+      
+      const response = await enrollFunction({
+        user_id: student.id,
+        class_section_id: section.id,
+      });
+
+      if (response.success) {
+        toast.success(`${student.name} enrolled successfully`);
+        fetchEnrollments();
+        setStudentSearch('');
+        setShowStudentDropdown(false);
+        
+        // Update current enrollment count
+        setFormData(prev => ({
+          ...prev,
+          current_enrollment: prev.current_enrollment + 1
+        }));
+      }
+    } catch (error) {
+      console.error('Error enrolling student:', error);
+      toast.error(error.message || 'Failed to enroll student');
+    } finally {
+      setEnrollmentLoading(false);
+    }
+  };
+
+  const handleDropStudent = async (enrollment) => {
+    if (!window.confirm(`Are you sure you want to drop ${enrollment.student?.name} from this class?`)) {
+      return;
+    }
+
+    setEnrollmentLoading(true);
+    try {
+      // Use faculty-specific endpoint if user is faculty
+      const dropFunction = isFaculty 
+        ? enrollmentService.facultyDropStudent 
+        : enrollmentService.dropStudent;
+      
+      const response = await dropFunction(enrollment.id);
+
+      if (response.success) {
+        toast.success('Student dropped successfully');
+        fetchEnrollments();
+        
+        // Update current enrollment count
+        setFormData(prev => ({
+          ...prev,
+          current_enrollment: Math.max(0, prev.current_enrollment - 1)
+        }));
+      }
+    } catch (error) {
+      console.error('Error dropping student:', error);
+      toast.error(error.message || 'Failed to drop student');
+    } finally {
+      setEnrollmentLoading(false);
+    }
+  };
 
   const fetchFaculty = async () => {
     try {
@@ -222,6 +359,7 @@ const ClassSectionModal = ({ mode, section, onClose, onSubmit }) => {
                 {mode === 'create' && 'Create New Class Section'}
                 {mode === 'edit' && 'Edit Class Section'}
                 {mode === 'view' && 'View Class Section'}
+                {mode === 'enroll' && 'Enroll Students'}
               </h3>
               <button
                 onClick={onClose}
@@ -235,7 +373,7 @@ const ClassSectionModal = ({ mode, section, onClose, onSubmit }) => {
           {/* Form */}
           <form onSubmit={handleSubmit} className="px-6 py-6">
             {/* Conflict Error Alert */}
-            {conflictError && (
+            {conflictError && !isEnroll && (
               <div className="mb-6 p-4 bg-red-50 border-2 border-red-200 rounded-xl">
                 <div className="flex items-start gap-3">
                   <div className="shrink-0 mt-0.5">
@@ -252,6 +390,9 @@ const ClassSectionModal = ({ mode, section, onClose, onSubmit }) => {
             )}
 
             <div className="space-y-6">
+              {/* Form Sections - Hide in enroll mode */}
+              {!isEnroll && (
+                <>
               {/* Course Information Section */}
               <div>
                 <h4 className="text-sm font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200">Course Information</h4>
@@ -646,6 +787,128 @@ const ClassSectionModal = ({ mode, section, onClose, onSubmit }) => {
                   </div>
                 </div>
               </div>
+                </>
+              )}
+
+              {/* Student Enrollment Section - Show in edit/view/enroll mode for existing sections */}
+              {(isEdit || isView || isEnroll) && section?.id && (
+                <div>
+                  <h4 className="text-sm font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200 flex items-center justify-between">
+                    <span>Enrolled Students ({enrollments.length}/{formData.max_capacity})</span>
+                    {!isView && (
+                      <span className="text-xs font-normal text-gray-500">
+                        {extractProgramFromCourseCode(formData.course_code) || 'All'} students only
+                      </span>
+                    )}
+                  </h4>
+
+                  {/* Add Student Dropdown - Only in edit mode */}
+                  {!isView && (
+                    <div ref={studentDropdownRef} className="mb-4">
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Add Student
+                      </label>
+                      <div className="relative">
+                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 z-10">
+                          <FaUserPlus />
+                        </div>
+                        <input
+                          type="text"
+                          value={studentSearch}
+                          onChange={(e) => {
+                            setStudentSearch(e.target.value);
+                            setShowStudentDropdown(true);
+                          }}
+                          onFocus={() => setShowStudentDropdown(true)}
+                          className="w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all border-gray-200 focus:border-orange-500"
+                          placeholder="Search students by name, ID, or email..."
+                          disabled={enrollmentLoading}
+                        />
+                        
+                        {/* Student Dropdown */}
+                        {showStudentDropdown && (
+                          <div className="absolute z-20 w-full top-full mt-1 bg-white border-2 border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                            {eligibleStudents.filter(student => {
+                              const searchLower = studentSearch.toLowerCase();
+                              return (
+                                student.name?.toLowerCase().includes(searchLower) ||
+                                student.email?.toLowerCase().includes(searchLower) ||
+                                student.student_id?.toLowerCase().includes(searchLower)
+                              );
+                            }).length > 0 ? (
+                              eligibleStudents
+                                .filter(student => {
+                                  const searchLower = studentSearch.toLowerCase();
+                                  return (
+                                    student.name?.toLowerCase().includes(searchLower) ||
+                                    student.email?.toLowerCase().includes(searchLower) ||
+                                    student.student_id?.toLowerCase().includes(searchLower)
+                                  );
+                                })
+                                .map(student => (
+                                  <button
+                                    key={student.id}
+                                    type="button"
+                                    onClick={() => handleEnrollStudent(student)}
+                                    disabled={enrollmentLoading}
+                                    className="w-full px-4 py-3 text-left hover:bg-orange-50 transition-colors border-b border-gray-100 last:border-b-0 disabled:opacity-50"
+                                  >
+                                    <div className="font-medium text-gray-900">{student.name}</div>
+                                    <div className="text-sm text-gray-600">
+                                      {student.student_id} • {student.program} • Year {student.year_level}
+                                    </div>
+                                    <div className="text-xs text-gray-500">{student.email}</div>
+                                  </button>
+                                ))
+                            ) : (
+                              <div className="px-4 py-3 text-gray-500 text-center">
+                                {studentSearch ? 'No students found matching your search' : 'No eligible students available'}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      <p className="mt-1 text-xs text-gray-500">
+                        Only {extractProgramFromCourseCode(formData.course_code) || 'eligible'} students who are not already enrolled will appear
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Enrolled Students List */}
+                  <div className="space-y-2 max-h-60 overflow-y-auto">
+                    {enrollments.length > 0 ? (
+                      enrollments.map((enrollment) => (
+                        <div
+                          key={enrollment.id}
+                          className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200"
+                        >
+                          <div className="flex-1">
+                            <div className="font-medium text-gray-900">{enrollment.student?.name}</div>
+                            <div className="text-sm text-gray-600">
+                              {enrollment.student?.student_id} • {enrollment.student?.program}
+                            </div>
+                          </div>
+                          {!isView && (
+                            <button
+                              type="button"
+                              onClick={() => handleDropStudent(enrollment)}
+                              disabled={enrollmentLoading}
+                              className="text-red-600 hover:text-red-700 transition-colors p-2 disabled:opacity-50"
+                              title="Drop student"
+                            >
+                              <FaTrash />
+                            </button>
+                          )}
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-4 text-gray-500 text-sm">
+                        No students enrolled yet
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Action Buttons */}
@@ -656,9 +919,9 @@ const ClassSectionModal = ({ mode, section, onClose, onSubmit }) => {
                 className="flex-1 px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all font-semibold"
                 disabled={loading}
               >
-                {isView ? 'Close' : 'Cancel'}
+                {(isView || isEnroll) ? 'Close' : 'Cancel'}
               </button>
-              {!isView && (
+              {!isView && !isEnroll && (
                 <button
                   type="submit"
                   className="flex-1 px-4 py-3 bg-linear-to-r from-orange-600 to-orange-500 text-white rounded-xl hover:from-orange-700 hover:to-orange-600 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed"

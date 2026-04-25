@@ -1,14 +1,13 @@
 import { useState, useEffect } from 'react';
 import AdminLayout from '../../layouts/AdminLayout';
 import usePageTitle from '../../hooks/usePageTitle';
-import { FaClock, FaSearch, FaPlus, FaChartBar, FaUsers, FaDoorOpen, FaEdit, FaTrash, FaEye } from 'react-icons/fa';
+import { FaClock, FaSearch, FaPlus, FaChartBar, FaUsers, FaDoorOpen, FaEdit, FaTrash, FaEye, FaUserPlus } from 'react-icons/fa';
 import classSectionService from '../../services/classSectionService';
 import ClassSectionModal from '../../components/admin-components/scheduling/ClassSectionModal';
 import DeleteConfirmModal from '../../components/admin-components/scheduling/DeleteConfirmModal';
 import { SchedulingSkeleton } from '../../layouts/skeleton-loading';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { toast } from 'react-toastify';
 import { useAuth } from '../../context/AuthContext';
 
 const Scheduling = () => {
@@ -34,6 +33,12 @@ const Scheduling = () => {
 
   // Check if user can manage schedules (admin or dept_chair)
   const canManageSchedules = user && ['admin', 'dept_chair'].includes(user.role);
+  
+  // Check if user is faculty
+  const isFaculty = user && user.role === 'faculty';
+  
+  // Check if user can enroll students (admin, dept_chair, or faculty)
+  const canEnrollStudents = user && ['admin', 'dept_chair', 'faculty'].includes(user.role);
 
   const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -93,6 +98,12 @@ const Scheduling = () => {
   const handleView = (schedule) => {
     setSelectedSection(schedule);
     setModalMode('view');
+    setShowModal(true);
+  };
+
+  const handleEnroll = (schedule) => {
+    setSelectedSection(schedule);
+    setModalMode('enroll');
     setShowModal(true);
   };
 
@@ -391,6 +402,15 @@ const Scheduling = () => {
                         >
                           <FaEye />
                         </button>
+                        {canEnrollStudents && (
+                          <button 
+                            onClick={() => handleEnroll(schedule)}
+                            className="text-green-600 hover:text-green-700 transition-colors"
+                            title="Enroll Students"
+                          >
+                            <FaUserPlus />
+                          </button>
+                        )}
                         {canManageSchedules && (
                           <>
                             <button 
@@ -461,6 +481,14 @@ const Scheduling = () => {
                   >
                     <FaEye /> View
                   </button>
+                  {canEnrollStudents && (
+                    <button 
+                      onClick={() => handleEnroll(schedule)}
+                      className="text-green-600 hover:text-green-700 transition-colors font-medium flex items-center gap-1"
+                    >
+                      <FaUserPlus /> Enroll
+                    </button>
+                  )}
                   {canManageSchedules && (
                     <>
                       <button 
