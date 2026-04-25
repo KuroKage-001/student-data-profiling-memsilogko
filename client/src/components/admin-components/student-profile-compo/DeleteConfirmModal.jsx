@@ -24,7 +24,7 @@ const DeleteConfirmModal = ({ student, onClose, onConfirm, loading }) => {
               <h3 className="text-xl font-bold text-white">Confirm Delete</h3>
               <button
                 onClick={onClose}
-                className="text-white hover:text-gray-200 transition-colors"
+                className="text-white hover:text-gray-200 transition-colors p-1 hover:bg-white/10 rounded-lg"
                 disabled={loading}
               >
                 <FaTimes className="text-xl" />
@@ -62,7 +62,7 @@ const DeleteConfirmModal = ({ student, onClose, onConfirm, loading }) => {
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all font-semibold"
+                className="flex-1 px-5 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-white hover:border-gray-400 transition-all font-semibold shadow-sm"
                 disabled={loading}
               >
                 Cancel
@@ -70,10 +70,20 @@ const DeleteConfirmModal = ({ student, onClose, onConfirm, loading }) => {
               <button
                 type="button"
                 onClick={() => onConfirm(student.id)}
-                className="flex-1 px-4 py-3 bg-linear-to-r from-red-600 to-red-500 text-white rounded-xl hover:from-red-700 hover:to-red-600 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-5 py-3 bg-linear-to-r from-red-600 to-red-500 text-white rounded-xl hover:from-red-700 hover:to-red-600 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
                 disabled={loading}
               >
-                {loading ? 'Deleting...' : 'Delete Student'}
+                {loading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Deleting...
+                  </span>
+                ) : (
+                  'Delete Student'
+                )}
               </button>
             </div>
           </div>

@@ -59,7 +59,7 @@ const FacultyProfileModal = ({ faculty, onClose, onEdit, onGenerateReport }) => 
 
       {/* Modal panel - Optimized for full space usage */}
       <div className="relative z-10 bg-white rounded-lg shadow-xl w-full max-w-5xl max-h-[95vh] flex flex-col overflow-hidden border border-gray-200">
-        {/* Header */}
+        {/* Header - Fixed */}
         <div className="bg-linear-to-r from-orange-500 to-orange-600 px-6 py-4 shrink-0">
           <div className="flex items-center justify-between">
             <h3 className="text-xl font-bold text-white">
@@ -67,15 +67,15 @@ const FacultyProfileModal = ({ faculty, onClose, onEdit, onGenerateReport }) => 
             </h3>
             <button
               onClick={onClose}
-              className="text-white hover:text-gray-200 transition-colors"
+              className="text-white hover:text-gray-200 transition-colors p-1 hover:bg-white/10 rounded-lg"
             >
               <FaTimes className="text-xl" />
             </button>
           </div>
         </div>
 
-        {/* Content - Scrollable */}
-        <div className="overflow-y-auto flex-1 bg-gray-50">
+        {/* Content - Scrollable with custom scrollbar */}
+        <div className="overflow-y-auto flex-1 bg-gray-50 scrollbar-thin scrollbar-thumb-orange-500 scrollbar-track-gray-100">
           <div className="p-4 sm:p-6">
             {/* Faculty Header */}
             <div className="bg-white border border-gray-200 rounded-lg p-4 sm:p-6 mb-4">

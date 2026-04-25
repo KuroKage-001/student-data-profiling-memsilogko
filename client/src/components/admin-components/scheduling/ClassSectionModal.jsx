@@ -372,40 +372,35 @@ const ClassSectionModal = ({ mode, section, onClose, onSubmit, onEnrollmentChang
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-      <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-        {/* Background overlay with blur */}
-        <div 
-          className="fixed inset-0 bg-black/30 backdrop-blur-sm transition-opacity"
-          onClick={onClose}
-          aria-hidden="true"
-        ></div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+      <div 
+        className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
+        onClick={onClose}
+        aria-hidden="true"
+      ></div>
 
-        {/* Center modal */}
-        <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-
-        {/* Modal panel */}
-        <div className="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full relative z-10 max-h-[90vh] overflow-y-auto">
-          {/* Header */}
-          <div className="bg-linear-to-r from-orange-500 to-orange-600 px-6 py-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xl font-bold text-white">
-                {mode === 'create' && 'Create New Class Section'}
-                {mode === 'edit' && 'Edit Class Section'}
-                {mode === 'view' && 'View Class Section'}
-                {mode === 'enroll' && 'Enroll Students'}
-              </h3>
-              <button
-                onClick={onClose}
-                className="text-white hover:text-gray-200 transition-colors"
-              >
-                <FaTimes className="text-xl" />
-              </button>
-            </div>
+      <div className="relative z-10 bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[92vh] flex flex-col overflow-hidden">
+        {/* Header - Fixed */}
+        <div className="bg-linear-to-r from-orange-500 to-orange-600 px-6 py-4 shrink-0">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xl font-bold text-white">
+              {mode === 'create' && 'Create New Class Section'}
+              {mode === 'edit' && 'Edit Class Section'}
+              {mode === 'view' && 'View Class Section'}
+              {mode === 'enroll' && 'Enroll Students'}
+            </h3>
+            <button
+              onClick={onClose}
+              className="text-white hover:text-gray-200 transition-colors p-1 hover:bg-white/10 rounded-lg"
+            >
+              <FaTimes className="text-xl" />
+            </button>
           </div>
+        </div>
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="px-6 py-6">
+        {/* Form - Scrollable with custom scrollbar */}
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-orange-500 scrollbar-track-gray-100">
+          <div className="px-6 py-6 space-y-4">
             {/* Conflict Error Alert */}
             {conflictError && !isEnroll && (
               <div className="mb-6 p-4 bg-red-50 border-2 border-red-200 rounded-xl">
@@ -1060,28 +1055,41 @@ const ClassSectionModal = ({ mode, section, onClose, onSubmit, onEnrollmentChang
                 </div>
               )}
             </div>
+          </div>
+        </form>
 
-            {/* Action Buttons */}
-            <div className="flex gap-3 mt-6">
+        {/* Action Buttons - Fixed at bottom */}
+        <div className="px-6 py-4 bg-linear-to-r from-gray-50 to-gray-100 border-t border-gray-200 shrink-0">
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 px-5 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-white hover:border-gray-400 transition-all font-semibold shadow-sm"
+              disabled={loading}
+            >
+              {(isView || isEnroll) ? 'Close' : 'Cancel'}
+            </button>
+            {!isView && !isEnroll && (
               <button
-                type="button"
-                onClick={onClose}
-                className="flex-1 px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all font-semibold"
+                type="submit"
+                onClick={handleSubmit}
+                className="flex-1 px-5 py-3 bg-linear-to-r from-orange-600 to-orange-500 text-white rounded-xl hover:from-orange-700 hover:to-orange-600 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
                 disabled={loading}
               >
-                {(isView || isEnroll) ? 'Close' : 'Cancel'}
+                {loading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Saving...
+                  </span>
+                ) : (
+                  mode === 'create' ? 'Create Section' : 'Update Section'
+                )}
               </button>
-              {!isView && !isEnroll && (
-                <button
-                  type="submit"
-                  className="flex-1 px-4 py-3 bg-linear-to-r from-orange-600 to-orange-500 text-white rounded-xl hover:from-orange-700 hover:to-orange-600 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-                  disabled={loading}
-                >
-                  {loading ? 'Saving...' : mode === 'create' ? 'Create Section' : 'Update Section'}
-                </button>
-              )}
-            </div>
-          </form>
+            )}
+          </div>
         </div>
       </div>
     </div>
