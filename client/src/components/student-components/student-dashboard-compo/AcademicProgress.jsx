@@ -1,4 +1,4 @@
-import { useStudentAcademicRecords } from '../../../hooks/student-dashboard-hook';
+import { useStudentAcademicRecords } from '../../../hooks/useStudentDashboard';
 import { FaBook, FaCheckCircle } from 'react-icons/fa';
 import { calculateCompletionPercentage } from '../../../utils/student-utilities/student-dashboard-utils';
 

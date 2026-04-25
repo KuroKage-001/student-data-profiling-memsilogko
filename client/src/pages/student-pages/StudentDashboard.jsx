@@ -5,7 +5,7 @@ import {
 } from '../../components/student-components/student-dashboard-compo';
 import UniversityMap from '../../components/admin-components/dashboard/UniversityMap';
 import usePageTitle from '../../hooks/usePageTitle';
-import { useStudentDashboard } from '../../hooks/student-dashboard-hook';
+import { useStudentDashboard } from '../../hooks/useStudentDashboard';
 import { StudentDashboardSkeleton } from '../../layouts/skeleton-loading';
 import { useAuth } from '../../context/AuthContext';
 import { FaBook, FaCalendarAlt, FaChartLine, FaUserGraduate } from 'react-icons/fa';

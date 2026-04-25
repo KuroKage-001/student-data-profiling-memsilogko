@@ -1,4 +1,4 @@
-import { useStudentUpcomingEvents } from '../../../hooks/student-dashboard-hook';
+import { useStudentUpcomingEvents } from '../../../hooks/useStudentDashboard';
 import { FaCalendarAlt, FaClock, FaMapMarkerAlt } from 'react-icons/fa';
 import { formatDate } from '../../../utils/student-utilities/student-dashboard-utils';
 

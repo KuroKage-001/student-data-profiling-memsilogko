@@ -1,5 +1,5 @@
 import { FaBook, FaCalendarAlt, FaChartLine, FaGraduationCap } from 'react-icons/fa';
-import { useStudentDashboard } from '../../../hooks/student-dashboard-hook';
+import { useStudentDashboard } from '../../../hooks/useStudentDashboard';
 import { formatNumber, formatGPA } from '../../../utils/student-utilities/student-dashboard-utils';
 
 const StudentDashboardStats = () => {

@@ -6,7 +6,7 @@ import { FacultyList, FacultyProfileModal, FacultyFormModal } from '../../compon
 import { FacultyProfilesSkeleton } from '../../layouts/skeleton-loading';
 import usePageTitle from '../../hooks/usePageTitle';
 import useToast from '../../hooks/useToast';
-import useFacultyProfileQuery from '../../hooks/faculty-profile-hook/useFacultyProfileQuery';
+import useFacultyProfileQuery from '../../hooks/useFacultyProfile';
 import { useAuth } from '../../context/AuthContext';
 import { generateFacultyPDF } from '../../components/admin-components/faculty-profile-compo/facultyReportPdf.jsx';
 import { exportFacultyToExcel, SEARCH_DEBOUNCE_DELAY } from '../../utils/admin-utilities/faculty-profile-utils';

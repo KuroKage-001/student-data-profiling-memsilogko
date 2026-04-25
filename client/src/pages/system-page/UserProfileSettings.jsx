@@ -5,7 +5,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import AdminLayout from '../../layouts/AdminLayout';
 import { ProfileInfoTab, ChangePasswordTab } from '../../components/system-components/user-profile-setting-compo';
-import { useUserProfile } from '../../hooks/user-profile-setting-hook/useUserProfile';
+import { useUserProfile } from '../../hooks/useUserProfileSettings';
 import { UserProfileSettingsSkeleton } from '../../layouts/skeleton-loading';
 import useToast from '../../hooks/useToast';
 import usePageTitle from '../../hooks/usePageTitle';

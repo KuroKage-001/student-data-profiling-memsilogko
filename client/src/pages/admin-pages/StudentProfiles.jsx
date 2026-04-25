@@ -13,7 +13,7 @@ import {
   getPrograms,
   getYearLevels,
   generateStudentId
-} from '../../hooks/student-profile-hook';
+} from '../../hooks/useStudentProfile';
 import useToast from '../../hooks/useToast';
 import { exportToExcel } from '../../utils/admin-utilities/student-profile-utils';
 import { generateStudentPDF } from '../../utils/admin-utilities/pdfGenerator';

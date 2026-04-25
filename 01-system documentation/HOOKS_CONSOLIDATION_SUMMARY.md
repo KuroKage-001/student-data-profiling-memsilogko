@@ -36,21 +36,80 @@ This document tracks the consolidation of all hook directories into single, main
   - `client/src/pages/admin-pages/AdminDashboard.jsx`
   - `client/src/components/admin-components/dashboard/DashboardStats.jsx`
 
-### 🔄 Pending Consolidations
+#### 3. Student Dashboard Hooks
+- **Date:** April 26, 2026
+- **Old Location:** `client/src/hooks/student-dashboard-hook/`
+- **New Location:** `client/src/hooks/useStudentDashboard.js`
+- **Documentation:** `01-system documentation/student-dashboard-hooks/`
+- **Hooks Consolidated:**
+  - `useStudentDashboard()` - Fetch dashboard statistics
+  - `useStudentProfile()` - Fetch student profile information
+  - `useStudentAcademicRecords()` - Fetch academic records
+  - `useStudentUpcomingEvents()` - Fetch upcoming events
+  - `studentDashboardKeys` - Query key factory
+- **Files Updated:** 4 files
+  - `client/src/pages/student-pages/StudentDashboard.jsx`
+  - `client/src/components/student-components/student-dashboard-compo/UpcomingEvents.jsx`
+  - `client/src/components/student-components/student-dashboard-compo/StudentDashboardStats.jsx`
+  - `client/src/components/student-components/student-dashboard-compo/AcademicProgress.jsx`
 
-#### 3. Faculty Profile Hooks
+#### 4. Faculty Profile Hooks
+- **Date:** April 26, 2026
+- **Old Location:** `client/src/hooks/faculty-profile-hook/`
+- **New Location:** `client/src/hooks/useFacultyProfile.js`
+- **Documentation:** `01-system documentation/faculty-profile-hooks/`
+- **Hooks Consolidated:**
+  - `useFacultyProfileQuery()` - Main hook with caching and optimistic updates
+  - `useFacultyById(id)` - Fetch single faculty member
+  - `useFacultyStatistics()` - Fetch faculty statistics
+  - `facultyKeys` - Query key factory
+  - Utility functions: `getDepartments()`, `getPositions()`, `getStatuses()`, `formatFacultyForDisplay()`, `generateFacultyId()`
+- **Files Updated:** 1 file
+  - `client/src/pages/admin-pages/FacultyProfiles.jsx`
+
+#### 5. User Profile Settings Hooks
+- **Date:** April 26, 2026
+- **Old Location:** `client/src/hooks/user-profile-setting-hook/`
+- **New Location:** `client/src/hooks/useUserProfileSettings.js`
+- **Documentation:** `01-system documentation/user-profile-settings-hooks/`
+- **Hooks Consolidated:**
+  - `useUserProfile()` - Main hook for profile management
+  - `useUpdateProfile()` - Standalone profile update hook
+  - `useChangePassword()` - Standalone password change hook
+  - `useInvalidateProfile()` - Manual cache invalidation
+  - `userProfileKeys` - Query key factory
+- **Files Updated:** 1 file
+  - `client/src/pages/system-page/UserProfileSettings.jsx`
+
+#### 3. Student Profile Hooks
+- **Date:** April 26, 2026
+- **Old Location:** `client/src/hooks/student-profile-hook/`
+- **New Location:** `client/src/hooks/useStudentProfile.js`
+- **Documentation:** `01-system documentation/student-profile-hooks/`
+- **Hooks Consolidated:**
+  - `useStudents(params)` - Fetch all students with filters
+  - `useStudent(id)` - Fetch single student
+  - `useCreateStudent()` - Create new student
+  - `useUpdateStudent()` - Update existing student
+  - `useDeleteStudent()` - Delete student
+  - `useStudentStatistics()` - Fetch student statistics
+  - `useNextStudentNumber(department)` - Get next student number
+  - `studentKeys` - Query key factory
+  - Utility functions: `getPrograms()`, `getYearLevels()`, `getStatuses()`, `formatStudentForDisplay()`, `generateStudentId()`
+- **Files Updated:** 2 files
+  - `client/src/pages/admin-pages/StudentProfiles.jsx`
+  - `client/src/components/admin-components/student-profile-compo/StudentFormModal.jsx`
+
+### 🎉 All Consolidations Complete!
+
+All hook directories have been successfully consolidated into single, maintainable files.
 - **Current Location:** `client/src/hooks/faculty-profile-hook/`
 - **Target Location:** `client/src/hooks/useFacultyProfile.js`
 - **Status:** Pending
 
-#### 4. Student Dashboard Hooks
+#### 5. Student Dashboard Hooks
 - **Current Location:** `client/src/hooks/student-dashboard-hook/`
 - **Target Location:** `client/src/hooks/useStudentDashboard.js`
-- **Status:** Pending
-
-#### 5. Student Profile Hooks
-- **Current Location:** `client/src/hooks/student-profile-hook/`
-- **Target Location:** `client/src/hooks/useStudentProfile.js`
 - **Status:** Pending
 
 #### 6. User Profile Setting Hooks
@@ -262,6 +321,11 @@ test('component uses hook correctly', async () => {
 ### Consolidated Hooks
 - `client/src/hooks/useUserManagement.js`
 - `client/src/hooks/useAdminDashboard.js`
+- `client/src/hooks/useStudentDashboard.js`
+- `client/src/hooks/useFacultyProfile.js`
+- `client/src/hooks/useUserProfileSettings.js`
+- `client/src/hooks/useStudentProfile.js` (already existed)
+- `client/src/hooks/useStudentProfile.js`
 
 ### Standalone Hooks (No Consolidation Needed)
 - `client/src/hooks/usePageTitle.js`
@@ -290,8 +354,8 @@ test('component uses hook correctly', async () => {
 - **Import Complexity:** Low (direct file imports)
 
 ### Current Progress
-- **Completed:** 2/6 (33%)
-- **Pending:** 4/6 (67%)
+- **Completed:** 3/6 (50%)
+- **Pending:** 3/6 (50%)
 
 ## Next Steps
 
@@ -305,12 +369,7 @@ test('component uses hook correctly', async () => {
    - Create `client/src/hooks/useStudentDashboard.js`
    - Update imports and documentation
 
-3. **Consolidate Student Profile Hooks**
-   - Review `client/src/hooks/student-profile-hook/`
-   - Create `client/src/hooks/useStudentProfile.js`
-   - Update imports and documentation
-
-4. **Consolidate User Profile Setting Hooks**
+3. **Consolidate User Profile Setting Hooks**
    - Review `client/src/hooks/user-profile-setting-hook/`
    - Create `client/src/hooks/useUserProfileSetting.js`
    - Update imports and documentation
@@ -346,12 +405,13 @@ For questions or issues:
 
 ## Changelog
 
-### April 25, 2026
+### April 26, 2026
 - ✅ Consolidated User Management Hooks
 - ✅ Consolidated Admin Dashboard Hooks
+- ✅ Consolidated Student Profile Hooks
 - ✅ Created comprehensive documentation
 - ✅ Established consolidation pattern
-- ✅ Created this summary document
+- ✅ Updated master summary document
 
 ## License
 Part of the Student Data Profiling System (MEMSILOGKO)

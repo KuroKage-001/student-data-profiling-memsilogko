@@ -1,15 +1,11 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tantml:invoke name="@tanstack/react-query';
 import { useCallback } from 'react';
-import facultyService from '../../services/faculty-profile-service/facultyService';
+import facultyService from '../services/faculty-profile-service/facultyService';
 
 /**
- * Professional caching configuration for faculty data
- * - Long cache times for better performance
- * - Smart invalidation strategies
- * - Optimistic updates for better UX
+ * Query keys factory for better cache organization
+ * Provides consistent query keys across the application
  */
-
-// Query keys factory for better organization
 export const facultyKeys = {
   all: ['faculty'],
   lists: () => [...facultyKeys.all, 'list'],
@@ -28,6 +24,17 @@ export const facultyKeys = {
  * - Optimistic updates for instant UI feedback
  * - Smart cache invalidation
  * - Persistent cache across component unmounts
+ * 
+ * @param {Object} initialFilters - Initial filter parameters for faculty list
+ * @returns {Object} Faculty data, loading states, and mutation functions
+ * 
+ * @example
+ * const {
+ *   faculty,
+ *   loading,
+ *   createFaculty,
+ *   updateFaculty
+ * } = useFacultyProfileQuery({ department: 'IT' });
  */
 const useFacultyProfileQuery = (initialFilters = {}) => {
   const queryClient = useQueryClient();
@@ -76,39 +83,6 @@ const useFacultyProfileQuery = (initialFilters = {}) => {
 
   const error = queryError?.message || null;
 
-  // Fetch single faculty by ID with caching
-  const useFacultyById = (id) => {
-    return useQuery({
-      queryKey: facultyKeys.detail(id),
-      queryFn: async () => {
-        const result = await facultyService.getFacultyById(id);
-        if (!result.success) {
-          throw new Error(result.message || 'Failed to fetch faculty');
-        }
-        return result.data;
-      },
-      staleTime: 15 * 60 * 1000, // 15 minutes
-      cacheTime: 60 * 60 * 1000, // 1 hour
-      enabled: !!id, // Only fetch if ID exists
-    });
-  };
-
-  // Fetch statistics with caching
-  const useStatistics = () => {
-    return useQuery({
-      queryKey: facultyKeys.statistics(),
-      queryFn: async () => {
-        const result = await facultyService.getFacultyStatistics();
-        if (!result.success) {
-          throw new Error(result.message || 'Failed to fetch statistics');
-        }
-        return result.data;
-      },
-      staleTime: 10 * 60 * 1000, // 10 minutes
-      cacheTime: 30 * 60 * 1000, // 30 minutes
-    });
-  };
-
   // Create faculty mutation with optimistic updates
   const createMutation = useMutation({
     mutationFn: async (facultyData) => {
@@ -147,7 +121,7 @@ const useFacultyProfileQuery = (initialFilters = {}) => {
         queryClient.setQueryData(facultyKeys.list(initialFilters), context.previousFaculty);
       }
     },
-    onSuccess: (result) => {
+    onSuccess: () => {
       // Invalidate and refetch all faculty queries
       queryClient.invalidateQueries({ queryKey: facultyKeys.lists() });
       queryClient.invalidateQueries({ queryKey: facultyKeys.statistics() });
@@ -385,10 +359,6 @@ const useFacultyProfileQuery = (initialFilters = {}) => {
     pagination,
     isFetching, // Background fetching indicator
     
-    // Queries
-    useFacultyById,
-    useStatistics,
-    
     // Mutations
     createFaculty,
     updateFaculty,
@@ -410,6 +380,54 @@ const useFacultyProfileQuery = (initialFilters = {}) => {
     generateFacultyId,
     clearError,
   };
+};
+
+/**
+ * Hook to fetch a single faculty member by ID
+ * 
+ * @param {number|string} id - Faculty ID
+ * @returns {Object} Query result with faculty data, loading state, and error
+ * 
+ * @example
+ * const { data: faculty, isLoading } = useFacultyById(facultyId);
+ */
+export const useFacultyById = (id) => {
+  return useQuery({
+    queryKey: facultyKeys.detail(id),
+    queryFn: async () => {
+      const result = await facultyService.getFacultyById(id);
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to fetch faculty');
+      }
+      return result.data;
+    },
+    staleTime: 15 * 60 * 1000, // 15 minutes
+    cacheTime: 60 * 60 * 1000, // 1 hour
+    enabled: !!id, // Only fetch if ID exists
+  });
+};
+
+/**
+ * Hook to fetch faculty statistics
+ * 
+ * @returns {Object} Query result with statistics data, loading state, and error
+ * 
+ * @example
+ * const { data: stats, isLoading } = useFacultyStatistics();
+ */
+export const useFacultyStatistics = () => {
+  return useQuery({
+    queryKey: facultyKeys.statistics(),
+    queryFn: async () => {
+      const result = await facultyService.getFacultyStatistics();
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to fetch statistics');
+      }
+      return result.data;
+    },
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    cacheTime: 30 * 60 * 1000, // 30 minutes
+  });
 };
 
 export default useFacultyProfileQuery;
