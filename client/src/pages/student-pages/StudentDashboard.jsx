@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../../layouts/AdminLayout';
 import { 
   StudentProfileCard, 
@@ -13,6 +14,7 @@ import { FaBook, FaCalendarAlt, FaChartLine, FaUserGraduate } from 'react-icons/
 const StudentDashboard = () => {
   usePageTitle('Student Dashboard');
   
+  const navigate = useNavigate();
   const { isLoading } = useStudentDashboard();
   const { user } = useAuth();
 
@@ -115,7 +117,10 @@ const StudentDashboard = () => {
                 </div>
 
                 {/* Student Profile Link */}
-                <div className="group relative bg-white rounded-xl sm:rounded-2xl p-6 sm:p-8 cursor-pointer overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 hover:border-green-300 hover:-translate-y-1">
+                <div 
+                  onClick={() => navigate('/profile/settings')}
+                  className="group relative bg-white rounded-xl sm:rounded-2xl p-6 sm:p-8 cursor-pointer overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 hover:border-green-300 hover:-translate-y-1"
+                >
                   <div className="absolute top-0 right-0 w-32 h-32 bg-linear-to-br from-green-100 to-transparent rounded-full -mr-16 -mt-16 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   
                   <div className="relative">
