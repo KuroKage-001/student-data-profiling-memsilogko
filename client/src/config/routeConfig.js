@@ -113,7 +113,7 @@ export const routeConfig = [
     component: StudentProfiles,
     isPublic: false,
     title: 'Student Profiles',
-    roles: ['admin', 'faculty'],
+    roles: ['admin', 'dept_chair', 'faculty'],
     requiresAuth: true,
   },
   {

@@ -5,6 +5,7 @@ import AdminLayout from '../../layouts/AdminLayout';
 import { StudentList, StudentFormModal, StudentProfileModal } from '../../components/admin-components/student-profile-compo';
 import { StudentProfilesSkeleton } from '../../layouts/skeleton-loading';
 import usePageTitle from '../../hooks/usePageTitle';
+import { useAuth } from '../../context/AuthContext';
 import { 
   useStudents, 
   useCreateStudent, 
@@ -20,6 +21,10 @@ import { FaUserGraduate, FaSearch, FaPlus, FaFileExport, FaFilter, FaChevronDown
 
 const StudentProfiles = () => {
   usePageTitle('Student Profiles');
+  
+  const { user } = useAuth();
+  const isDeptChair = user?.role === 'dept_chair';
+  const userDepartment = user?.department;
   
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
@@ -44,8 +49,14 @@ const StudentProfiles = () => {
     if (filters.skills) params.skills = filters.skills;
     if (filters.activities) params.activities = filters.activities;
     if (filters.status !== 'all') params.status = filters.status;
+    
+    // For dept_chair, filter by their department
+    if (isDeptChair && userDepartment) {
+      params.department = userDepartment;
+    }
+    
     return params;
-  }, [filters]); // Remove searchTerm from dependencies
+  }, [filters, isDeptChair, userDepartment]); // Add isDeptChair and userDepartment to dependencies
 
   // React Query hooks
   const { data: students = [], isLoading, error } = useStudents(queryParams);
@@ -146,6 +157,26 @@ const StudentProfiles = () => {
   const programs = getPrograms();
   const yearLevels = getYearLevels();
 
+  // Filter programs for dept_chair based on their department
+  const availablePrograms = useMemo(() => {
+    if (!isDeptChair || !userDepartment) {
+      return programs;
+    }
+    
+    // Map departments to their programs
+    const departmentPrograms = {
+      'IT': ['BSIT', 'Information Technology'],
+      'CS': ['BSCS', 'Computer Science'],
+      'CE': ['BSCpE', 'Computer Engineering'],
+      'DS': ['BSDS', 'Data Science'],
+    };
+    
+    return programs.filter(program => {
+      const deptPrograms = departmentPrograms[userDepartment] || [];
+      return deptPrograms.some(dp => program.includes(dp));
+    });
+  }, [programs, isDeptChair, userDepartment]);
+
   // Show skeleton loading while data is being fetched
   if (isLoading) {
     return (
@@ -168,17 +199,30 @@ const StudentProfiles = () => {
             </div>
             <div>
               <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
-                Student Profiles
+                {isDeptChair && userDepartment ? `${userDepartment} Student Profiles` : 'Student Profiles'}
               </h1>
             </div>
           </div>
           <p className="text-xs sm:text-sm text-gray-600 ml-10 sm:ml-13 font-medium">
-            Comprehensive student data management and profiling
+            {isDeptChair && userDepartment 
+              ? `${userDepartment} department student data management and profiling`
+              : 'Comprehensive student data management and profiling'
+            }
           </p>
         </div>
 
         {/* Search and Actions Section */}
         <div className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-lg border border-gray-100 mb-4 sm:mb-6 shrink-0">
+          {/* Department Filter Indicator for Dept Chair */}
+          {isDeptChair && userDepartment && (
+            <div className="mb-3 px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg flex items-center gap-2 text-sm text-blue-700">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span>Viewing <strong>{userDepartment}</strong> department students only</span>
+            </div>
+          )}
+          
           <div className="space-y-2.5 sm:space-y-3 lg:space-y-0 lg:flex lg:gap-3 lg:items-center lg:justify-between">
             {/* Search Input with Icon */}
             <div className="relative w-full lg:flex-1 lg:max-w-md">
@@ -243,9 +287,15 @@ const StudentProfiles = () => {
                   value={filters.program}
                   onChange={(e) => handleFilterChange('program', e.target.value)}
                   className="w-full px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  disabled={isDeptChair && availablePrograms.length === 0}
                 >
-                  <option value="all">All Programs</option>
-                  {programs.map(program => (
+                  <option value="all">
+                    {isDeptChair && userDepartment 
+                      ? `All ${userDepartment} Programs` 
+                      : 'All Programs'
+                    }
+                  </option>
+                  {availablePrograms.map(program => (
                     <option key={program} value={program}>{program}</option>
                   ))}
                 </select>
