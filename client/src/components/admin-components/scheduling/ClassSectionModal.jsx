@@ -5,7 +5,7 @@ import enrollmentService from '../../../services/enrollmentService';
 import { toast } from 'react-toastify';
 import { useAuth } from '../../../context/AuthContext';
 
-const ClassSectionModal = ({ mode, section, onClose, onSubmit }) => {
+const ClassSectionModal = ({ mode, section, onClose, onSubmit, onEnrollmentChange }) => {
   const isEdit = mode === 'edit';
   const isView = mode === 'view';
   const isEnroll = mode === 'enroll'; // New mode for faculty enrollment
@@ -49,7 +49,7 @@ const ClassSectionModal = ({ mode, section, onClose, onSubmit }) => {
   const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
   useEffect(() => {
-    if (section && (isEdit || isView)) {
+    if (section && (isEdit || isView || isEnroll)) {
       setFormData({
         section_code: section.section_code || '',
         course_code: section.course_code || '',
@@ -97,7 +97,7 @@ const ClassSectionModal = ({ mode, section, onClose, onSubmit }) => {
     }
   }, [section, isEdit, isView, isEnroll]);
 
-  // Fetch eligible students when course code changes
+  // Fetch eligible students when course code changes or when modal opens in enroll mode
   useEffect(() => {
     if ((mode === 'edit' || mode === 'create' || mode === 'enroll') && formData.course_code) {
       const program = extractProgramFromCourseCode(formData.course_code);
@@ -105,7 +105,7 @@ const ClassSectionModal = ({ mode, section, onClose, onSubmit }) => {
         fetchEligibleStudents(program);
       }
     }
-  }, [formData.course_code, mode]);
+  }, [formData.course_code, mode, section?.id]);
 
   const extractProgramFromCourseCode = (courseCode) => {
     const match = courseCode.match(/^(IT|CS)\s/i);
@@ -117,11 +117,18 @@ const ClassSectionModal = ({ mode, section, onClose, onSubmit }) => {
     
     try {
       const response = await enrollmentService.getClassEnrollments(section.id);
-      if (response.success) {
-        setEnrollments(response.data || []);
+      
+      // Response is already the data object {success: true, data: [...]}
+      if (response && response.success && Array.isArray(response.data)) {
+        setEnrollments(response.data);
+      } else if (Array.isArray(response)) {
+        // Fallback if response is directly an array
+        setEnrollments(response);
+      } else {
+        setEnrollments([]);
       }
     } catch (error) {
-      console.error('Error fetching enrollments:', error);
+      setEnrollments([]);
     }
   };
 
@@ -131,11 +138,17 @@ const ClassSectionModal = ({ mode, section, onClose, onSubmit }) => {
         section?.id || null,
         program
       );
-      if (response.success) {
-        setEligibleStudents(response.data || []);
+      
+      // Response is already the data object {success: true, data: [...]}
+      if (response && response.success && Array.isArray(response.data)) {
+        setEligibleStudents(response.data);
+      } else if (Array.isArray(response)) {
+        // Fallback if response is directly an array
+        setEligibleStudents(response);
+      } else {
+        setEligibleStudents([]);
       }
     } catch (error) {
-      console.error('Error fetching eligible students:', error);
       setEligibleStudents([]);
     }
   };
@@ -160,7 +173,7 @@ const ClassSectionModal = ({ mode, section, onClose, onSubmit }) => {
 
       if (response.success) {
         toast.success(`${student.name} enrolled successfully`);
-        fetchEnrollments();
+        await fetchEnrollments();
         setStudentSearch('');
         setShowStudentDropdown(false);
         
@@ -169,9 +182,13 @@ const ClassSectionModal = ({ mode, section, onClose, onSubmit }) => {
           ...prev,
           current_enrollment: prev.current_enrollment + 1
         }));
+        
+        // Notify parent component to refresh
+        if (onEnrollmentChange) {
+          onEnrollmentChange();
+        }
       }
     } catch (error) {
-      console.error('Error enrolling student:', error);
       toast.error(error.message || 'Failed to enroll student');
     } finally {
       setEnrollmentLoading(false);
@@ -194,16 +211,20 @@ const ClassSectionModal = ({ mode, section, onClose, onSubmit }) => {
 
       if (response.success) {
         toast.success('Student dropped successfully');
-        fetchEnrollments();
+        await fetchEnrollments();
         
         // Update current enrollment count
         setFormData(prev => ({
           ...prev,
           current_enrollment: Math.max(0, prev.current_enrollment - 1)
         }));
+        
+        // Notify parent component to refresh
+        if (onEnrollmentChange) {
+          onEnrollmentChange();
+        }
       }
     } catch (error) {
-      console.error('Error dropping student:', error);
       toast.error(error.message || 'Failed to drop student');
     } finally {
       setEnrollmentLoading(false);
@@ -218,7 +239,6 @@ const ClassSectionModal = ({ mode, section, onClose, onSubmit }) => {
         setFacultyList(facultyData);
       }
     } catch (error) {
-      console.error('Error fetching faculty:', error);
       setFacultyList([]);
     }
   };
@@ -304,6 +324,10 @@ const ClassSectionModal = ({ mode, section, onClose, onSubmit }) => {
     if (formData.max_capacity < 1) {
       newErrors.max_capacity = 'Capacity must be at least 1';
     }
+    // Make faculty required in both create and edit mode
+    if ((mode === 'create' || mode === 'edit') && !formData.faculty_id) {
+      newErrors.faculty_id = 'Faculty assignment is required';
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -319,19 +343,29 @@ const ClassSectionModal = ({ mode, section, onClose, onSubmit }) => {
     setLoading(true);
     setConflictError(null);
     try {
-      await onSubmit(formData);
-      // If successful, the parent will close the modal and show success toast
-    } catch (error) {
-      console.error('Error submitting form:', error);
+      // Format time values to H:i format (remove seconds if present)
+      const submitData = {
+        ...formData,
+        start_time: formData.start_time.substring(0, 5), // Ensure HH:MM format
+        end_time: formData.end_time.substring(0, 5), // Ensure HH:MM format
+      };
       
+      await onSubmit(submitData);
+      // If successful, the parent will close the modal and show success toast
+      // Modal will be closed by parent component
+    } catch (error) {
       // Display conflict error in the modal
       if (error.conflict) {
         const conflict = error.conflict;
         setConflictError(
           `Schedule conflict detected: ${conflict.course_code} (${conflict.course_name}) is already scheduled in ${conflict.room || 'this room'} on ${conflict.day_of_week} from ${conflict.start_time} to ${conflict.end_time}. Please choose a different time slot or room.`
         );
+      } else if (error.message) {
+        // Show other errors as conflict error for visibility
+        setConflictError(error.message);
       }
-      // Don't re-throw - error is handled here
+      // Re-throw the error so parent knows submission failed
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -393,6 +427,103 @@ const ClassSectionModal = ({ mode, section, onClose, onSubmit }) => {
               {/* Form Sections - Hide in enroll mode */}
               {!isEnroll && (
                 <>
+              {/* View Mode - Professional Card Layout */}
+              {isView ? (
+                <div className="space-y-6">
+                  {/* Course Information Card */}
+                  <div className="bg-linear-to-br from-orange-50 to-orange-100/50 rounded-xl p-6 border-2 border-orange-200">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center">
+                        <FaBook className="text-white" />
+                      </div>
+                      <h4 className="text-lg font-bold text-gray-900">Course Information</h4>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="bg-white rounded-lg p-4">
+                        <div className="text-xs font-semibold text-gray-500 uppercase mb-1">Section Code</div>
+                        <div className="text-base font-bold text-gray-900">{formData.section_code}</div>
+                      </div>
+                      <div className="bg-white rounded-lg p-4">
+                        <div className="text-xs font-semibold text-gray-500 uppercase mb-1">Course Code</div>
+                        <div className="text-base font-bold text-gray-900">{formData.course_code}</div>
+                      </div>
+                      <div className="bg-white rounded-lg p-4 md:col-span-2">
+                        <div className="text-xs font-semibold text-gray-500 uppercase mb-1">Course Name</div>
+                        <div className="text-base font-bold text-gray-900">{formData.course_name}</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Schedule Information Card */}
+                  <div className="bg-linear-to-br from-blue-50 to-blue-100/50 rounded-xl p-6 border-2 border-blue-200">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+                        <FaClock className="text-white" />
+                      </div>
+                      <h4 className="text-lg font-bold text-gray-900">Schedule Information</h4>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="bg-white rounded-lg p-4">
+                        <div className="text-xs font-semibold text-gray-500 uppercase mb-1">Day</div>
+                        <div className="text-base font-bold text-gray-900 flex items-center gap-2">
+                          <FaCalendar className="text-blue-500" />
+                          {formData.day_of_week}
+                        </div>
+                      </div>
+                      <div className="bg-white rounded-lg p-4">
+                        <div className="text-xs font-semibold text-gray-500 uppercase mb-1">Room</div>
+                        <div className="text-base font-bold text-gray-900 flex items-center gap-2">
+                          <FaDoorOpen className="text-blue-500" />
+                          {formData.room || 'TBA'}
+                        </div>
+                      </div>
+                      <div className="bg-white rounded-lg p-4">
+                        <div className="text-xs font-semibold text-gray-500 uppercase mb-1">Start Time</div>
+                        <div className="text-base font-bold text-gray-900">{formData.start_time}</div>
+                      </div>
+                      <div className="bg-white rounded-lg p-4">
+                        <div className="text-xs font-semibold text-gray-500 uppercase mb-1">End Time</div>
+                        <div className="text-base font-bold text-gray-900">{formData.end_time}</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Additional Information Card */}
+                  <div className="bg-linear-to-br from-green-50 to-green-100/50 rounded-xl p-6 border-2 border-green-200">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
+                        <FaUser className="text-white" />
+                      </div>
+                      <h4 className="text-lg font-bold text-gray-900">Additional Information</h4>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="bg-white rounded-lg p-4">
+                        <div className="text-xs font-semibold text-gray-500 uppercase mb-1">Instructor</div>
+                        <div className="text-base font-bold text-gray-900">{section?.instructor || 'Not assigned'}</div>
+                      </div>
+                      <div className="bg-white rounded-lg p-4">
+                        <div className="text-xs font-semibold text-gray-500 uppercase mb-1">Capacity</div>
+                        <div className="text-base font-bold text-gray-900">
+                          {formData.current_enrollment} / {formData.max_capacity} students
+                          <span className="text-sm font-normal text-gray-600 ml-2">
+                            ({Math.round((formData.current_enrollment / formData.max_capacity) * 100)}% full)
+                          </span>
+                        </div>
+                      </div>
+                      <div className="bg-white rounded-lg p-4">
+                        <div className="text-xs font-semibold text-gray-500 uppercase mb-1">Semester</div>
+                        <div className="text-base font-bold text-gray-900">{formData.semester}</div>
+                      </div>
+                      <div className="bg-white rounded-lg p-4">
+                        <div className="text-xs font-semibold text-gray-500 uppercase mb-1">Academic Year</div>
+                        <div className="text-base font-bold text-gray-900">{formData.academic_year}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <>
+              {/* Edit/Create Mode - Form Layout */}
               {/* Course Information Section */}
               <div>
                 <h4 className="text-sm font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200">Course Information</h4>
@@ -693,7 +824,7 @@ const ClassSectionModal = ({ mode, section, onClose, onSubmit }) => {
                   <div ref={facultyDropdownRef}>
                     <div className="flex items-center justify-between mb-2">
                       <label className="block text-sm font-semibold text-gray-700">
-                        Assign Faculty (Optional)
+                        Assign Faculty {(mode === 'create' || mode === 'edit') ? '*' : ''}
                       </label>
                       {!isView && (
                         <button
@@ -714,10 +845,16 @@ const ClassSectionModal = ({ mode, section, onClose, onSubmit }) => {
                       </div>
                       
                       {/* Display selected faculty or search input */}
-                      {formData.faculty_id && selectedFacultyName && !showFacultyDropdown ? (
+                      {isView ? (
+                        <div className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50">
+                          <span className="text-gray-900 font-medium">
+                            {section?.instructor || 'No faculty assigned'}
+                          </span>
+                        </div>
+                      ) : formData.faculty_id && selectedFacultyName && !showFacultyDropdown ? (
                         <div className="w-full pl-10 pr-10 py-3 border-2 border-gray-200 rounded-xl bg-orange-50 flex items-center justify-between">
                           <span className="text-gray-900 font-medium">{selectedFacultyName}</span>
-                          {!isView && (
+                          {(mode !== 'create' && mode !== 'edit') && (
                             <button
                               type="button"
                               onClick={handleClearFaculty}
@@ -735,9 +872,11 @@ const ClassSectionModal = ({ mode, section, onClose, onSubmit }) => {
                             onChange={handleFacultySearchChange}
                             onFocus={() => setShowFacultyDropdown(true)}
                             disabled={isView}
-                            className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all border-gray-200 focus:border-orange-500 ${
-                              isView ? 'bg-gray-100' : ''
-                            }`}
+                            className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all ${
+                              errors.faculty_id 
+                                ? 'border-red-500 focus:border-red-600' 
+                                : 'border-gray-200 focus:border-orange-500'
+                            } ${isView ? 'bg-gray-100' : ''}`}
                             placeholder="Search faculty by name, department, or email..."
                           />
                           
@@ -746,16 +885,18 @@ const ClassSectionModal = ({ mode, section, onClose, onSubmit }) => {
                             <div className="absolute z-20 w-full bottom-full mb-1 bg-white border-2 border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
                               {filteredFaculty.length > 0 ? (
                                 <>
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      handleClearFaculty();
-                                      setShowFacultyDropdown(false);
-                                    }}
-                                    className="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors border-b border-gray-100 text-gray-500 italic"
-                                  >
-                                    -- No Faculty (Clear Selection) --
-                                  </button>
+                                  {(mode !== 'create' && mode !== 'edit') && (
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        handleClearFaculty();
+                                        setShowFacultyDropdown(false);
+                                      }}
+                                      className="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors border-b border-gray-100 text-gray-500 italic"
+                                    >
+                                      -- No Faculty (Clear Selection) --
+                                    </button>
+                                  )}
                                   {filteredFaculty.map(faculty => (
                                     <button
                                       key={faculty.id}
@@ -781,12 +922,21 @@ const ClassSectionModal = ({ mode, section, onClose, onSubmit }) => {
                         </>
                       )}
                     </div>
-                    <p className="mt-1 text-xs text-gray-500">
-                      Search by name, department, or email. Click "Refresh List" to see newly added faculty.
-                    </p>
+                    {errors.faculty_id && (
+                      <p className="mt-1 text-sm text-red-600">{errors.faculty_id}</p>
+                    )}
+                    {!isView && (
+                      <p className="mt-1 text-xs text-gray-500">
+                        {(mode === 'create' || mode === 'edit')
+                          ? 'Faculty assignment is required. Search by name, department, or email.' 
+                          : 'Search by name, department, or email. Click "Refresh List" to see newly added faculty.'}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
+                </>
+              )}
                 </>
               )}
 

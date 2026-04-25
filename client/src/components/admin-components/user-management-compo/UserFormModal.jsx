@@ -97,53 +97,50 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, user, loading }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-      <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-        {/* Background overlay with blur */}
-        <div 
-          className="fixed inset-0 bg-black/30 backdrop-blur-sm transition-opacity"
-          onClick={onClose}
-          aria-hidden="true"
-        ></div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+      {/* Background overlay with blur */}
+      <div 
+        className="fixed inset-0 bg-black/30 backdrop-blur-sm transition-opacity"
+        onClick={onClose}
+        aria-hidden="true"
+      ></div>
 
-        {/* Center modal */}
-        <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-
-        {/* Modal panel */}
-        <div className="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full relative z-10">
-          {/* Header */}
-          <div className="bg-linear-to-r from-orange-500 to-orange-600 px-6 py-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xl font-bold text-white">
-                {isEdit ? 'Edit User' : 'Add New User'}
-              </h3>
-              <button
-                onClick={onClose}
-                className="text-white hover:text-gray-200 transition-colors"
-              >
-                <FaTimes className="text-xl" />
-              </button>
-            </div>
+      {/* Modal panel - optimized for no scrolling */}
+      <div className="relative bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] flex flex-col z-10">
+        {/* Header */}
+        <div className="bg-linear-to-r from-orange-500 to-orange-600 px-6 py-3.5 shrink-0 rounded-t-lg">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xl font-bold text-white">
+              {isEdit ? 'Edit User' : 'Add New User'}
+            </h3>
+            <button
+              onClick={onClose}
+              className="text-white hover:text-gray-200 transition-colors"
+            >
+              <FaTimes className="text-xl" />
+            </button>
           </div>
+        </div>
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="px-6 py-6">
-            <div className="space-y-4">
+        {/* Form - scrollable content */}
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto">
+          <div className="px-6 py-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-3">
               {/* Name Field */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <div className="md:col-span-2">
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">
                   Full Name
                 </label>
                 <div className="relative">
                   <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                    <FaUser />
+                    <FaUser className="text-sm" />
                   </div>
                   <input
                     type="text"
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
-                    className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all ${
+                    className={`w-full pl-9 pr-3 py-2.5 border-2 rounded-lg focus:outline-none transition-all text-sm ${
                       errors.name 
                         ? 'border-red-500 focus:border-red-600' 
                         : 'border-gray-200 focus:border-orange-500'
@@ -152,25 +149,25 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, user, loading }) => {
                   />
                 </div>
                 {errors.name && (
-                  <p className="mt-1 text-sm text-red-600">{errors.name}</p>
+                  <p className="mt-1 text-xs text-red-600">{errors.name}</p>
                 )}
               </div>
 
               {/* Email Field */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <div className="md:col-span-2">
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">
                   Email Address
                 </label>
                 <div className="relative">
                   <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                    <FaEnvelope />
+                    <FaEnvelope className="text-sm" />
                   </div>
                   <input
                     type="email"
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
-                    className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all ${
+                    className={`w-full pl-9 pr-3 py-2.5 border-2 rounded-lg focus:outline-none transition-all text-sm ${
                       errors.email 
                         ? 'border-red-500 focus:border-red-600' 
                         : 'border-gray-200 focus:border-orange-500'
@@ -179,59 +176,59 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, user, loading }) => {
                   />
                 </div>
                 {errors.email && (
-                  <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+                  <p className="mt-1 text-xs text-red-600">{errors.email}</p>
                 )}
               </div>
 
               {/* Password Field */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Password {isEdit && <span className="text-gray-500 font-normal">(leave blank to keep current)</span>}
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                  Password {isEdit && <span className="text-gray-500 text-xs font-normal">(leave blank to keep)</span>}
                 </label>
                 <div className="relative">
                   <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                    <FaLock />
+                    <FaLock className="text-sm" />
                   </div>
                   <input
                     type={showPassword ? 'text' : 'password'}
                     name="password"
                     value={formData.password}
                     onChange={handleChange}
-                    className={`w-full pl-10 pr-12 py-3 border-2 rounded-xl focus:outline-none transition-all ${
+                    className={`w-full pl-9 pr-10 py-2.5 border-2 rounded-lg focus:outline-none transition-all text-sm ${
                       errors.password 
                         ? 'border-red-500 focus:border-red-600' 
                         : 'border-gray-200 focus:border-orange-500'
                     }`}
-                    placeholder={isEdit ? 'Enter new password' : 'Enter password'}
+                    placeholder={isEdit ? 'New password' : 'Enter password'}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-orange-500 transition-colors"
                   >
-                    {showPassword ? <FaEyeSlash className="text-lg" /> : <FaEye className="text-lg" />}
+                    {showPassword ? <FaEyeSlash className="text-base" /> : <FaEye className="text-base" />}
                   </button>
                 </div>
                 {errors.password && (
-                  <p className="mt-1 text-sm text-red-600">{errors.password}</p>
+                  <p className="mt-1 text-xs text-red-600">{errors.password}</p>
                 )}
               </div>
 
               {/* Confirm Password Field */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Confirm Password {isEdit && <span className="text-gray-500 font-normal">(required if changing password)</span>}
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                  Confirm Password {isEdit && <span className="text-gray-500 text-xs font-normal">(if changing)</span>}
                 </label>
                 <div className="relative">
                   <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                    <FaLock />
+                    <FaLock className="text-sm" />
                   </div>
                   <input
                     type={showConfirmPassword ? 'text' : 'password'}
                     name="confirmPassword"
                     value={formData.confirmPassword}
                     onChange={handleChange}
-                    className={`w-full pl-10 pr-12 py-3 border-2 rounded-xl focus:outline-none transition-all ${
+                    className={`w-full pl-9 pr-10 py-2.5 border-2 rounded-lg focus:outline-none transition-all text-sm ${
                       errors.confirmPassword 
                         ? 'border-red-500 focus:border-red-600' 
                         : 'border-gray-200 focus:border-orange-500'
@@ -243,28 +240,28 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, user, loading }) => {
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-orange-500 transition-colors"
                   >
-                    {showConfirmPassword ? <FaEyeSlash className="text-lg" /> : <FaEye className="text-lg" />}
+                    {showConfirmPassword ? <FaEyeSlash className="text-base" /> : <FaEye className="text-base" />}
                   </button>
                 </div>
                 {errors.confirmPassword && (
-                  <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
+                  <p className="mt-1 text-xs text-red-600">{errors.confirmPassword}</p>
                 )}
               </div>
 
               {/* Role Field */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">
                   Role
                 </label>
                 <div className="relative">
                   <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                    <FaUserTag />
+                    <FaUserTag className="text-sm" />
                   </div>
                   <select
                     name="role"
                     value={formData.role}
                     onChange={handleChange}
-                    className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all appearance-none ${
+                    className={`w-full pl-9 pr-3 py-2.5 border-2 rounded-lg focus:outline-none transition-all appearance-none text-sm ${
                       errors.role 
                         ? 'border-red-500 focus:border-red-600' 
                         : 'border-gray-200 focus:border-orange-500'
@@ -277,19 +274,50 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, user, loading }) => {
                   </select>
                 </div>
                 {errors.role && (
-                  <p className="mt-1 text-sm text-red-600">{errors.role}</p>
+                  <p className="mt-1 text-xs text-red-600">{errors.role}</p>
                 )}
               </div>
+
+              {/* Status Field - Only show when editing */}
+              {isEdit && (
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                    Status
+                  </label>
+                  <div className="relative">
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                      <FaToggleOn className="text-sm" />
+                    </div>
+                    <select
+                      name="status"
+                      value={formData.status}
+                      onChange={handleChange}
+                      className={`w-full pl-9 pr-3 py-2.5 border-2 rounded-lg focus:outline-none transition-all appearance-none text-sm ${
+                        errors.status 
+                          ? 'border-red-500 focus:border-red-600' 
+                          : 'border-gray-200 focus:border-orange-500'
+                      }`}
+                    >
+                      <option value="active">Active</option>
+                      <option value="inactive">Inactive</option>
+                      <option value="suspended">Suspended</option>
+                    </select>
+                  </div>
+                  {errors.status && (
+                    <p className="mt-1 text-xs text-red-600">{errors.status}</p>
+                  )}
+                </div>
+              )}
 
               {/* Department Field - Show for all roles */}
               {(formData.role === 'student' || formData.role === 'dept_chair' || formData.role === 'faculty' || formData.role === 'admin') && (
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">
                     Department *
                   </label>
                   <div className="relative">
                     <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                       </svg>
                     </div>
@@ -297,7 +325,7 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, user, loading }) => {
                       name="department"
                       value={formData.department}
                       onChange={handleChange}
-                      className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all appearance-none ${
+                      className={`w-full pl-9 pr-3 py-2.5 border-2 rounded-lg focus:outline-none transition-all appearance-none text-sm ${
                         errors.department 
                           ? 'border-red-500 focus:border-red-600' 
                           : 'border-gray-200 focus:border-orange-500'
@@ -309,7 +337,7 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, user, loading }) => {
                     </select>
                   </div>
                   {errors.department && (
-                    <p className="mt-1 text-sm text-red-600">{errors.department}</p>
+                    <p className="mt-1 text-xs text-red-600">{errors.department}</p>
                   )}
                 </div>
               )}
@@ -317,12 +345,12 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, user, loading }) => {
               {/* Position Field - Show for Faculty, Admin, and Dept Chair */}
               {(formData.role === 'faculty' || formData.role === 'admin' || formData.role === 'dept_chair') && (
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">
                     Position *
                   </label>
                   <div className="relative">
                     <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                       </svg>
                     </div>
@@ -330,7 +358,7 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, user, loading }) => {
                       name="position"
                       value={formData.position}
                       onChange={handleChange}
-                      className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all appearance-none ${
+                      className={`w-full pl-9 pr-3 py-2.5 border-2 rounded-lg focus:outline-none transition-all appearance-none text-sm ${
                         errors.position 
                           ? 'border-red-500 focus:border-red-600' 
                           : 'border-gray-200 focus:border-orange-500'
@@ -348,20 +376,20 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, user, loading }) => {
                     </select>
                   </div>
                   {errors.position && (
-                    <p className="mt-1 text-sm text-red-600">{errors.position}</p>
+                    <p className="mt-1 text-xs text-red-600">{errors.position}</p>
                   )}
                 </div>
               )}
 
               {/* Student Number Field - Only show for Student role */}
               {formData.role === 'student' && (
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Student Number <span className="text-gray-500 font-normal">(optional - will be auto-generated if not provided)</span>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                    Student Number <span className="text-gray-500 text-xs font-normal">(optional - auto-generated if blank)</span>
                   </label>
                   <div className="relative">
                     <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
                       </svg>
                     </div>
@@ -370,7 +398,7 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, user, loading }) => {
                       name="student_number"
                       value={formData.student_number}
                       onChange={handleChange}
-                      className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all ${
+                      className={`w-full pl-9 pr-3 py-2.5 border-2 rounded-lg focus:outline-none transition-all text-sm ${
                         errors.student_number 
                           ? 'border-red-500 focus:border-red-600' 
                           : 'border-gray-200 focus:border-orange-500'
@@ -379,64 +407,34 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, user, loading }) => {
                     />
                   </div>
                   {errors.student_number && (
-                    <p className="mt-1 text-sm text-red-600">{errors.student_number}</p>
-                  )}
-                  <p className="mt-1 text-xs text-gray-500">Leave blank to auto-generate based on department and year</p>
-                </div>
-              )}
-
-              {/* Status Field - Only show when editing */}
-              {isEdit && (
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Status
-                  </label>
-                  <div className="relative">
-                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                      <FaToggleOn />
-                    </div>
-                    <select
-                      name="status"
-                      value={formData.status}
-                      onChange={handleChange}
-                      className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all appearance-none ${
-                        errors.status 
-                          ? 'border-red-500 focus:border-red-600' 
-                          : 'border-gray-200 focus:border-orange-500'
-                      }`}
-                    >
-                      <option value="active">Active</option>
-                      <option value="inactive">Inactive</option>
-                      <option value="suspended">Suspended</option>
-                    </select>
-                  </div>
-                  {errors.status && (
-                    <p className="mt-1 text-sm text-red-600">{errors.status}</p>
+                    <p className="mt-1 text-xs text-red-600">{errors.student_number}</p>
                   )}
                 </div>
               )}
             </div>
+          </div>
 
-            {/* Action Buttons */}
-            <div className="flex gap-3 mt-6">
+          {/* Action Buttons - Fixed at bottom */}
+          <div className="px-6 py-3.5 border-t border-gray-200 bg-gray-50 shrink-0 rounded-b-lg">
+            <div className="flex gap-3">
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all font-semibold"
+                className="flex-1 px-4 py-2.5 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-all font-semibold text-sm"
                 disabled={loading}
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="flex-1 px-4 py-3 bg-linear-to-r from-orange-600 to-orange-500 text-white rounded-xl hover:from-orange-700 hover:to-orange-600 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-4 py-2.5 bg-linear-to-r from-orange-600 to-orange-500 text-white rounded-lg hover:from-orange-700 hover:to-orange-600 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                 disabled={loading}
               >
                 {loading ? 'Saving...' : isEdit ? 'Update User' : 'Create User'}
               </button>
             </div>
-          </form>
-        </div>
+          </div>
+        </form>
       </div>
     </div>
   );

@@ -134,7 +134,9 @@ class ClassSectionController extends Controller
                 $request->start_time,
                 $request->end_time,
                 $request->semester,
-                $request->academic_year
+                $request->academic_year,
+                null,
+                $request->course_code
             );
 
             if ($conflict) {
@@ -243,7 +245,9 @@ class ClassSectionController extends Controller
             'semester' => 'sometimes|required|string|max:50',
             'academic_year' => 'sometimes|required|string|max:20',
             'max_capacity' => 'sometimes|required|integer|min:1',
+            'current_enrollment' => 'sometimes|required|integer|min:0',
             'status' => 'sometimes|required|in:active,cancelled,completed',
+            'faculty_id' => 'nullable|integer',
         ]);
 
         if ($validator->fails()) {
@@ -255,6 +259,8 @@ class ClassSectionController extends Controller
         }
 
         try {
+            DB::beginTransaction();
+            
             $classSection = ClassSection::findOrFail($id);
 
             // Check for conflicts if schedule details are being updated
@@ -266,7 +272,8 @@ class ClassSectionController extends Controller
                     $request->end_time ?? $classSection->end_time,
                     $request->semester ?? $classSection->semester,
                     $request->academic_year ?? $classSection->academic_year,
-                    $id
+                    $id,
+                    $request->course_code ?? $classSection->course_code
                 );
 
                 if ($conflict) {
@@ -278,11 +285,36 @@ class ClassSectionController extends Controller
                 }
             }
 
-            $classSection->update($request->all());
+            // Update class section (exclude faculty_id from mass assignment)
+            $updateData = $request->except('faculty_id');
+            $classSection->update($updateData);
+            
+            // Handle faculty assignment update if provided
+            if ($request->has('faculty_id')) {
+                // Remove existing primary faculty assignment
+                FacultyClassAssignment::where('class_section_id', $id)
+                    ->where('assignment_type', 'primary')
+                    ->delete();
+                
+                // Add new faculty assignment if faculty_id is provided
+                if ($request->faculty_id) {
+                    FacultyClassAssignment::create([
+                        'faculty_id' => $request->faculty_id,
+                        'class_section_id' => $classSection->id,
+                        'assignment_type' => 'primary',
+                        'assigned_date' => now(),
+                        'status' => 'active',
+                    ]);
+                }
+            }
+            
+            DB::commit();
+            
             $classSection->load('facultyAssignments.faculty');
             
             $primaryFaculty = $classSection->primaryFaculty();
             $classSection->instructor = $primaryFaculty ? $primaryFaculty->faculty->name : 'Unassigned';
+            $classSection->instructor_id = $primaryFaculty ? $primaryFaculty->faculty_id : null;
 
             return response()->json([
                 'success' => true,
@@ -290,6 +322,7 @@ class ClassSectionController extends Controller
                 'data' => $classSection
             ]);
         } catch (\Exception $e) {
+            DB::rollBack();
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to update class section',
@@ -396,8 +429,9 @@ class ClassSectionController extends Controller
 
     /**
      * Check for schedule conflicts
+     * Only check conflicts for the same course program (IT vs CS)
      */
-    private function checkScheduleConflict($room, $day, $startTime, $endTime, $semester, $academicYear, $excludeId = null)
+    private function checkScheduleConflict($room, $day, $startTime, $endTime, $semester, $academicYear, $excludeId = null, $courseCode = null)
     {
         $query = ClassSection::where('room', $room)
             ->where('day_of_week', $day)
@@ -413,10 +447,29 @@ class ClassSectionController extends Controller
                   });
             });
 
+        // Only check conflicts within the same program (IT vs CS)
+        if ($courseCode) {
+            $program = $this->extractProgramFromCourseCode($courseCode);
+            if ($program) {
+                $query->where('course_code', 'like', $program . '%');
+            }
+        }
+
         if ($excludeId) {
             $query->where('id', '!=', $excludeId);
         }
 
         return $query->first();
+    }
+
+    /**
+     * Extract program from course code (e.g., "IT 101" -> "IT", "CS 201" -> "CS")
+     */
+    private function extractProgramFromCourseCode($courseCode)
+    {
+        if (preg_match('/^(IT|CS)\s/i', $courseCode, $matches)) {
+            return strtoupper($matches[1]);
+        }
+        return null;
     }
 }

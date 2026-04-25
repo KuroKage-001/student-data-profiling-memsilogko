@@ -61,7 +61,6 @@ const Scheduling = () => {
         setSchedules(response.data);
       }
     } catch (error) {
-      console.error('Error fetching schedules:', error);
       toast.error('Failed to load schedules');
     } finally {
       setLoading(false);
@@ -79,7 +78,7 @@ const Scheduling = () => {
         setStatistics(response);
       }
     } catch (error) {
-      console.error('Error fetching statistics:', error);
+      // Silently fail - statistics are not critical
     }
   };
 
@@ -124,7 +123,6 @@ const Scheduling = () => {
         toast.error(response?.message || 'Failed to delete class section');
       }
     } catch (error) {
-      console.error('Error deleting section:', error);
       toast.error(error?.message || 'Failed to delete class section');
     } finally {
       setShowDeleteModal(false);
@@ -145,12 +143,10 @@ const Scheduling = () => {
       if (response.success) {
         toast.success(`Class section ${modalMode === 'create' ? 'created' : 'updated'} successfully`);
         setShowModal(false);
-        fetchSchedules();
-        fetchStatistics();
+        await fetchSchedules();
+        await fetchStatistics();
       }
     } catch (error) {
-      console.error('Error saving section:', error);
-      
       // Handle schedule conflict error with detailed information
       if (error.conflict) {
         const conflict = error.conflict;
@@ -164,6 +160,12 @@ const Scheduling = () => {
       // Re-throw so modal knows there was an error
       throw error;
     }
+  };
+
+  // Callback to refresh data when enrollments change
+  const handleEnrollmentChange = async () => {
+    await fetchSchedules();
+    await fetchStatistics();
   };
 
   const filteredSchedules = schedules.filter(schedule => {
@@ -675,6 +677,7 @@ const Scheduling = () => {
           section={selectedSection}
           onClose={() => setShowModal(false)}
           onSubmit={handleModalSubmit}
+          onEnrollmentChange={handleEnrollmentChange}
         />
       )}
 

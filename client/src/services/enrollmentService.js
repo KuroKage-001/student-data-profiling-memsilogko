@@ -5,7 +5,8 @@ const enrollmentService = {
   getClassEnrollments: async (classSectionId) => {
     try {
       const response = await api.get(`/class-sections/${classSectionId}/enrollments`);
-      return response.data;
+      // response is {success: true, data: [...]}
+      return response;
     } catch (error) {
       throw error.response?.data || error;
     }
@@ -14,12 +15,16 @@ const enrollmentService = {
   // Get eligible students for enrollment (filtered by program)
   getEligibleStudents: async (classSectionId, program) => {
     try {
-      const params = {};
-      if (classSectionId) params.class_section_id = classSectionId;
-      if (program) params.program = program;
+      const params = new URLSearchParams();
+      if (classSectionId) params.append('class_section_id', classSectionId);
+      if (program) params.append('program', program);
       
-      const response = await api.get('/eligible-students', { params });
-      return response.data;
+      const queryString = params.toString();
+      const endpoint = queryString ? `/eligible-students?${queryString}` : '/eligible-students';
+      
+      const response = await api.get(endpoint);
+      // response is {success: true, data: [...]}
+      return response;
     } catch (error) {
       throw error.response?.data || error;
     }
@@ -29,7 +34,7 @@ const enrollmentService = {
   enrollStudent: async (data) => {
     try {
       const response = await api.post('/enrollments', data);
-      return response.data;
+      return response;
     } catch (error) {
       throw error.response?.data || error;
     }
@@ -39,7 +44,7 @@ const enrollmentService = {
   dropStudent: async (enrollmentId) => {
     try {
       const response = await api.delete(`/enrollments/${enrollmentId}`);
-      return response.data;
+      return response;
     } catch (error) {
       throw error.response?.data || error;
     }
@@ -49,7 +54,7 @@ const enrollmentService = {
   facultyEnrollStudent: async (data) => {
     try {
       const response = await api.post('/faculty-enrollments', data);
-      return response.data;
+      return response;
     } catch (error) {
       throw error.response?.data || error;
     }
@@ -59,7 +64,7 @@ const enrollmentService = {
   facultyDropStudent: async (enrollmentId) => {
     try {
       const response = await api.delete(`/faculty-enrollments/${enrollmentId}`);
-      return response.data;
+      return response;
     } catch (error) {
       throw error.response?.data || error;
     }

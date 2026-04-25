@@ -5,7 +5,7 @@ const classSectionService = {
   getAllSections: async (params = {}) => {
     try {
       const response = await api.get('/class-sections', { params });
-      return response.data; // This already contains { success: true, data: [...] }
+      return response; // Return full response {success: true, data: [...]}
     } catch (error) {
       throw error.response?.data || error;
     }
@@ -15,7 +15,7 @@ const classSectionService = {
   getById: async (id) => {
     try {
       const response = await api.get(`/class-sections/${id}`);
-      return response.data;
+      return response;
     } catch (error) {
       throw error.response?.data || error;
     }
@@ -25,7 +25,7 @@ const classSectionService = {
   createSection: async (data) => {
     try {
       const response = await api.post('/class-sections', data);
-      return response.data;
+      return response;
     } catch (error) {
       throw error.response?.data || error;
     }
@@ -35,7 +35,7 @@ const classSectionService = {
   updateSection: async (id, data) => {
     try {
       const response = await api.put(`/class-sections/${id}`, data);
-      return response.data;
+      return response;
     } catch (error) {
       throw error.response?.data || error;
     }
@@ -45,7 +45,7 @@ const classSectionService = {
   deleteSection: async (id) => {
     try {
       const response = await api.delete(`/class-sections/${id}`);
-      return response.data;
+      return response;
     } catch (error) {
       throw error.response?.data || error;
     }
@@ -55,7 +55,7 @@ const classSectionService = {
   getStatistics: async (params = {}) => {
     try {
       const response = await api.get('/class-sections-statistics', { params });
-      return response.data;
+      return response;
     } catch (error) {
       throw error.response?.data || error;
     }
@@ -65,7 +65,7 @@ const classSectionService = {
   assignFaculty: async (data) => {
     try {
       const response = await api.post('/faculty-assignments', data);
-      return response.data;
+      return response;
     } catch (error) {
       throw error.response?.data || error;
     }
@@ -75,7 +75,7 @@ const classSectionService = {
   unassignFaculty: async (assignmentId) => {
     try {
       const response = await api.delete(`/faculty-assignments/${assignmentId}`);
-      return response.data;
+      return response;
     } catch (error) {
       throw error.response?.data || error;
     }
@@ -85,7 +85,7 @@ const classSectionService = {
   getFacultyClasses: async (facultyId) => {
     try {
       const response = await api.get(`/faculty/${facultyId}/classes`);
-      return response.data;
+      return response;
     } catch (error) {
       throw error.response?.data || error;
     }
@@ -95,7 +95,7 @@ const classSectionService = {
   getClassFaculty: async (classSectionId) => {
     try {
       const response = await api.get(`/class-sections/${classSectionId}/faculty`);
-      return response.data;
+      return response;
     } catch (error) {
       throw error.response?.data || error;
     }

@@ -46,7 +46,18 @@ const apiRequest = async (endpoint, options = {}) => {
     const data = await response.json();
     
     if (!response.ok) {
-      throw new Error(data.message || `HTTP ${response.status}: Request failed`);
+      // Create a custom error object that preserves all response data
+      const error = new Error(data.message || `HTTP ${response.status}: Request failed`);
+      
+      // Preserve additional error data (like conflict information)
+      if (data.conflict) {
+        error.conflict = data.conflict;
+      }
+      if (data.errors) {
+        error.errors = data.errors;
+      }
+      
+      throw error;
     }
     
     return data;
@@ -79,7 +90,15 @@ export const authAPI = {
 
 // Generic API methods
 export const api = {
-  get: (endpoint) => apiRequest(endpoint),
+  get: (endpoint, options = {}) => {
+    // Handle query params if provided
+    if (options.params) {
+      const params = new URLSearchParams(options.params);
+      const queryString = params.toString();
+      endpoint = queryString ? `${endpoint}?${queryString}` : endpoint;
+    }
+    return apiRequest(endpoint);
+  },
   post: (endpoint, data) => apiRequest(endpoint, {
     method: 'POST',
     body: JSON.stringify(data),

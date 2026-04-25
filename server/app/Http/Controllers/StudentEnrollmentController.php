@@ -17,7 +17,9 @@ class StudentEnrollmentController extends Controller
     public function getClassEnrollments($classSectionId)
     {
         try {
+            // Only get currently enrolled students (not dropped)
             $enrollments = StudentEnrollment::where('class_section_id', $classSectionId)
+                ->where('enrollment_status', 'enrolled')
                 ->with('student')
                 ->get();
 
@@ -43,6 +45,18 @@ class StudentEnrollmentController extends Controller
             $classSectionId = $request->query('class_section_id');
             $program = $request->query('program'); // IT or CS
             
+            \Log::info('Getting eligible students', [
+                'class_section_id' => $classSectionId,
+                'program' => $program
+            ]);
+            
+            // First, let's check all users with role 'student'
+            $allStudents = User::where('role', 'student')->get(['id', 'name', 'email', 'role', 'program', 'status']);
+            \Log::info('All students in database', [
+                'count' => $allStudents->count(),
+                'students' => $allStudents->toArray()
+            ]);
+            
             $query = User::where('role', 'student')
                 ->where('status', 'active');
             
@@ -50,6 +64,14 @@ class StudentEnrollmentController extends Controller
             if ($program) {
                 $query->where('program', $program);
             }
+            
+            // Log total students before filtering by enrollment
+            $totalStudents = (clone $query)->count();
+            $studentsBeforeFilter = (clone $query)->get(['id', 'name', 'program', 'status']);
+            \Log::info('Students matching criteria before enrollment filter', [
+                'count' => $totalStudents,
+                'students' => $studentsBeforeFilter->toArray()
+            ]);
             
             // Exclude already enrolled students if class section is provided
             if ($classSectionId) {
@@ -63,11 +85,27 @@ class StudentEnrollmentController extends Controller
                 ->orderBy('name')
                 ->get();
 
+            \Log::info('Eligible students found', [
+                'count' => $students->count(),
+                'students' => $students->toArray()
+            ]);
+
             return response()->json([
                 'success' => true,
-                'data' => $students
+                'data' => $students,
+                'debug' => [
+                    'total_students_in_db' => User::where('role', 'student')->count(),
+                    'active_students' => User::where('role', 'student')->where('status', 'active')->count(),
+                    'program_filter' => $program,
+                    'students_with_program' => User::where('role', 'student')->where('program', $program)->count(),
+                ]
             ]);
         } catch (\Exception $e) {
+            \Log::error('Error fetching eligible students', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to fetch eligible students',
@@ -171,10 +209,22 @@ class StudentEnrollmentController extends Controller
 
             $enrollment = StudentEnrollment::findOrFail($enrollmentId);
             
+            \Log::info('Attempting to drop student', [
+                'enrollment_id' => $enrollmentId,
+                'current_status' => $enrollment->enrollment_status,
+                'user_id' => $enrollment->user_id,
+                'class_section_id' => $enrollment->class_section_id
+            ]);
+            
             if ($enrollment->enrollment_status !== 'enrolled') {
+                \Log::warning('Cannot drop student - not enrolled', [
+                    'enrollment_id' => $enrollmentId,
+                    'status' => $enrollment->enrollment_status
+                ]);
+                
                 return response()->json([
                     'success' => false,
-                    'message' => 'Student is not currently enrolled in this class'
+                    'message' => "Student is not currently enrolled in this class (status: {$enrollment->enrollment_status})"
                 ], 409);
             }
 
@@ -186,7 +236,15 @@ class StudentEnrollmentController extends Controller
 
             // Decrement class enrollment count
             $classSection = ClassSection::findOrFail($enrollment->class_section_id);
+            $oldCount = $classSection->current_enrollment;
             $classSection->decrement('current_enrollment');
+            $newCount = $classSection->fresh()->current_enrollment;
+            
+            \Log::info('Student dropped successfully', [
+                'enrollment_id' => $enrollmentId,
+                'old_enrollment_count' => $oldCount,
+                'new_enrollment_count' => $newCount
+            ]);
 
             DB::commit();
 
@@ -196,6 +254,12 @@ class StudentEnrollmentController extends Controller
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
+            \Log::error('Error dropping student', [
+                'enrollment_id' => $enrollmentId,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to drop student',
