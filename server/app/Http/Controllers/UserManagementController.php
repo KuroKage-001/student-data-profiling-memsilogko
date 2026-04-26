@@ -22,8 +22,8 @@ class UserManagementController extends Controller
         $prefix = $year . '-' . $department;
         
         // Get the highest existing student number for this department and year
-        // Use DB::raw for explicit casting in PostgreSQL
-        $lastStudent = User::whereRaw("student_number::text LIKE ?", [$prefix . '%'])
+        // Use explicit string concatenation for PostgreSQL
+        $lastStudent = User::whereRaw("student_number::text LIKE '" . $prefix . "%'")
             ->orderBy('student_number', 'desc')
             ->first();
         
@@ -49,8 +49,8 @@ class UserManagementController extends Controller
         $prefix = 'STU' . $year . '-' . $department;
         
         // Get the highest existing student ID for this department and year
-        // Use DB::raw for explicit casting in PostgreSQL
-        $lastStudent = User::whereRaw("student_id::text LIKE ?", [$prefix . '%'])
+        // Use explicit string concatenation for PostgreSQL
+        $lastStudent = User::whereRaw("student_id::text LIKE '" . $prefix . "%'")
             ->orderBy('student_id', 'desc')
             ->first();
         
@@ -261,8 +261,8 @@ class UserManagementController extends Controller
         $year = date('y');
         
         // Get the last faculty ID for this year
-        // Use DB::raw for explicit casting in PostgreSQL
-        $lastFaculty = Faculty::whereRaw("faculty_id::text LIKE ?", ["{$prefix}{$year}%"])
+        // Use explicit string concatenation for PostgreSQL
+        $lastFaculty = Faculty::whereRaw("faculty_id::text LIKE '" . $prefix . $year . "%'")
             ->orderBy('faculty_id', 'desc')
             ->first();
         
