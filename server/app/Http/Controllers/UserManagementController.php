@@ -136,6 +136,11 @@ class UserManagementController extends Controller
      */
     public function store(Request $request)
     {
+        // Remove empty student_number to allow auto-generation
+        if ($request->has('student_number') && empty(trim($request->student_number))) {
+            $request->request->remove('student_number');
+        }
+        
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
@@ -304,6 +309,11 @@ class UserManagementController extends Controller
             $user = User::findOrFail($id);
             $oldRole = $user->role;
 
+            // Remove empty student_number to allow auto-generation
+            if ($request->has('student_number') && empty(trim($request->student_number))) {
+                $request->request->remove('student_number');
+            }
+
             $validator = Validator::make($request->all(), [
                 'name' => 'sometimes|required|string|max:255',
                 'email' => 'sometimes|required|string|email|max:255|unique:users,email,' . $id,
@@ -311,7 +321,7 @@ class UserManagementController extends Controller
                 'role' => 'sometimes|required|in:admin,faculty,student,dept_chair',
                 'department' => 'required_if:role,dept_chair,student,faculty,admin|nullable|in:IT,CS',
                 'position' => 'required_if:role,faculty,admin,dept_chair|nullable|string|max:100',
-                'student_number' => 'required_if:role,student|nullable|string|max:50|unique:users,student_number,' . $id,
+                'student_number' => 'nullable|string|max:50|unique:users,student_number,' . $id,
                 'status' => 'sometimes|required|in:active,inactive,suspended'
             ]);
 
@@ -352,8 +362,13 @@ class UserManagementController extends Controller
                 }
 
                 // Handle student_number for student role
-                if ($request->role === 'student' && $request->has('student_number')) {
-                    $updateData['student_number'] = $request->student_number;
+                if ($request->role === 'student') {
+                    // Auto-generate student number if not provided
+                    if (!$request->has('student_number')) {
+                        $updateData['student_number'] = $this->generateStudentNumber($request->department);
+                    } else {
+                        $updateData['student_number'] = $request->student_number;
+                    }
                     
                     // Auto-generate student_id if not already set
                     if (!$user->student_id) {
