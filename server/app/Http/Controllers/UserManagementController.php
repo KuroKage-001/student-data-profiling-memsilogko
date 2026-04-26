@@ -186,9 +186,14 @@ class UserManagementController extends Controller
             // Add student_number and program if role is student
             if ($request->role === 'student') {
                 // Auto-generate student number if not provided or if it already exists
-                if (!$request->filled('student_number') || User::where('student_number', $request->student_number)->exists()) {
+                if (!$request->filled('student_number')) {
+                    // No student number provided, auto-generate
+                    $userData['student_number'] = $this->generateStudentNumber($request->department);
+                } elseif (User::where('student_number', $request->student_number)->exists()) {
+                    // Student number already exists, auto-generate a new one
                     $userData['student_number'] = $this->generateStudentNumber($request->department);
                 } else {
+                    // Use the provided student number
                     $userData['student_number'] = $request->student_number;
                 }
                 
