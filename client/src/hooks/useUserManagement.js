@@ -35,7 +35,7 @@ export const useUsers = (params = {}) => {
     },
     staleTime: 15 * 60 * 1000, // 15 minutes - data stays fresh
     gcTime: 60 * 60 * 1000, // 1 hour - keep in cache even when unused
-    refetchOnMount: false, // Don't refetch if data is fresh
+    refetchOnMount: true, // Refetch when component mounts to ensure fresh data
   });
 };
 
@@ -74,8 +74,11 @@ export const useCreateUser = () => {
       return result;
     },
     onSuccess: () => {
-      // Invalidate and refetch users list
-      queryClient.invalidateQueries({ queryKey: userKeys.lists() });
+      // Invalidate and refetch users list immediately
+      queryClient.invalidateQueries({ 
+        queryKey: userKeys.lists(),
+        refetchType: 'active' // Force refetch of active queries
+      });
     },
   });
 };
@@ -97,7 +100,10 @@ export const useUpdateUser = () => {
     },
     onSuccess: (data, variables) => {
       // Invalidate both the list and the specific user detail
-      queryClient.invalidateQueries({ queryKey: userKeys.lists() });
+      queryClient.invalidateQueries({ 
+        queryKey: userKeys.lists(),
+        refetchType: 'active' // Force refetch of active queries
+      });
       queryClient.invalidateQueries({ queryKey: userKeys.detail(variables.id) });
     },
   });
@@ -119,8 +125,11 @@ export const useDeleteUser = () => {
       return result;
     },
     onSuccess: () => {
-      // Invalidate and refetch users list
-      queryClient.invalidateQueries({ queryKey: userKeys.lists() });
+      // Invalidate and refetch users list immediately
+      queryClient.invalidateQueries({ 
+        queryKey: userKeys.lists(),
+        refetchType: 'active' // Force refetch of active queries
+      });
     },
   });
 };
