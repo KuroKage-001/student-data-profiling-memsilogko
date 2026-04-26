@@ -1,17 +1,37 @@
 # Student Number Auto-Generation Fix
 
 ## Issue
-In production, when creating a new student user with the "leave blank for auto-generate" option for Student Number, the system was returning a 422 validation error:
+In production, when creating a new student user with the "leave blank for auto-generate" option for Student Number, the system was returning errors:
 
+1. **Initial Error (422 Validation Error)**:
 ```
 Validation failed - student_number: The student number field is required when role is student.
 ```
 
-## Root Cause
+2. **Secondary Error (500 Internal Server Error)**:
+```
+SQLSTATE[25P02]: In failed sql transaction: 7 ERROR: current transaction is aborted, 
+commands ignored until end of transaction block
+SQL: select * from "users" where "student_id"::text LIKE STU2026-IT% order by "student_id" desc limit 1
+```
+
+## Root Causes
+
+### Issue 1: Validation Rules
 The backend validation in `UserManagementController.php` had conflicting rules:
 1. In the `store` method: `student_number` was marked as `nullable` but the logic didn't properly handle empty strings
 2. In the `update` method: `student_number` had `required_if:role,student` which prevented auto-generation
 3. When the frontend sent an empty string `""`, Laravel treated it as present but empty, causing validation issues
+
+### Issue 2: PostgreSQL Compatibility
+The `LIKE` operator usage was incompatible with PostgreSQL (used in production on Render):
+- MySQL allows: `where('column', 'LIKE', 'pattern%')`
+- PostgreSQL requires: `whereRaw("column LIKE ?", ['pattern%'])` for proper type handling
+
+The error occurred in three methods:
+- `generateStudentNumber()` - querying `student_number` field
+- `generateStudentId()` - querying `student_id` field  
+- `generateFacultyId()` - querying `faculty_id` field
 
 ## Solution
 
@@ -108,7 +128,8 @@ if ($request->role === 'student' && $request->has('student_number')) {
 
 ## Auto-Generation Logic
 
-The `generateStudentNumber()` method:
+### Fixed `generateStudentNumber()` Method
+**Changed for PostgreSQL compatibility:**
 ```php
 private function generateStudentNumber($department)
 {
@@ -116,7 +137,8 @@ private function generateStudentNumber($department)
     $prefix = $year . '-' . $department;
     
     // Get the highest existing student number for this department and year
-    $lastStudent = User::where('student_number', 'LIKE', $prefix . '%')
+    // Use whereRaw for PostgreSQL compatibility
+    $lastStudent = User::whereRaw("student_number LIKE ?", [$prefix . '%'])
         ->orderBy('student_number', 'desc')
         ->first();
     
@@ -131,6 +153,46 @@ private function generateStudentNumber($department)
     
     // Format with leading zeros
     return $prefix . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
+}
+```
+
+**Changed from:**
+```php
+// Old MySQL-style query (incompatible with PostgreSQL)
+$lastStudent = User::where('student_number', 'LIKE', $prefix . '%')
+    ->orderBy('student_number', 'desc')
+    ->first();
+```
+
+### Fixed `generateStudentId()` Method
+```php
+private function generateStudentId($department)
+{
+    $year = date('Y');
+    $prefix = 'STU' . $year . '-' . $department;
+    
+    // Use whereRaw for PostgreSQL compatibility
+    $lastStudent = User::whereRaw("student_id LIKE ?", [$prefix . '%'])
+        ->orderBy('student_id', 'desc')
+        ->first();
+    
+    // ... rest of logic
+}
+```
+
+### Fixed `generateFacultyId()` Method
+```php
+private function generateFacultyId()
+{
+    $prefix = 'FAC';
+    $year = date('y');
+    
+    // Use whereRaw for PostgreSQL compatibility
+    $lastFaculty = Faculty::whereRaw("faculty_id LIKE ?", ["{$prefix}{$year}%"])
+        ->orderBy('faculty_id', 'desc')
+        ->first();
+    
+    // ... rest of logic
 }
 ```
 
@@ -165,6 +227,20 @@ private function generateStudentNumber($department)
 - `server/app/Http/Controllers/UserManagementController.php`
   - `store()` method: Added empty string preprocessing
   - `update()` method: Fixed validation rule and added auto-generation logic
+  - `generateStudentNumber()` method: Fixed PostgreSQL compatibility (whereRaw)
+  - `generateStudentId()` method: Fixed PostgreSQL compatibility (whereRaw)
+  - `generateFacultyId()` method: Fixed PostgreSQL compatibility (whereRaw)
+
+## Database Compatibility
+- **Development**: Works with MySQL/MariaDB (XAMPP)
+- **Production**: Works with PostgreSQL (Render/Neon)
+- **Solution**: Using `whereRaw()` with parameterized queries ensures compatibility with both databases
+
+## Why This Matters
+PostgreSQL is stricter about type comparisons than MySQL:
+- MySQL implicitly casts types in `LIKE` comparisons
+- PostgreSQL requires explicit handling, which is why the error showed `"student_id"::text LIKE`
+- Using `whereRaw()` with bound parameters (`?`) lets Laravel handle the type casting properly for both databases
 
 ## Frontend (No Changes Required)
 The frontend already correctly handles this by deleting empty student_number from the payload:

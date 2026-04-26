@@ -22,7 +22,8 @@ class UserManagementController extends Controller
         $prefix = $year . '-' . $department;
         
         // Get the highest existing student number for this department and year
-        $lastStudent = User::where('student_number', 'LIKE', $prefix . '%')
+        // Use whereRaw for PostgreSQL compatibility
+        $lastStudent = User::whereRaw("student_number LIKE ?", [$prefix . '%'])
             ->orderBy('student_number', 'desc')
             ->first();
         
@@ -48,7 +49,8 @@ class UserManagementController extends Controller
         $prefix = 'STU' . $year . '-' . $department;
         
         // Get the highest existing student ID for this department and year
-        $lastStudent = User::where('student_id', 'LIKE', $prefix . '%')
+        // Use whereRaw for PostgreSQL compatibility
+        $lastStudent = User::whereRaw("student_id LIKE ?", [$prefix . '%'])
             ->orderBy('student_id', 'desc')
             ->first();
         
@@ -254,7 +256,8 @@ class UserManagementController extends Controller
         $year = date('y');
         
         // Get the last faculty ID for this year
-        $lastFaculty = Faculty::where('faculty_id', 'like', "{$prefix}{$year}%")
+        // Use whereRaw for PostgreSQL compatibility
+        $lastFaculty = Faculty::whereRaw("faculty_id LIKE ?", ["{$prefix}{$year}%"])
             ->orderBy('faculty_id', 'desc')
             ->first();
         
