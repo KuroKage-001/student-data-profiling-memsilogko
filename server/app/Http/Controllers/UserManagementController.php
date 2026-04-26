@@ -243,14 +243,31 @@ class UserManagementController extends Controller
             }
 
             DB::commit();
+            
+            // CRITICAL: Disconnect and reconnect to ensure transaction is flushed
+            // This is necessary for Neon's connection pooler
+            DB::disconnect();
+            DB::reconnect();
 
             // Invalidate user caches
             CacheService::invalidateRelated('users');
 
+            // Verify the user was actually saved by querying from a fresh connection
+            $savedUser = User::find($user->id);
+            
+            if (!$savedUser) {
+                // User wasn't actually saved - transaction may have failed
+                \Log::error('User creation failed: User ID ' . $user->id . ' not found after commit');
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User creation failed: Data not persisted to database'
+                ], 500);
+            }
+
             return response()->json([
                 'success' => true,
                 'message' => 'User created successfully' . ($request->role === 'faculty' ? ' with faculty profile' : ''),
-                'data' => $user
+                'data' => $savedUser // Return fresh data from database
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
