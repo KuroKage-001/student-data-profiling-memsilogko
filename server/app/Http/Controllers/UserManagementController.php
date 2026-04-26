@@ -163,7 +163,29 @@ class UserManagementController extends Controller
         }
 
         try {
-            // Prepare user data BEFORE starting transaction
+            // Prepare student-specific data BEFORE transaction to avoid aborted transaction errors
+            $studentNumber = null;
+            $studentId = null;
+            
+            if ($request->role === 'student') {
+                // Auto-generate student number if not provided or if it already exists
+                if (!$request->filled('student_number')) {
+                    // No student number provided, auto-generate
+                    $studentNumber = $this->generateStudentNumber($request->department);
+                } elseif (User::where('student_number', $request->student_number)->exists()) {
+                    // Student number already exists, auto-generate a new one
+                    $studentNumber = $this->generateStudentNumber($request->department);
+                } else {
+                    // Use the provided student number
+                    $studentNumber = $request->student_number;
+                }
+                
+                // Auto-generate student_id for student profile
+                $studentId = $this->generateStudentId($request->department);
+            }
+            
+            DB::beginTransaction();
+            
             $userData = [
                 'name' => $request->name,
                 'email' => $request->email,
@@ -183,19 +205,9 @@ class UserManagementController extends Controller
             }
 
             // Add student_number and program if role is student
-            // IMPORTANT: Generate these BEFORE transaction to avoid aborted transaction errors
             if ($request->role === 'student') {
-                // Auto-generate student number if not provided or if it already exists
-                if (!$request->filled('student_number')) {
-                    // No student number provided, auto-generate
-                    $userData['student_number'] = $this->generateStudentNumber($request->department);
-                } elseif (User::where('student_number', $request->student_number)->exists()) {
-                    // Student number already exists, auto-generate a new one
-                    $userData['student_number'] = $this->generateStudentNumber($request->department);
-                } else {
-                    // Use the provided student number
-                    $userData['student_number'] = $request->student_number;
-                }
+                $userData['student_number'] = $studentNumber;
+                $userData['student_id'] = $studentId;
                 
                 // Auto-set program based on department
                 if ($request->department === 'IT') {
@@ -204,9 +216,6 @@ class UserManagementController extends Controller
                     $userData['program'] = 'Bachelor of Science in Computer Science';
                 }
                 
-                // Auto-generate student_id for student profile
-                $userData['student_id'] = $this->generateStudentId($request->department);
-                
                 // Set default enrollment date to today
                 $userData['enrollment_date'] = now()->toDateString();
                 
@@ -214,9 +223,6 @@ class UserManagementController extends Controller
                 $userData['year_level'] = '1st Year';
             }
 
-            // NOW start the transaction with all data prepared
-            DB::beginTransaction();
-            
             $user = User::create($userData);
 
             // Auto-create Faculty record if role is faculty
