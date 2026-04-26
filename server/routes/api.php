@@ -175,6 +175,33 @@ Route::middleware(['auth:api', 'check.status'])->group(function () {
 // Seeding API (Protected by secret key - for environments without shell access)
 Route::prefix('seed')->group(function () {
     Route::get('/', [App\Http\Controllers\SeedController::class, 'seed']);
-    Route::get('/status', [App\Http\Controllers\SeedController::class, 'status']);
+    Route::get('/', [App\Http\Controllers\SeedController::class, 'status']);
     Route::get('/list', [App\Http\Controllers\SeedController::class, 'listSeeders']);
+});
+
+// Debug endpoint to check deployed code version
+Route::get('/debug/version', function () {
+    return response()->json([
+        'status' => 'deployed',
+        'timestamp' => now()->toDateTimeString(),
+        'commit_check' => 'bf76d94',
+        'php_version' => PHP_VERSION,
+        'laravel_version' => app()->version(),
+        'test_query' => function() {
+            try {
+                $prefix = '2026-IT';
+                $sql = "student_number::text LIKE '" . $prefix . "%'";
+                return [
+                    'success' => true,
+                    'sql_generated' => $sql,
+                    'message' => 'String concatenation working'
+                ];
+            } catch (\Exception $e) {
+                return [
+                    'success' => false,
+                    'error' => $e->getMessage()
+                ];
+            }
+        }
+    ]);
 });
