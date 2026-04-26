@@ -163,8 +163,7 @@ class UserManagementController extends Controller
         }
 
         try {
-            DB::beginTransaction();
-            
+            // Prepare user data BEFORE starting transaction
             $userData = [
                 'name' => $request->name,
                 'email' => $request->email,
@@ -184,6 +183,7 @@ class UserManagementController extends Controller
             }
 
             // Add student_number and program if role is student
+            // IMPORTANT: Generate these BEFORE transaction to avoid aborted transaction errors
             if ($request->role === 'student') {
                 // Auto-generate student number if not provided or if it already exists
                 if (!$request->filled('student_number')) {
@@ -214,6 +214,9 @@ class UserManagementController extends Controller
                 $userData['year_level'] = '1st Year';
             }
 
+            // NOW start the transaction with all data prepared
+            DB::beginTransaction();
+            
             $user = User::create($userData);
 
             // Auto-create Faculty record if role is faculty
